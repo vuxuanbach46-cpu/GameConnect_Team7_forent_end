@@ -91,3 +91,9 @@ Lưu ý khi tạo trang:
 | Console (F12) báo `blocked by CORS policy` | Kiểm tra `CORS_ORIGINS` trong `backend/.env`, sửa xong nhớ chạy lại backend |
 | Menu/header không hiện | Sai `data-root` ở thẻ `<body>`, hoặc sai đường dẫn file JS. Mở F12 → Console để xem lỗi |
 | Sửa code mà trang không đổi | Tải lại cứng: `Ctrl + F5` |
+
+## 6. Nhật ký kiểm thử Task T3CC5DE
+- Người thực hiện: Bùi Nguyễn Thanh An (B25DTCN059)
+- Trạng thái: Đã kiểm tra kết nối Frontend -> Backend FastAPI -> MySQL 8.0 thành công.
+- CRUD mẫu trên trang Items (`pages/items.html`) hoạt động chính xác.
+
