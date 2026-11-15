@@ -1,0 +1,1410 @@
+/* ==========================================================
+   GameConnect — Trang Bạn Bè & Kết Nối (Minimalist & Clean UI)
+   - Sử dụng khoảng trắng thoáng đãng & đường viền mảnh 1px
+   - Không dùng đổ bóng đậm hay dải màu chuyển sắc rực rỡ
+   ========================================================== */
+:root {
+  --fc-bg-main: #0c0d12;
+  --fc-bg-sidebar: #11131a;
+  --fc-bg-sidebar-hover: #141720;
+  --fc-bg-surface: #161922;
+  --fc-bg-card: #13161f;
+  --fc-bg-card-hover: #181c27;
+  --fc-border: #232734;
+  --fc-border-strong: #31374a;
+  --fc-orange: #e85002;
+  --fc-orange-hover: #d14700;
+  --fc-cyan: #38bdf8;
+  --fc-text: #f1f5f9;
+  --fc-text-secondary: #94a3b8;
+  --fc-text-muted: #64748b;
+  --fc-online: #22c55e;
+  --fc-ingame: #eab308;
+  --fc-offline: #475569;
+  --fc-danger: #ef4444;
+}
+
+/* ==================== CHẾ ĐỘ SÁNG (LIGHT MODE) ==================== */
+body.fc-light-mode {
+  --fc-bg-main: #f8fafc;
+  --fc-bg-sidebar: #ffffff;
+  --fc-bg-sidebar-hover: #ffffff;
+  --fc-bg-surface: #f1f5f9;
+  --fc-bg-card: #ffffff;
+  --fc-bg-card-hover: #f8fafc;
+  --fc-border: #e2e8f0;
+  --fc-border-strong: #cbd5e1;
+  --fc-text: #0f172a;
+  --fc-text-secondary: #475569;
+  --fc-text-muted: #64748b;
+  --fc-offline: #94a3b8;
+}
+
+body.fc-dark-body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--fc-bg-main);
+  color: var(--fc-text);
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Ẩn header/footer mặc định của base template */
+body.fc-dark-body #app-header,
+body.fc-dark-body #app-footer {
+  display: none;
+}
+
+/* ==================== APP SHELL ==================== */
+.fc-app-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==================== THANH BAR BÊN TRÁI (PHẲNG, THOÁNG, VIỀN MẢNH) ==================== */
+.fc-left-bar {
+  width: 68px;
+  flex-shrink: 0;
+  background: var(--fc-bg-sidebar);
+  border-right: 1px solid var(--fc-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px 12px;
+  z-index: 50;
+  user-select: none;
+  overflow: hidden;
+  transition: width 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
+              background-color 0.2s ease,
+              border-color 0.2s ease;
+}
+
+/* Khi di chuột vào thanh bar trái: Mở rộng nhẹ nhàng, phân tách bằng viền mảnh 1px */
+.fc-left-bar:hover {
+  width: 244px;
+  background: var(--fc-bg-sidebar-hover);
+  border-right-color: var(--fc-border-strong);
+}
+
+.fc-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+/* ---------- LOGO & TÊN TRANG WEB (TỐI GIẢN, KHÔNG GRADIENT LÒE LOẸT) ---------- */
+.fc-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 2px 2px 6px;
+  text-decoration: none;
+  color: var(--fc-text);
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.fc-brand-logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--fc-bg-surface);
+  border: 1px solid var(--fc-border-strong);
+  color: var(--fc-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.fc-brand-link:hover .fc-brand-logo {
+  border-color: var(--fc-text-secondary);
+}
+
+.fc-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.fc-left-bar:hover .fc-brand-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.fc-brand-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--fc-text);
+}
+
+.fc-brand-sub {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--fc-text-muted);
+}
+
+/* ---------- CÁC NÚT TRÊN THANH BAR TRÁI ---------- */
+.fc-nav-item {
+  position: relative;
+  width: 100%;
+  height: 42px;
+  padding: 0 2px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  font: inherit;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.fc-nav-icon {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.fc-nav-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fc-left-bar:hover .fc-nav-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Hover phẳng, dùng viền mảnh 1px, không phóng to hay chuyển sắc */
+.fc-nav-item:hover {
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border);
+  color: var(--fc-text);
+}
+
+/* Mục Bạn bè đang active: Phẳng, viền mảnh 1px, thanh chỉ thị mảnh bên trái */
+.fc-nav-item.active {
+  color: var(--fc-text);
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border-strong);
+}
+
+.fc-nav-item.active .fc-nav-label {
+  font-weight: 600;
+}
+
+.fc-nav-item.active .fc-nav-icon {
+  color: var(--fc-text);
+}
+
+.fc-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  width: 3px;
+  height: 20px;
+  background: var(--fc-orange);
+  border-radius: 0 2px 2px 0;
+}
+
+.fc-game-pill {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--fc-bg-surface);
+  border: 1px solid var(--fc-border-strong);
+  color: var(--fc-text-secondary);
+  font-weight: 700;
+  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fc-nav-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--fc-border);
+  margin: 8px 0;
+}
+
+.fc-nav-badge {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--fc-orange);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==================== RIGHT SOCIAL BAR ==================== */
+.fc-right-bar {
+  width: 64px;
+  flex-shrink: 0;
+  background: var(--fc-bg-sidebar);
+  border-left: 1px solid var(--fc-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 0;
+  gap: 12px;
+  z-index: 20;
+}
+
+.fc-right-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.fc-right-icon-btn:hover {
+  background: var(--fc-bg-surface);
+  color: var(--fc-text);
+  border-color: var(--fc-border);
+}
+
+.fc-right-icon-btn.active {
+  color: var(--fc-text);
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border-strong);
+}
+
+.fc-avatar-menu-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.fc-self-avatar-wrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.fc-self-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--fc-border-strong);
+}
+
+/* Menu bật ra khi nhấn vào Avatar */
+.fc-avatar-dropdown {
+  position: absolute;
+  top: 4px;
+  right: 52px;
+  width: 220px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border-strong);
+  border-radius: 10px;
+  padding: 10px;
+  z-index: 200;
+}
+
+.fc-avatar-dropdown-header {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+}
+
+.fc-avatar-dropdown-header strong {
+  font-size: 13.5px;
+  color: var(--fc-text);
+}
+
+.fc-avatar-dropdown-header span {
+  font-size: 11.5px;
+  color: var(--fc-online);
+  font-weight: 500;
+}
+
+.fc-avatar-dropdown-divider {
+  height: 1px;
+  background: var(--fc-border);
+  margin: 8px 0;
+}
+
+.fc-avatar-dropdown-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fc-text-muted);
+  padding: 2px 8px 6px;
+}
+
+.fc-theme-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-theme-option:hover {
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border);
+}
+
+.fc-theme-option.active {
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border-strong);
+  color: var(--fc-text);
+}
+
+.fc-theme-check {
+  font-weight: 700;
+  color: var(--fc-orange);
+}
+
+.fc-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fc-online);
+  border: 2px solid var(--fc-bg-sidebar);
+}
+
+.fc-party-box {
+  background: transparent;
+  border-top: 1px solid var(--fc-border);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==================== MAIN CENTER WORKSPACE ==================== */
+.fc-main-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--fc-bg-main);
+}
+
+/* ---------- TOP TAB BAR ---------- */
+.fc-top-tabbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 64px;
+  padding: 0 36px;
+  background: var(--fc-bg-sidebar);
+  border-bottom: 1px solid var(--fc-border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.fc-tab-back-home {
+  position: absolute;
+  left: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fc-text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--fc-border);
+  background: transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-tab-back-home:hover {
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.fc-tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+}
+
+.fc-tab-btn {
+  position: relative;
+  height: 100%;
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  color: var(--fc-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.16s ease;
+}
+
+.fc-tab-btn:hover {
+  color: var(--fc-text);
+}
+
+.fc-tab-btn.active {
+  color: var(--fc-text);
+}
+
+.fc-tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--fc-orange);
+}
+
+.fc-tab-count {
+  min-width: 26px;
+  height: 20px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  border: 1px solid var(--fc-border-strong);
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.fc-tab-btn:hover .fc-tab-count {
+  color: var(--fc-text);
+  border-color: var(--fc-text-secondary);
+}
+
+.fc-tab-btn.active .fc-tab-count {
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+  background: rgba(232, 80, 2, 0.08);
+}
+
+/* ---------- CONTENT SCROLL AREA ---------- */
+.fc-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 40px 56px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong) var(--fc-bg-sidebar);
+}
+
+.fc-content-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fc-content-scroll::-webkit-scrollbar-track {
+  background: var(--fc-bg-sidebar);
+  border-left: 1px solid var(--fc-border);
+}
+
+.fc-content-scroll::-webkit-scrollbar-thumb {
+  background: var(--fc-border-strong);
+  border-radius: 999px;
+}
+
+.fc-content-container {
+  width: 96%;
+  max-width: 1680px;
+  margin: 0 auto;
+}
+
+/* ---------- FILTER & TOOLBAR ---------- */
+.fc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+  padding: 16px 22px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border);
+  border-radius: 10px;
+}
+
+.fc-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.fc-toolbar-right {
+  color: var(--fc-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.fc-search-box {
+  position: relative;
+  min-width: 280px;
+  max-width: 420px;
+  flex: 1;
+}
+
+.fc-search-box svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--fc-text-muted);
+  pointer-events: none;
+}
+
+.fc-search-input {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  background: var(--fc-bg-surface);
+  border: 1px solid var(--fc-border);
+  border-radius: 8px;
+  color: var(--fc-text);
+  font-size: 13.5px;
+  transition: border-color 0.15s ease;
+}
+
+.fc-search-input::placeholder {
+  color: var(--fc-text-muted);
+}
+
+.fc-search-input:focus {
+  outline: none;
+  border-color: var(--fc-border-strong);
+}
+
+/* ---------- CUSTOM DROPDOWN (LỌC GAME & TRẠNG THÁI HIỆN ĐẠI, PHẲNG, VIỀN MẢNH) ---------- */
+.fc-dropdown {
+  position: relative;
+}
+
+.fc-dropdown-trigger {
+  min-width: 215px;
+  height: 40px;
+  padding: 0 14px;
+  background: var(--fc-bg-surface);
+  border: 1px solid var(--fc-border);
+  border-radius: 8px;
+  color: var(--fc-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-dropdown-trigger:hover,
+.fc-dropdown.is-open .fc-dropdown-trigger {
+  background: var(--fc-bg-card-hover);
+  border-color: var(--fc-border-strong);
+}
+
+.fc-dropdown-trigger-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+}
+
+.fc-dropdown-chevron {
+  color: var(--fc-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.fc-dropdown.is-open .fc-dropdown-chevron {
+  transform: rotate(180deg);
+  color: var(--fc-text);
+}
+
+.fc-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 256px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border-strong);
+  border-radius: 10px;
+  padding: 6px;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: fcDropdownFade 0.14s ease;
+}
+
+.fc-dropdown-menu[hidden] {
+  display: none !important;
+}
+
+@keyframes fcDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fc-dropdown-item {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+
+.fc-dropdown-item:hover {
+  background: var(--fc-bg-surface);
+  color: var(--fc-text);
+}
+
+.fc-dropdown-item.active {
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border-strong);
+  color: var(--fc-text);
+  font-weight: 600;
+}
+
+.fc-dropdown-item-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fc-dropdown-item-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Logo từng Game trong Dropdown */
+.fc-dd-game-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.fc-dd-all-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--fc-text-secondary);
+  flex-shrink: 0;
+}
+
+/* Chấm trạng thái trong Dropdown Trạng thái */
+.fc-dd-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fc-dd-dot.is-all {
+  background: var(--fc-cyan);
+}
+
+.fc-dd-dot.is-online {
+  background: var(--fc-online);
+}
+
+.fc-dd-dot.is-offline {
+  background: var(--fc-offline);
+}
+
+/* Số đếm trong Dropdown không có đường viền bao quanh */
+.fc-dd-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 0 2px;
+  background: transparent;
+  border: none;
+  color: var(--fc-text-muted);
+}
+
+.fc-dropdown-item.active .fc-dd-count {
+  color: var(--fc-text);
+  font-weight: 700;
+}
+
+.fc-dd-check {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--fc-orange);
+  width: 12px;
+  text-align: center;
+}
+
+.fc-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--fc-text-muted);
+  margin: 0 2px 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--fc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fc-section-cols-hint {
+  font-size: 11.5px;
+  color: var(--fc-text-muted);
+  font-weight: 600;
+}
+
+/* ---------- HÀNG NGƯỜI CHƠI (KHOẢNG TRẮNG THOÁNG & VIỀN MẢNH 1PX) ---------- */
+.fc-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fc-player-row {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.7fr) minmax(240px, 1.15fr) minmax(210px, 0.95fr) auto;
+  align-items: center;
+  gap: 28px;
+  padding: 20px 28px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border);
+  border-radius: 10px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-player-row:hover {
+  background: var(--fc-bg-card-hover);
+  border-color: var(--fc-border-strong);
+}
+
+/* Cột 1: Avatar + Tên + Trạng thái / Bạn chung */
+.fc-player-identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.fc-avatar-box {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.fc-avatar-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--fc-border-strong);
+  background: var(--fc-bg-surface);
+}
+
+.fc-presence-badge {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--fc-bg-card);
+}
+
+.fc-presence-online { background: var(--fc-online); }
+.fc-presence-ingame { background: var(--fc-ingame); }
+.fc-presence-offline { background: var(--fc-offline); }
+
+.fc-player-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fc-player-subhead {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fc-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fc-player-subhead.is-ingame {
+  color: var(--fc-ingame);
+}
+
+.fc-player-subhead.is-online {
+  color: var(--fc-online);
+}
+
+.fc-player-subhead.is-inroom {
+  color: var(--fc-ingame);
+}
+
+.fc-player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fc-player-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fc-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-verified-badge {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.fc-player-desc {
+  font-size: 13px;
+  color: var(--fc-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cột 2: Game đang chơi + Nhãn Cấp/Rank có màu phẳng dịu mắt (không chuyển sắc lòe loẹt) */
+.fc-player-games {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fc-game-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fc-text);
+  flex-wrap: wrap;
+}
+
+.fc-game-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fc-cyan);
+  flex-shrink: 0;
+}
+
+.fc-row-game-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Nhãn Cấp độ & Rank CS2: Màu phẳng dịu mắt (Flat Tinted), viền mảnh 1px */
+.fc-cs2-game-rank-pill,
+.fc-game-level-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--fc-bg-surface);
+  border: 1px solid var(--fc-border);
+  color: var(--fc-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.fc-game-level-pill.lv-valorant {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.32);
+  color: #fb7185;
+}
+
+.fc-game-level-pill.lv-lol {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.32);
+  color: #38bdf8;
+}
+
+.fc-game-level-pill.lv-tft {
+  background: rgba(234, 179, 8, 0.1);
+  border-color: rgba(234, 179, 8, 0.34);
+  color: #facc15;
+}
+
+.fc-game-level-pill.lv-aov {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.32);
+  color: #fbbf24;
+}
+
+.fc-cs2-game-rank-pill.cs2-tier-gold {
+  background: rgba(234, 179, 8, 0.1);
+  border-color: rgba(234, 179, 8, 0.34);
+  color: #facc15;
+}
+
+.fc-cs2-game-rank-pill.cs2-tier-purple {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.34);
+  color: #c084fc;
+}
+
+.fc-cs2-game-rank-pill.cs2-tier-blue {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.34);
+  color: #60a5fa;
+}
+
+.fc-cs2-game-rank-img {
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.fc-level-icon-svg {
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.fc-role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fc-role-tag {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  border: 1px solid var(--fc-border);
+}
+
+/* Cột 3: Rank Icon */
+.fc-player-rank {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fc-rank-badges-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.fc-rank-icon-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Khung SVG Điểm CS2 Premier — Phẳng gọn, không bóng đậm */
+.fc-premier-svg-wrap {
+  position: relative;
+  width: 92px;
+  height: 33px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fc-premier-svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fc-premier-score-text {
+  position: absolute;
+  left: 19px;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%) skewX(-10deg);
+  text-align: center;
+  font-family: "Arial Black", Impact, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.fc-premier-score-text small {
+  font-size: 12.5px;
+  font-weight: 800;
+  opacity: 0.95;
+}
+
+.fc-rank-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fc-rank-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fc-rank-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fc-text);
+}
+
+.fc-rank-elo {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fc-text-muted);
+}
+
+/* Cột 4: Nút thao tác (Actions — Màu phẳng, không đổ bóng, không scale) */
+.fc-player-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.fc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.fc-btn-primary {
+  background: var(--fc-orange);
+  color: #ffffff;
+}
+
+.fc-btn-primary:hover {
+  background: var(--fc-orange-hover);
+}
+
+.fc-btn-join {
+  background: transparent;
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+}
+
+.fc-btn-join:hover {
+  background: rgba(232, 80, 2, 0.1);
+}
+
+.fc-btn-secondary {
+  background: var(--fc-bg-surface);
+  color: var(--fc-text);
+  border-color: var(--fc-border);
+}
+
+.fc-btn-secondary:hover {
+  background: var(--fc-bg-card-hover);
+  border-color: var(--fc-border-strong);
+}
+
+.fc-btn-danger-ghost {
+  background: transparent;
+  color: var(--fc-text-secondary);
+  border-color: var(--fc-border);
+}
+
+.fc-btn-danger-ghost:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.fc-btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 7px;
+}
+
+/* ---------- EMPTY STATE ---------- */
+.fc-empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  background: var(--fc-bg-card);
+  border: 1px dashed var(--fc-border-strong);
+  border-radius: 10px;
+  color: var(--fc-text-secondary);
+}
+
+.fc-empty-state h3 {
+  color: var(--fc-text);
+  margin: 12px 0 6px;
+  font-size: 16px;
+}
+
+/* ---------- PAGINATION (PHÂN TRANG PHẲNG, VIỀN MẢNH) ---------- */
+.fc-pagination {
+  margin-top: 28px;
+  padding: 16px 24px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fc-pagination:empty {
+  display: none;
+}
+
+.fc-page-info {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fc-text-secondary);
+}
+
+.fc-page-info strong {
+  color: var(--fc-text);
+  font-weight: 700;
+}
+
+.fc-page-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fc-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 7px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.fc-page-btn:hover:not(:disabled) {
+  background: var(--fc-bg-card-hover);
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.fc-page-btn.active {
+  background: var(--fc-orange);
+  color: #ffffff;
+  border-color: var(--fc-orange);
+}
+
+.fc-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fc-page-size-select {
+  padding: 8px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.fc-page-size-select:focus {
+  outline: none;
+  border-color: var(--fc-border-strong);
+}
+
+/* ---------- TOAST NOTIFICATION ---------- */
+.fc-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.fc-toast {
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border-strong);
+  border-left: 3px solid var(--fc-orange);
+  color: var(--fc-text);
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  animation: fcSlideIn 0.18s ease;
+}
+
+@keyframes fcSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .fc-player-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .fc-player-games,
+  .fc-player-rank,
+  .fc-player-actions {
+    padding-left: 0;
+    border-left: none;
+    padding-top: 12px;
+    border-top: 1px solid var(--fc-border);
+  }
+  .fc-player-actions {
+    justify-content: flex-start;
+  }
+  .fc-tab-back-home span,
+  .fc-theme-label {
+    display: none;
+  }
+}
