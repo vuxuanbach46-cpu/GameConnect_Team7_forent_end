@@ -691,3 +691,154 @@ body.community-page {
   .community-aside { grid-template-columns: 1fr; }
   .aside-footer { grid-column: auto; }
 }
+
+body.community-page {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.community-app-shell {
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+}
+
+.community-main {
+  padding: 26px 30px 42px;
+}
+
+.community-content-container {
+  width: 100%;
+  max-width: none;
+}
+
+.community-heading {
+  max-width: none;
+  margin-bottom: 22px;
+}
+
+.community-grid {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  justify-content: stretch;
+  gap: 20px;
+}
+
+.community-tabs .filter-button {
+  height: 100%;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+
+.community-tabs .filter-button:hover,
+.community-tabs .filter-button.active {
+  background: transparent;
+  color: var(--fc-text);
+}
+
+.community-tabs .filter-button.active::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  bottom: 0;
+  left: 16px;
+  height: 2px;
+  background: var(--fc-orange);
+}
+
+.community-right-bar .fc-right-icon-btn {
+  color: var(--fc-text-secondary);
+  text-decoration: none;
+}
+
+.community-vs {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .community-grid {
+    grid-template-columns: minmax(0, 1fr) 250px;
+  }
+}
+
+@media (max-width: 720px) {
+  .community-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .community-aside {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .community-heading {
+    align-items: flex-start;
+  }
+
+  .heading-live {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .community-app-shell .fc-left-bar,
+  .community-app-shell .fc-left-bar:hover {
+    width: 56px;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .community-app-shell .fc-brand-text,
+  .community-app-shell .fc-nav-label {
+    display: none;
+  }
+
+  .community-app-shell .fc-right-bar {
+    display: none;
+  }
+
+  .community-app-shell .fc-top-tabbar {
+    height: 56px;
+    justify-content: flex-end;
+    padding: 0 8px;
+  }
+
+  .community-app-shell .fc-tab-back-home {
+    left: 8px;
+    padding: 6px;
+  }
+
+  .community-app-shell .fc-tab-back-home span {
+    display: none;
+  }
+
+  .community-tabs {
+    gap: 0;
+  }
+
+  .community-tabs .filter-button {
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  .community-app-shell .fc-content-scroll {
+    padding: 18px 12px 32px;
+  }
+
+  .community-main {
+    padding: 8px 0 28px;
+  }
+
+  .community-aside {
+    grid-template-columns: 1fr;
+  }
+}

@@ -6,34 +6,68 @@
   <title>Cộng đồng | GameConnect</title>
   <link rel="icon" href="../assets/images/logo.svg">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/friends.css">
   <link rel="stylesheet" href="../css/community.css">
 </head>
-<body class="community-page" data-root="../">
+<body class="community-page fc-dark-body" data-root="../">
   <header id="app-header"></header>
 
-  <main class="community-shell">
-    <aside class="community-rail" aria-label="Điều hướng bảng tin">
-      <a class="community-brand" href="../index.html" aria-label="GameConnect, về trang chủ">
-        <img src="../assets/images/logo.svg" alt="" width="34" height="34">
-        <span>COMMUNITY<span>GAMECONNECT</span></span>
-      </a>
-      <div class="rail-divider"></div>
-      <a class="rail-link" href="../index.html">
-        <span class="rail-icon" aria-hidden="true">⌂</span><span>Trang chủ</span>
-      </a>
-      <a class="rail-link active" href="community.html" aria-current="page">
-        <span class="rail-icon" aria-hidden="true">▤</span><span>Bảng tin</span>
-      </a>
-      <a class="rail-link" href="friends.html">
-        <span class="rail-icon" aria-hidden="true">♧</span><span>Bạn bè</span>
-      </a>
-      <div class="rail-note">
-        <span class="live-dot"></span>
-        <div><strong>Đang hoạt động</strong><small>Cộng đồng game thủ</small></div>
+  <div class="fc-app-shell community-app-shell">
+    <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
+      <div class="fc-bar-group">
+        <a href="../index.html" class="fc-brand-link" title="GameConnect - Trang chủ">
+          <div class="fc-brand-logo" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <line x1="15" y1="13" x2="15.01" y2="13"></line>
+              <line x1="18" y1="11" x2="18.01" y2="11"></line>
+              <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+            </svg>
+          </div>
+          <div class="fc-brand-text">
+            <span class="fc-brand-title">GameConnect</span>
+            <span class="fc-brand-sub">GAMING HUB</span>
+          </div>
+        </a>
+        <div class="fc-nav-divider"></div>
+        <a href="../index.html" class="fc-nav-item" title="Trang chủ">
+          <span class="fc-nav-icon" aria-hidden="true">⌂</span><span class="fc-nav-label">Trang chủ</span>
+        </a>
+        <a href="community.html" class="fc-nav-item active" aria-current="page" title="Bảng tin cộng đồng">
+          <span class="fc-nav-icon" aria-hidden="true">☷</span><span class="fc-nav-label">Bảng tin</span>
+        </a>
+        <a href="friends.html" class="fc-nav-item" title="Bạn bè & Kết nối">
+          <span class="fc-nav-icon" aria-hidden="true">♧</span><span class="fc-nav-label">Bạn bè & Kết nối</span>
+        </a>
+        <a href="../index.html" class="fc-nav-item" title="Tìm đội nhanh">
+          <span class="fc-nav-icon" aria-hidden="true">▷</span><span class="fc-nav-label">Tìm đội nhanh</span>
+        </a>
+      </div>
+      <div class="fc-bar-group">
+        <a href="items.html" class="fc-nav-item" title="Cửa hàng vật phẩm">
+          <span class="fc-nav-icon" aria-hidden="true">▣</span><span class="fc-nav-label">Cửa hàng vật phẩm</span>
+        </a>
       </div>
     </aside>
 
-    <section class="community-main">
+    <main class="fc-main-area">
+      <header class="fc-top-tabbar">
+        <a href="../index.html" class="fc-tab-back-home">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Trang chủ</span>
+        </a>
+        <nav class="fc-tabs-nav community-tabs" role="group" aria-label="Lọc bảng tin">
+          <button type="button" class="fc-tab-btn filter-button active" data-filter="all" aria-pressed="true">KHÁM PHÁ</button>
+          <button type="button" class="fc-tab-btn filter-button" data-filter="mine" aria-pressed="false">BÀI CỦA TÔI</button>
+        </nav>
+      </header>
+
+      <div class="fc-content-scroll">
+        <div class="fc-content-container community-content-container">
+          <section class="community-main">
       <div class="community-heading">
         <div>
           <p class="eyebrow"><span class="eyebrow-mark"></span> GAMECONNECT SOCIAL</p>
@@ -95,10 +129,6 @@
               <h2>Dòng thời gian</h2>
               <p>Câu chuyện mới nhất từ game thủ</p>
             </div>
-            <div class="feed-filters" role="group" aria-label="Lọc bài viết">
-              <button type="button" class="filter-button active" data-filter="all" aria-pressed="true">Khám phá</button>
-              <button type="button" class="filter-button" data-filter="mine" aria-pressed="false">Bài của tôi</button>
-            </div>
           </div>
           <div id="active-game-filter" class="active-game-filter" hidden></div>
           <div id="feed-list" class="feed-list" aria-live="polite"></div>
@@ -155,8 +185,35 @@
           </div>
         </aside>
       </div>
-    </section>
-  </main>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <aside class="fc-right-bar community-right-bar" aria-label="Thanh trạng thái">
+      <div class="fc-avatar-menu-wrapper">
+        <span class="fc-self-avatar-wrap" title="Trạng thái của bạn">
+          <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=CaptianVN&backgroundColor=b6e3f4" alt="Avatar của bạn" class="fc-self-avatar">
+          <span class="fc-status-dot"></span>
+        </span>
+      </div>
+      <button type="button" class="fc-right-icon-btn community-vs" aria-label="Đấu nhanh VS">VS</button>
+      <button type="button" class="fc-right-icon-btn" aria-label="Thông báo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      </button>
+      <a class="fc-right-icon-btn" href="friends.html" aria-label="Bạn bè & Kết nối">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </a>
+    </aside>
+  </div>
 
   <footer id="app-footer"></footer>
   <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
