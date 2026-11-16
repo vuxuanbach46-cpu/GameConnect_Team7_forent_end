@@ -261,10 +261,26 @@
 
     <aside class="fc-right-bar community-right-bar" aria-label="Thanh trạng thái">
       <div class="fc-avatar-menu-wrapper">
-        <span class="fc-self-avatar-wrap" title="Trạng thái của bạn">
+        <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Tuỳ chọn giao diện" aria-label="Mở tuỳ chọn giao diện" aria-haspopup="true" aria-expanded="false">
           <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=CaptianVN&backgroundColor=b6e3f4" alt="Avatar của bạn" class="fc-self-avatar">
           <span class="fc-status-dot"></span>
-        </span>
+        </button>
+        <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
+          <div class="fc-avatar-dropdown-header">
+            <strong>CaptainVN</strong>
+            <span>● Đang trực tuyến</span>
+          </div>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <div class="fc-avatar-dropdown-label">Giao diện hiển thị</div>
+          <button type="button" class="fc-theme-option" data-set-theme="dark" aria-pressed="false">
+            <span>🌙 Chế độ Tối (Dark)</span>
+            <span class="fc-theme-check" id="check-theme-dark"></span>
+          </button>
+          <button type="button" class="fc-theme-option" data-set-theme="light" aria-pressed="false">
+            <span>☀️ Chế độ Sáng (Light)</span>
+            <span class="fc-theme-check" id="check-theme-light"></span>
+          </button>
+        </div>
       </div>
       <button type="button" class="fc-right-icon-btn community-vs" aria-label="Đấu nhanh VS">VS</button>
       <button type="button" class="fc-right-icon-btn" aria-label="Thông báo">

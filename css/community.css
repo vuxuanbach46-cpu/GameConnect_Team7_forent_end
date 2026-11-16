@@ -14,6 +14,20 @@
   --community-green: #22c55e;
 }
 
+body.community-page.fc-light-mode {
+  --community-bg: #f8fafc;
+  --community-sidebar: #ffffff;
+  --community-surface: #f1f5f9;
+  --community-card: #ffffff;
+  --community-hover: #f8fafc;
+  --community-border: #e2e8f0;
+  --community-border-strong: #cbd5e1;
+  --community-orange-soft: rgba(232, 80, 2, .08);
+  --community-text: #0f172a;
+  --community-secondary: #475569;
+  --community-muted: #64748b;
+}
+
 body.community-page {
   min-height: 100vh;
   background: var(--community-bg);
@@ -803,13 +817,24 @@ body.community-page {
   }
 
   .community-app-shell .fc-right-bar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 40px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    z-index: 60;
+  }
+
+  .community-app-shell .fc-right-bar > .fc-right-icon-btn {
     display: none;
   }
 
   .community-app-shell .fc-top-tabbar {
     height: 56px;
     justify-content: flex-end;
-    padding: 0 8px;
+    padding: 0 52px 0 8px;
   }
 
   .community-app-shell .fc-tab-back-home {
@@ -841,4 +866,61 @@ body.community-page {
   .community-aside {
     grid-template-columns: 1fr;
   }
+}
+
+body.community-page.fc-light-mode #post-content {
+  background: #fff;
+}
+
+body.community-page.fc-light-mode #post-content::placeholder {
+  color: #64748b;
+}
+
+body.community-page.fc-light-mode .tool-button,
+body.community-page.fc-light-mode #post-game {
+  background: #f8fafc;
+}
+
+body.community-page.fc-light-mode #post-game option {
+  background: #fff;
+}
+
+body.community-page.fc-light-mode .filter-button.active {
+  background: #f1f5f9;
+}
+
+body.community-page.fc-light-mode .post-menu[open] .post-menu-actions {
+  background: #fff;
+}
+
+body.community-page.fc-light-mode .post-menu-actions button:hover {
+  background: #f1f5f9;
+}
+
+body.community-page.fc-light-mode .post-copy p {
+  color: #334155;
+}
+
+body.community-page.fc-light-mode .post-game-tag,
+body.community-page.fc-light-mode .active-game-filter {
+  color: #9a3412;
+}
+
+body.community-page.fc-light-mode .post-media:not(.post-media-art) {
+  background: #f1f5f9;
+}
+
+body.community-page.fc-light-mode .welcome-card {
+  background:
+    radial-gradient(ellipse at 95% 0%, rgba(232, 80, 2, .12), transparent 45%),
+    linear-gradient(145deg, #fff, #f8fafc);
+}
+
+body.community-page.fc-light-mode .welcome-card a,
+body.community-page.fc-light-mode .game-row:hover .game-name strong {
+  color: #c2410c;
+}
+
+body.community-page.fc-light-mode .game-logo {
+  background: #f1f5f9;
 }
