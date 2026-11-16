@@ -5,6 +5,7 @@ Khung frontend chung cho các nhóm thực tập lớp **HN-KS25-CNTT1**. Không
 - Layout chung (header + menu + footer) cho mọi trang
 - Module gọi API `js/api.js` dùng **axios**: cấu hình `baseURL` một lần, gom xử lý lỗi một chỗ bằng interceptor
 - Trang chủ kiểm tra kết nối **Frontend → Backend → MySQL**
+- Trang **Cộng đồng**: bảng tin, đăng bài kèm ảnh/gắn game, chỉnh sửa và xoá bài cá nhân; bản demo lưu bài viết trên trình duyệt
 - Trang **Items**: ví dụ CRUD đầy đủ (thêm / sửa / xoá / tìm kiếm) gọi sang backend FastAPI
 
 ## 1. Cấu trúc thư mục
@@ -13,9 +14,11 @@ Khung frontend chung cho các nhóm thực tập lớp **HN-KS25-CNTT1**. Không
 frontend/
 ├── index.html             # Trang chủ (kiểm tra kết nối)
 ├── pages/
+│   ├── community.html    # Bảng tin cộng đồng
 │   └── items.html         # Trang CRUD mẫu
 ├── css/
-│   └── style.css          # Style chung, đổi màu ở :root
+│   ├── style.css          # Style chung, đổi màu ở :root
+│   └── community.css      # Giao diện bảng tin cộng đồng
 ├── js/
 │   ├── config.js          # API_BASE_URL: địa chỉ backend
 │   ├── api.js             # axios instance + api.get / post / put / delete
@@ -23,6 +26,7 @@ frontend/
 │   ├── layout.js          # Chèn header/menu/footer vào mọi trang
 │   └── pages/             # Mỗi trang 1 file JS riêng
 │       ├── home.js
+│       ├── community.js
 │       └── items.js
 └── assets/images/         # Ảnh, logo, icon
 ```
@@ -74,6 +78,8 @@ Trình duyệt (FE: 127.0.0.1:5500) --axios--> Backend FastAPI (127.0.0.1:8000/a
    ```js
    { href: "pages/products.html", label: "Sản phẩm" },
    ```
+
+Trang Cộng đồng hiện dùng dữ liệu mẫu; bài viết do người dùng tạo được lưu trong `localStorage` của trình duyệt. Khi backend có API bài viết, có thể thay lớp lưu cục bộ trong `js/pages/community.js` bằng các lời gọi API tương ứng.
 
 Lưu ý khi tạo trang:
 

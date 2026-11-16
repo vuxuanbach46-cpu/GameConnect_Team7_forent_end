@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cộng đồng | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/community.css">
+</head>
+<body class="community-page" data-root="../">
+  <header id="app-header"></header>
+
+  <main class="community-shell">
+    <aside class="community-rail" aria-label="Điều hướng bảng tin">
+      <a class="community-brand" href="../index.html" aria-label="GameConnect, về trang chủ">
+        <img src="../assets/images/logo.svg" alt="" width="34" height="34">
+        <span>COMMUNITY<span>GAMECONNECT</span></span>
+      </a>
+      <div class="rail-divider"></div>
+      <a class="rail-link" href="../index.html">
+        <span class="rail-icon" aria-hidden="true">⌂</span><span>Trang chủ</span>
+      </a>
+      <a class="rail-link active" href="community.html" aria-current="page">
+        <span class="rail-icon" aria-hidden="true">▤</span><span>Bảng tin</span>
+      </a>
+      <a class="rail-link" href="friends.html">
+        <span class="rail-icon" aria-hidden="true">♧</span><span>Bạn bè</span>
+      </a>
+      <div class="rail-note">
+        <span class="live-dot"></span>
+        <div><strong>Đang hoạt động</strong><small>Cộng đồng game thủ</small></div>
+      </div>
+    </aside>
+
+    <section class="community-main">
+      <div class="community-heading">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-mark"></span> GAMECONNECT SOCIAL</p>
+          <h1>Bảng tin cộng đồng</h1>
+          <p class="heading-copy">Chia sẻ khoảnh khắc, tìm đồng đội và bắt nhịp cùng cộng đồng.</p>
+        </div>
+        <div class="heading-live"><span class="live-dot"></span> Kết nối cùng game thủ</div>
+      </div>
+
+      <div class="community-grid">
+        <div class="feed-column">
+          <section class="composer panel" aria-labelledby="composer-title">
+            <div class="composer-topline">
+              <div class="avatar avatar-self" aria-hidden="true">M</div>
+              <div>
+                <h2 id="composer-title">Chia sẻ với cộng đồng</h2>
+                <p>Một khoảnh khắc đáng nhớ trong game?</p>
+              </div>
+              <span class="composer-spark" aria-hidden="true">✦</span>
+            </div>
+            <form id="post-form">
+              <label class="sr-only" for="post-content">Nội dung bài viết</label>
+              <textarea id="post-content" name="content" rows="3" maxlength="600" placeholder="Hôm nay bạn vừa có pha xử lý nào đỉnh?"></textarea>
+              <div class="composer-meta">
+                <span id="char-count">0 / 600</span>
+                <span class="composer-hint">Hãy lan tỏa tinh thần fair-play nhé!</span>
+              </div>
+              <div id="image-preview" class="image-preview" hidden>
+                <img id="preview-image" alt="Ảnh xem trước">
+                <button class="remove-image" id="remove-image" type="button" aria-label="Bỏ ảnh">×</button>
+              </div>
+              <div class="composer-bottom">
+                <div class="composer-tools">
+                  <label class="tool-button" for="post-image">
+                    <span aria-hidden="true">▧</span> Thêm ảnh
+                  </label>
+                  <input id="post-image" type="file" accept="image/*" hidden>
+                  <label class="sr-only" for="post-game">Gắn thẻ game</label>
+                  <select id="post-game" name="game">
+                    <option value="">Chọn game</option>
+                    <option value="Valorant">Valorant</option>
+                    <option value="Liên Minh Huyền Thoại">Liên Minh Huyền Thoại</option>
+                    <option value="CS2">Counter-Strike 2</option>
+                    <option value="Liên Quân Mobile">Liên Quân Mobile</option>
+                    <option value="TFT">Đấu Trường Chân Lý</option>
+                  </select>
+                </div>
+                <div class="form-submit-group">
+                  <button class="cancel-edit" id="cancel-edit" type="button" hidden>Huỷ sửa</button>
+                  <button class="publish-button" id="publish-button" type="submit"><span aria-hidden="true">↗</span> Đăng bài</button>
+                </div>
+              </div>
+              <p class="composer-error" id="composer-error" role="alert" hidden></p>
+            </form>
+          </section>
+
+          <div class="feed-toolbar">
+            <div>
+              <h2>Dòng thời gian</h2>
+              <p>Câu chuyện mới nhất từ game thủ</p>
+            </div>
+            <div class="feed-filters" role="group" aria-label="Lọc bài viết">
+              <button type="button" class="filter-button active" data-filter="all" aria-pressed="true">Khám phá</button>
+              <button type="button" class="filter-button" data-filter="mine" aria-pressed="false">Bài của tôi</button>
+            </div>
+          </div>
+          <div id="active-game-filter" class="active-game-filter" hidden></div>
+          <div id="feed-list" class="feed-list" aria-live="polite"></div>
+          <div id="feed-empty" class="feed-empty" hidden>
+            <span aria-hidden="true">⌕</span>
+            <strong>Chưa có bài viết nào</strong>
+            <p>Hãy là người đầu tiên chia sẻ khoảnh khắc của bạn.</p>
+          </div>
+          <div id="feed-status" class="feed-status" aria-live="polite"></div>
+          <button id="load-more" class="load-more" type="button" hidden>Tải thêm bài viết <span aria-hidden="true">↓</span></button>
+          <div id="feed-sentinel" aria-hidden="true"></div>
+        </div>
+
+        <aside class="community-aside">
+          <section class="aside-card welcome-card">
+            <div class="welcome-glow" aria-hidden="true"></div>
+            <p class="eyebrow">YOUR NEXT GG</p>
+            <h2>Chơi hay hơn<br>khi có đồng đội.</h2>
+            <p>Kết nối với những người cùng chung đam mê và sẵn sàng cho trận tiếp theo.</p>
+            <a href="friends.html">Tìm đồng đội <span aria-hidden="true">↗</span></a>
+            <div class="welcome-orbit orbit-one" aria-hidden="true"></div>
+            <div class="welcome-orbit orbit-two" aria-hidden="true"></div>
+          </section>
+
+          <section class="aside-card game-card">
+            <div class="aside-title">
+              <div><p class="eyebrow">YOUR ARENA</p><h2>Game nổi bật</h2></div>
+              <span class="aside-spark" aria-hidden="true">✦</span>
+            </div>
+            <div class="game-list">
+              <button class="game-row" type="button" data-game-filter="Valorant">
+                <span class="game-logo game-valorant"><img src="../assets/images/games/valorant.png" alt=""></span>
+                <span class="game-name"><strong>Valorant</strong><small>Chiến thuật · FPS</small></span><span class="game-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="game-row" type="button" data-game-filter="Liên Minh Huyền Thoại">
+                <span class="game-logo game-lol"><img src="../assets/images/games/lol.png" alt=""></span>
+                <span class="game-name"><strong>League of Legends</strong><small>MOBA · Chiến thuật</small></span><span class="game-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="game-row" type="button" data-game-filter="CS2">
+                <span class="game-logo game-cs2"><img src="../assets/images/games/cs2.png" alt=""></span>
+                <span class="game-name"><strong>Counter-Strike 2</strong><small>FPS · Đối kháng</small></span><span class="game-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="game-row" type="button" data-game-filter="Liên Quân Mobile">
+                <span class="game-logo game-aov"><img src="../assets/images/games/aov.png" alt=""></span>
+                <span class="game-name"><strong>Liên Quân Mobile</strong><small>MOBA · Mobile</small></span><span class="game-arrow" aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <button type="button" class="show-all-games" data-game-filter="">Xem tất cả bài viết <span aria-hidden="true">→</span></button>
+          </section>
+
+          <div class="aside-footer">
+            <span>GAMECONNECT</span>
+            <p>Cùng chơi. Cùng chia sẻ. Cùng chiến thắng.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer id="app-footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/community.js"></script>
+</body>
+</html>
