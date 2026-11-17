@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm đồng đội | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/team-posts.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container" style="padding-top:24px;padding-bottom:40px;">
+
+    <!-- ===== BỘ LỌC ===== -->
+    <section class="card filter-bar">
+      <div class="filter-row">
+        <!-- Tìm kiếm từ khoá -->
+        <div class="filter-group filter-group--wide">
+          <label for="filter-q">🔍 Từ khoá</label>
+          <input id="filter-q" type="search" placeholder="Tìm theo tiêu đề, mô tả...">
+        </div>
+
+        <!-- Game -->
+        <div class="filter-group">
+          <label for="filter-game">🎮 Game</label>
+          <select id="filter-game">
+            <option value="">-- Tất cả game --</option>
+          </select>
+        </div>
+
+        <!-- Rank -->
+        <div class="filter-group">
+          <label for="filter-rank">🏆 Rank</label>
+          <select id="filter-rank" disabled>
+            <option value="">-- Tất cả rank --</option>
+          </select>
+        </div>
+
+        <!-- Vai trò -->
+        <div class="filter-group">
+          <label for="filter-role">🎯 Vai trò</label>
+          <select id="filter-role" disabled>
+            <option value="">-- Tất cả vai trò --</option>
+          </select>
+        </div>
+
+        <!-- Khu vực -->
+        <div class="filter-group">
+          <label for="filter-region">🌏 Khu vực</label>
+          <select id="filter-region">
+            <option value="">-- Tất cả --</option>
+            <option value="VN">VN</option>
+            <option value="SEA">SEA</option>
+            <option value="NA">NA</option>
+            <option value="EU">EU</option>
+          </select>
+        </div>
+
+        <!-- Nút lọc / reset -->
+        <div class="filter-group filter-group--actions">
+          <label>&nbsp;</label>
+          <div style="display:flex;gap:8px;">
+            <button id="btn-filter" class="btn btn-primary">Lọc</button>
+            <button id="btn-reset-filter" class="btn">Xoá lọc</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HEADER DANH SÁCH ===== -->
+    <div class="list-header" style="margin-bottom:12px;">
+      <h2 style="margin:0;">Bài đăng tìm đồng đội <span id="total-count" class="muted" style="font-size:14px;font-weight:400;"></span></h2>
+      <button id="btn-open-create" class="btn btn-primary">+ Đăng bài</button>
+    </div>
+
+    <!-- ===== DANH SÁCH CARD ===== -->
+    <div id="post-grid" class="post-grid">
+      <div class="post-skeleton"></div>
+      <div class="post-skeleton"></div>
+      <div class="post-skeleton"></div>
+    </div>
+
+    <!-- ===== PHÂN TRANG ===== -->
+    <div id="pagination" class="pagination"></div>
+
+  </main>
+
+  <!-- ===== MODAL TẠO / SỬA BÀI ===== -->
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Đăng bài tìm đồng đội</h3>
+        <button id="btn-close-modal" class="btn-icon" title="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="post-form" novalidate>
+          <!-- Game (bắt buộc) -->
+          <label for="f-game">Game <span class="required">*</span></label>
+          <select id="f-game" name="game_id" required>
+            <option value="">-- Chọn game --</option>
+          </select>
+
+          <!-- Tiêu đề -->
+          <label for="f-title">Tiêu đề <span class="required">*</span></label>
+          <input id="f-title" name="title" type="text" maxlength="150" required
+            placeholder="VD: [VN] Tìm Jungle + Support leo Plat">
+
+          <!-- Rank min/max -->
+          <div class="form-row">
+            <div>
+              <label for="f-min-rank">Rank tối thiểu</label>
+              <select id="f-min-rank" name="min_rank_id" disabled>
+                <option value="">-- Không yêu cầu --</option>
+              </select>
+            </div>
+            <div>
+              <label for="f-max-rank">Rank tối đa</label>
+              <select id="f-max-rank" name="max_rank_id" disabled>
+                <option value="">-- Không giới hạn --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Vai trò cần tuyển -->
+          <label>Vai trò cần tuyển</label>
+          <div id="f-roles-wrap" class="role-checkboxes">
+            <span class="muted" style="font-size:13px;">Chọn game trước để hiện vai trò</span>
+          </div>
+
+          <!-- Số người cần tuyển -->
+          <label for="f-needed">Số người cần tuyển <span class="required">*</span></label>
+          <input id="f-needed" name="needed_players" type="number" min="1" max="50" value="1" required>
+
+          <!-- Giờ chơi -->
+          <label for="f-playtime">Khung giờ chơi</label>
+          <input id="f-playtime" name="play_time" type="text" placeholder="VD: 20:00-23:00" maxlength="100">
+
+          <!-- Khu vực -->
+          <label for="f-region">Khu vực / Server</label>
+          <select id="f-region" name="region">
+            <option value="">-- Không chọn --</option>
+            <option value="VN">VN</option>
+            <option value="SEA">SEA</option>
+            <option value="NA">NA</option>
+            <option value="EU">EU</option>
+          </select>
+
+          <!-- Mô tả -->
+          <label for="f-desc">Mô tả</label>
+          <textarea id="f-desc" name="description" rows="3"
+            placeholder="Mic on bắt buộc, không toxic, chơi nghiêm túc..."></textarea>
+
+          <!-- Hạn hiển thị -->
+          <label for="f-expires">Hạn hiển thị (tối đa 7 ngày)</label>
+          <input id="f-expires" name="expires_at" type="datetime-local">
+
+          <p id="form-error" class="text-error" hidden></p>
+
+          <div class="form-actions">
+            <button id="btn-submit-post" type="submit" class="btn btn-primary">Đăng bài</button>
+            <button type="button" class="btn" id="btn-cancel-form">Huỷ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/team-posts.js"></script>
+</body>
+</html>

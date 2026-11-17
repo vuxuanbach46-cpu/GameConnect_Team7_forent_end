@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết bài đăng | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/team-posts.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container" style="padding-top:24px;padding-bottom:40px;max-width:860px;">
+
+    <!-- Breadcrumb -->
+    <div style="margin-bottom:16px;">
+      <a href="team-posts.html" style="color:var(--color-muted);text-decoration:none;">← Danh sách bài đăng</a>
+    </div>
+
+    <!-- Nội dung chi tiết (render bằng JS) -->
+    <div id="detail-wrap">
+      <div class="card" style="text-align:center;padding:40px;">
+        <span class="muted">Đang tải...</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal sửa (tái sử dụng cùng form với trang list) -->
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Chỉnh sửa bài đăng</h3>
+        <button id="btn-close-modal" class="btn-icon" title="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="post-form" novalidate>
+          <label for="f-game">Game <span class="required">*</span></label>
+          <select id="f-game" name="game_id" required>
+            <option value="">-- Chọn game --</option>
+          </select>
+
+          <label for="f-title">Tiêu đề <span class="required">*</span></label>
+          <input id="f-title" name="title" type="text" maxlength="150" required
+            placeholder="VD: [VN] Tìm Jungle + Support leo Plat">
+
+          <div class="form-row">
+            <div>
+              <label for="f-min-rank">Rank tối thiểu</label>
+              <select id="f-min-rank" name="min_rank_id" disabled>
+                <option value="">-- Không yêu cầu --</option>
+              </select>
+            </div>
+            <div>
+              <label for="f-max-rank">Rank tối đa</label>
+              <select id="f-max-rank" name="max_rank_id" disabled>
+                <option value="">-- Không giới hạn --</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Vai trò cần tuyển</label>
+          <div id="f-roles-wrap" class="role-checkboxes">
+            <span class="muted" style="font-size:13px;">Chọn game trước để hiện vai trò</span>
+          </div>
+
+          <label for="f-needed">Số người cần tuyển <span class="required">*</span></label>
+          <input id="f-needed" name="needed_players" type="number" min="1" max="50" value="1" required>
+
+          <label for="f-playtime">Khung giờ chơi</label>
+          <input id="f-playtime" name="play_time" type="text" placeholder="VD: 20:00-23:00" maxlength="100">
+
+          <label for="f-region">Khu vực / Server</label>
+          <select id="f-region" name="region">
+            <option value="">-- Không chọn --</option>
+            <option value="VN">VN</option>
+            <option value="SEA">SEA</option>
+            <option value="NA">NA</option>
+            <option value="EU">EU</option>
+          </select>
+
+          <label for="f-desc">Mô tả</label>
+          <textarea id="f-desc" name="description" rows="3"></textarea>
+
+          <label for="f-expires">Hạn hiển thị</label>
+          <input id="f-expires" name="expires_at" type="datetime-local">
+
+          <p id="form-error" class="text-error" hidden></p>
+
+          <div class="form-actions">
+            <button id="btn-submit-post" type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <button type="button" class="btn" id="btn-cancel-form">Huỷ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/team-post-detail.js"></script>
+</body>
+</html>
