@@ -410,4 +410,53 @@ window.addEventListener("scroll", () => {
   }
 }, { passive: true });
 
+function applyCommunityTheme(theme) {
+  const isLight = theme === "light";
+  document.body.classList.toggle("fc-light-mode", isLight);
+
+  document.getElementById("check-theme-dark").textContent = isLight ? "" : "✓";
+  document.getElementById("check-theme-light").textContent = isLight ? "✓" : "";
+  document.querySelectorAll(".fc-theme-option").forEach((button) => {
+    const selected = button.dataset.setTheme === theme;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+
+  localStorage.setItem("gc_friends_theme", theme);
+}
+
+const avatarMenuButton = document.getElementById("btn-avatar-menu");
+const avatarDropdownMenu = document.getElementById("avatar-dropdown-menu");
+applyCommunityTheme(localStorage.getItem("gc_friends_theme") || "dark");
+
+avatarMenuButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  avatarDropdownMenu.hidden = !avatarDropdownMenu.hidden;
+  avatarMenuButton.setAttribute("aria-expanded", String(!avatarDropdownMenu.hidden));
+});
+
+document.querySelectorAll(".fc-theme-option").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    applyCommunityTheme(button.dataset.setTheme);
+    avatarDropdownMenu.hidden = true;
+    avatarMenuButton.setAttribute("aria-expanded", "false");
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!avatarDropdownMenu.hidden && !avatarDropdownMenu.contains(event.target)) {
+    avatarDropdownMenu.hidden = true;
+    avatarMenuButton.setAttribute("aria-expanded", "false");
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !avatarDropdownMenu.hidden) {
+    avatarDropdownMenu.hidden = true;
+    avatarMenuButton.setAttribute("aria-expanded", "false");
+    avatarMenuButton.focus();
+  }
+});
+
 renderFeed();
