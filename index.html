@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/notifications.css">
 </head>
 <body class="flex h-screen overflow-hidden select-none">
 
@@ -109,13 +110,17 @@
             </div>
 
             <!-- Khu vực Đăng nhập / Đăng ký (Tự động đổi thành tên User & nút Đăng xuất qua index.js) -->
-            <div id="auth-actions" class="flex items-center gap-3 flex-shrink-0">
-                <a href="pages/login.html" class="px-3.5 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-[#1e2029] border border-[#2e313e] rounded-lg transition">
-                    Đăng nhập
-                </a>
-                <a href="pages/register.html" class="px-4 py-1.5 text-xs btn-orange rounded-lg">
-                    Đăng ký ngay
-                </a>
+            <!-- Chuông thông báo (Tài nguyên chung) + Khu vực Đăng nhập / Đăng ký -->
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <div id="gc-notif-bell"></div>
+                <div id="auth-actions" class="flex items-center gap-3">
+                    <a href="pages/login.html" class="px-3.5 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-[#1e2029] border border-[#2e313e] rounded-lg transition">
+                        Đăng nhập
+                    </a>
+                    <a href="pages/register.html" class="px-4 py-1.5 text-xs btn-orange rounded-lg">
+                        Đăng ký ngay
+                    </a>
+                </div>
             </div>
         </header>
 
