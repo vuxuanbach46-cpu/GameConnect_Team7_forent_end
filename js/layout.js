@@ -12,6 +12,7 @@ const MENU = [
   { href: "pages/friends.html", label: "Bạn bè (UI/UX)" },
   { href: "pages/items.html", label: "Items (CRUD mẫu)" },
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
+  { href: "pages/my-team.html", label: "🎮 Đội của tôi" },
 ];
 
 function renderLayout() {
