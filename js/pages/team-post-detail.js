@@ -68,6 +68,7 @@ async function loadDetail() {
 function statusBadge(status) {
   const map = {
     OPEN:    ["badge-open", "Đang mở"],
+    FULL:    ["badge-full", "Đã đủ người"],
     CLOSED:  ["badge-closed", "Đã đóng"],
     EXPIRED: ["badge-expired", "Hết hạn"],
   };
@@ -97,9 +98,16 @@ function renderDetail(post) {
 
   // Đơn ứng tuyển (chỉ hiện nếu có)
   const apps = post.applications || [];
+  const statusBadgesApp = {
+    PENDING: `<span class="badge-app-pending"><i class="fa-solid fa-clock"></i> Chờ duyệt</span>`,
+    ACCEPTED: `<span class="badge-app-accepted"><i class="fa-solid fa-check"></i> Đã chấp nhận</span>`,
+    REJECTED: `<span class="badge-app-rejected"><i class="fa-solid fa-xmark"></i> Đã từ chối</span>`,
+    CANCELLED: `<span class="badge-app-cancelled"><i class="fa-solid fa-ban"></i> Đã rút đơn</span>`,
+  };
+
   const appsSection = apps.length > 0 ? `
     <div class="card">
-      <h3 style="margin:0 0 16px;">Đơn ứng tuyển (${apps.length})</h3>
+      <h3 style="margin:0 0 16px;"><i class="fa-solid fa-users text-orange-500"></i> Đơn ứng tuyển (${apps.length})</h3>
       <div class="table-wrap">
         <table>
           <thead>
@@ -109,17 +117,38 @@ function renderDetail(post) {
               <th>Lời nhắn</th>
               <th>Trạng thái</th>
               <th>Ngày nộp</th>
+              <th style="text-align:right;">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            ${apps.map((a) => `
-              <tr>
-                <td>${a.id}</td>
-                <td>User #${a.user_id}</td>
-                <td>${escapeHtml(a.message || "—")}</td>
-                <td><span class="application-status-${a.status.toLowerCase()}">${a.status}</span></td>
-                <td>${formatDateTime(a.created_at)}</td>
-              </tr>`).join("")}
+            ${apps.map((a) => {
+              const statusHtml = statusBadgesApp[a.status] || `<span class="badge">${a.status}</span>`;
+              let actionsHtml = "—";
+              if (a.status === "PENDING" && post.status !== "CLOSED") {
+                actionsHtml = `
+                  <button class="btn-accept btn-small" onclick="handleDetailAppDecision(${a.id}, 'ACCEPTED')">
+                    <i class="fa-solid fa-check"></i> Chấp nhận
+                  </button>
+                  <button class="btn-reject btn-small" onclick="handleDetailAppDecision(${a.id}, 'REJECTED')">
+                    <i class="fa-solid fa-xmark"></i> Từ chối
+                  </button>
+                `;
+              }
+              return `
+                <tr>
+                  <td>${a.id}</td>
+                  <td>
+                    <strong>Game thủ #${a.user_id}</strong>
+                    <a href="javascript:void(0)" onclick="openProfileModal(${a.user_id})" class="applicant-profile-link" style="margin-left:8px;">
+                      <i class="fa-solid fa-id-card"></i> Hồ sơ
+                    </a>
+                  </td>
+                  <td>${escapeHtml(a.message || "—")}</td>
+                  <td>${statusHtml}</td>
+                  <td>${formatDateTime(a.created_at)}</td>
+                  <td style="text-align:right;white-space:nowrap;">${actionsHtml}</td>
+                </tr>`;
+            }).join("")}
           </tbody>
         </table>
       </div>
@@ -339,7 +368,92 @@ function hideFormError() {
 }
 
 // ============================================================
-// 8. Khởi động
+// 8. Duyệt đơn ứng tuyển (Chấp nhận / Từ chối) & Xem hồ sơ
+// ============================================================
+async function handleDetailAppDecision(appId, decision) {
+  const actionText = decision === "ACCEPTED" ? "chấp nhận" : "từ chối";
+  if (!confirm(`Bạn có chắc muốn ${actionText} đơn ứng tuyển này?`)) return;
+
+  try {
+    await api.put(`/team-posts/${postId}/applications/${appId}`, {
+      status: decision,
+    });
+    showToast(`Đã ${actionText} đơn ứng tuyển thành công! 🎉`, "success");
+    loadDetail();
+  } catch (err) {
+    showToast(err.message || `Lỗi khi ${actionText} đơn`, "error");
+  }
+}
+
+async function openProfileModal(userId) {
+  const modalOverlay = document.getElementById("profile-modal-overlay");
+  const avatar = document.getElementById("pm-avatar");
+  const username = document.getElementById("pm-username");
+  const bio = document.getElementById("pm-bio");
+  const region = document.getElementById("pm-region");
+  const playtime = document.getElementById("pm-playtime");
+  const mic = document.getElementById("pm-mic");
+  const role = document.getElementById("pm-role");
+
+  if (!modalOverlay) return;
+
+  avatar.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=user_${userId}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+  username.textContent = `Game thủ #${userId}`;
+  bio.textContent = "Đang tải thông tin hồ sơ...";
+  region.textContent = "—";
+  playtime.textContent = "—";
+  mic.textContent = "—";
+  role.textContent = "—";
+
+  modalOverlay.hidden = false;
+  document.body.style.overflow = "hidden";
+
+  try {
+    let profile = null;
+    try {
+      profile = await api.get(`/api/profiles/${userId}`);
+    } catch (e) {
+      try {
+        profile = await api.get(`/users/${userId}`);
+      } catch (e2) {}
+    }
+
+    if (profile) {
+      username.textContent = profile.display_name || profile.username || `Game thủ #${userId}`;
+      if (profile.avatar) avatar.src = profile.avatar;
+      bio.textContent = profile.bio || "Game thủ chưa cập nhật lời giới thiệu.";
+      region.textContent = profile.region || "Việt Nam";
+      playtime.textContent = profile.play_time || "20:00 - 23:00";
+      mic.innerHTML = profile.has_mic ? `<span style="color:#34d399;"><i class="fa-solid fa-microphone"></i> Có Mic</span>` : `<span style="color:#94a3b8;"><i class="fa-solid fa-microphone-slash"></i> Không</span>`;
+      role.textContent = profile.role || "Thành viên";
+    } else {
+      bio.textContent = "Hồ sơ cá nhân chưa cập nhật thông tin chi tiết.";
+      region.textContent = "Việt Nam";
+      playtime.textContent = "Buổi tối";
+      mic.innerHTML = `<span style="color:#34d399;"><i class="fa-solid fa-microphone"></i> Sẵn sàng mic</span>`;
+      role.textContent = "Game thủ";
+    }
+  } catch (err) {
+    bio.textContent = "Không thể tải thông tin hồ sơ chi tiết.";
+  }
+}
+
+function closeProfileModal() {
+  const modalOverlay = document.getElementById("profile-modal-overlay");
+  if (modalOverlay) {
+    modalOverlay.hidden = true;
+    document.body.style.overflow = "";
+  }
+}
+
+document.getElementById("btn-close-profile-modal")?.addEventListener("click", closeProfileModal);
+document.getElementById("btn-done-profile")?.addEventListener("click", closeProfileModal);
+document.getElementById("profile-modal-overlay")?.addEventListener("click", (e) => {
+  if (e.target.id === "profile-modal-overlay") closeProfileModal();
+});
+
+// ============================================================
+// 9. Khởi động
 // ============================================================
 (async function init() {
   if (!postId) return;

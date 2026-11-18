@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết bài đăng | GameConnect</title>
   <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/team-posts.css">
 </head>
@@ -93,6 +95,46 @@
             <button type="button" class="btn" id="btn-cancel-form">Huỷ</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Xem Hồ Sơ Người Chơi -->
+  <div id="profile-modal-overlay" class="modal-overlay" hidden>
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 id="profile-modal-title"><i class="fa-solid fa-id-card text-orange-500"></i> Hồ sơ game thủ</h3>
+        <button id="btn-close-profile-modal" class="btn-icon" title="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-modal-content">
+          <img id="pm-avatar" class="profile-avatar-lg" src="" alt="Avatar">
+          <h3 id="pm-username" class="profile-username">User</h3>
+          <p id="pm-bio" class="profile-bio">Chưa cập nhật tiểu sử.</p>
+
+          <div class="profile-details-grid">
+            <div class="profile-detail-item">
+              <strong>Khu vực</strong>
+              <span id="pm-region">—</span>
+            </div>
+            <div class="profile-detail-item">
+              <strong>Khung giờ chơi</strong>
+              <span id="pm-playtime">—</span>
+            </div>
+            <div class="profile-detail-item">
+              <strong>Voice chat (Mic)</strong>
+              <span id="pm-mic">—</span>
+            </div>
+            <div class="profile-detail-item">
+              <strong>Vai trò tài khoản</strong>
+              <span id="pm-role">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;text-align:right;">
+          <button type="button" class="btn" id="btn-done-profile">Đóng</button>
+        </div>
       </div>
     </div>
   </div>

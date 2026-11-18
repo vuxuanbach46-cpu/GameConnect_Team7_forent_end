@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài của tôi & Người ứng tuyển | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/team-posts.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container" style="padding-top:24px;padding-bottom:48px;">
+
+    <!-- ===== TOP NAVIGATION BAR ===== -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
+      <div class="team-nav-tabs" style="margin-bottom:0;">
+        <a href="team-posts.html" class="team-nav-tab">
+          <i class="fa-solid fa-gamepad"></i> Khám phá bài đăng
+        </a>
+        <button id="tab-btn-my-posts" class="team-nav-tab active">
+          <i class="fa-solid fa-clipboard-list"></i> Bài đăng của tôi <span id="badge-count-my-posts" class="pill-count" style="display:none;">0</span>
+        </button>
+        <button id="tab-btn-applied" class="team-nav-tab">
+          <i class="fa-solid fa-inbox"></i> Tôi đã ứng tuyển <span id="badge-count-applied" class="pill-count" style="display:none;">0</span>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <a href="team-posts.html" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Đăng bài mới
+        </a>
+      </div>
+    </div>
+
+    <!-- ==========================================================
+         PANEL 1: BÀI ĐĂNG CỦA TÔI (MY POSTS & APPLICANTS)
+         ========================================================== -->
+    <section id="panel-my-posts">
+      <!-- Thống kê nhanh -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div id="stat-my-total" class="stat-val">0</div>
+          <div class="stat-lbl">Tổng bài đăng</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-my-open" class="stat-val" style="color:#34d399;">0</div>
+          <div class="stat-lbl">Đang mở (OPEN)</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-my-full" class="stat-val" style="color:#fbbf24;">0</div>
+          <div class="stat-lbl">Đã đủ người (FULL)</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-my-closed" class="stat-val" style="color:#f87171;">0</div>
+          <div class="stat-lbl">Đã đóng (CLOSED)</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-my-applicants" class="stat-val" style="color:#38bdf8;">0</div>
+          <div class="stat-lbl">Đơn ứng tuyển nhận được</div>
+        </div>
+      </div>
+
+      <!-- Bộ lọc trạng thái -->
+      <div class="filter-pills">
+        <span style="font-size:13px;font-weight:700;color:var(--color-muted);margin-right:4px;">
+          <i class="fa-solid fa-filter"></i> Trạng thái bài:
+        </span>
+        <button class="pill active" data-post-status="ALL">Tất cả <span id="count-pill-all" class="pill-count">0</span></button>
+        <button class="pill" data-post-status="OPEN">Đang mở <span id="count-pill-open" class="pill-count">0</span></button>
+        <button class="pill" data-post-status="FULL">Đã đủ người <span id="count-pill-full" class="pill-count">0</span></button>
+        <button class="pill" data-post-status="CLOSED">Đã đóng <span id="count-pill-closed" class="pill-count">0</span></button>
+      </div>
+
+      <!-- Danh sách bài đăng & Người ứng tuyển -->
+      <div id="my-posts-container">
+        <div class="post-skeleton"></div>
+        <div class="post-skeleton"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PANEL 2: TÔI ĐÃ ỨNG TUYỂN (MY APPLICATIONS)
+         ========================================================== -->
+    <section id="panel-applied" hidden>
+      <!-- Thống kê nhanh ứng tuyển -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div id="stat-app-total" class="stat-val">0</div>
+          <div class="stat-lbl">Đơn đã gửi</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-app-pending" class="stat-val" style="color:#fbbf24;">0</div>
+          <div class="stat-lbl">Chờ duyệt</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-app-accepted" class="stat-val" style="color:#34d399;">0</div>
+          <div class="stat-lbl">Được chấp nhận</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-app-rejected" class="stat-val" style="color:#f87171;">0</div>
+          <div class="stat-lbl">Bị từ chối</div>
+        </div>
+        <div class="stat-card">
+          <div id="stat-app-cancelled" class="stat-val" style="color:#9ca3af;">0</div>
+          <div class="stat-lbl">Đã rút đơn</div>
+        </div>
+      </div>
+
+      <!-- Bộ lọc trạng thái đơn -->
+      <div class="filter-pills">
+        <span style="font-size:13px;font-weight:700;color:var(--color-muted);margin-right:4px;">
+          <i class="fa-solid fa-filter"></i> Trạng thái đơn:
+        </span>
+        <button class="pill active" data-app-status="ALL">Tất cả <span id="count-app-all" class="pill-count">0</span></button>
+        <button class="pill" data-app-status="PENDING">Chờ duyệt <span id="count-app-pending" class="pill-count">0</span></button>
+        <button class="pill" data-app-status="ACCEPTED">Được chấp nhận <span id="count-app-accepted" class="pill-count">0</span></button>
+        <button class="pill" data-app-status="REJECTED">Bị từ chối <span id="count-app-rejected" class="pill-count">0</span></button>
+        <button class="pill" data-app-status="CANCELLED">Đã rút đơn <span id="count-app-cancelled" class="pill-count">0</span></button>
+      </div>
+
+      <!-- Danh sách các bài đã nộp đơn -->
+      <div id="applied-container">
+        <div class="post-skeleton"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================
+       MODAL: XEM HỒ SƠ NGƯỜI CHƠI (PROFILE MODAL)
+       ========================================================== -->
+  <div id="profile-modal-overlay" class="modal-overlay" hidden>
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 id="profile-modal-title"><i class="fa-solid fa-id-card text-orange-500"></i> Hồ sơ game thủ</h3>
+        <button id="btn-close-profile-modal" class="btn-icon" title="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-modal-content">
+          <img id="pm-avatar" class="profile-avatar-lg" src="" alt="Avatar">
+          <h3 id="pm-username" class="profile-username">User</h3>
+          <p id="pm-bio" class="profile-bio">Chưa cập nhật tiểu sử.</p>
+
+          <div class="profile-details-grid">
+            <div class="profile-detail-item">
+              <strong>Khu vực</strong>
+              <span id="pm-region">—</span>
+            </div>
+            <div class="profile-detail-item">
+              <strong>Khung giờ chơi</strong>
+              <span id="pm-playtime">—</span>
+            </div>
+            <div class="profile-detail-item">
+              <strong>Voice chat (Mic)</strong>
+              <span id="pm-mic">—</span>
+            </div>
+            <div class="profile-detail-item">
+              <strong>Vai trò tài khoản</strong>
+              <span id="pm-role">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;text-align:right;">
+          <button type="button" class="btn" id="btn-done-profile">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       MODAL: CHỈNH SỬA BÀI ĐĂNG (EDIT POST MODAL)
+       ========================================================== -->
+  <div id="edit-modal-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Chỉnh sửa bài đăng</h3>
+        <button id="btn-close-edit-modal" class="btn-icon" title="Đóng">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-post-form" novalidate>
+          <input type="hidden" id="edit-post-id">
+
+          <!-- Game (disabled khi sửa) -->
+          <label for="edit-game">Game</label>
+          <select id="edit-game" disabled></select>
+
+          <!-- Tiêu đề -->
+          <label for="edit-title">Tiêu đề <span class="required">*</span></label>
+          <input id="edit-title" name="title" type="text" maxlength="150" required>
+
+          <!-- Rank min/max -->
+          <div class="form-row">
+            <div>
+              <label for="edit-min-rank">Rank tối thiểu</label>
+              <select id="edit-min-rank" name="min_rank_id">
+                <option value="">-- Không yêu cầu --</option>
+              </select>
+            </div>
+            <div>
+              <label for="edit-max-rank">Rank tối đa</label>
+              <select id="edit-max-rank" name="max_rank_id">
+                <option value="">-- Không giới hạn --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Vai trò cần tuyển -->
+          <label>Vai trò cần tuyển</label>
+          <div id="edit-roles-wrap" class="role-checkboxes"></div>
+
+          <!-- Số người cần tuyển -->
+          <label for="edit-needed">Số người cần tuyển <span class="required">*</span></label>
+          <input id="edit-needed" name="needed_players" type="number" min="1" max="50" required>
+
+          <!-- Giờ chơi -->
+          <label for="edit-playtime">Khung giờ chơi</label>
+          <input id="edit-playtime" name="play_time" type="text" placeholder="VD: 20:00-23:00">
+
+          <!-- Khu vực -->
+          <label for="edit-region">Khu vực / Server</label>
+          <select id="edit-region" name="region">
+            <option value="">-- Không chọn --</option>
+            <option value="VN">VN</option>
+            <option value="SEA">SEA</option>
+            <option value="NA">NA</option>
+            <option value="EU">EU</option>
+          </select>
+
+          <!-- Mô tả -->
+          <label for="edit-desc">Mô tả</label>
+          <textarea id="edit-desc" name="description" rows="3"></textarea>
+
+          <!-- Hạn hiển thị -->
+          <label for="edit-expires">Hạn hiển thị</label>
+          <input id="edit-expires" name="expires_at" type="datetime-local">
+
+          <p id="edit-form-error" class="text-error" hidden></p>
+
+          <div class="form-actions">
+            <button id="btn-submit-edit" type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <button type="button" class="btn" id="btn-cancel-edit">Huỷ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/my-team-posts.js"></script>
+</body>
+</html>

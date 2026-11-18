@@ -97,7 +97,7 @@
 /* Badge trạng thái */
 .badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
@@ -105,9 +105,15 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.badge-open   { background: #dcfce7; color: #15803d; }
-.badge-closed { background: #fee2e2; color: #b91c1c; }
-.badge-expired{ background: #f3f4f6; color: #6b7280; }
+.badge-open   { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+.badge-full   { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+.badge-closed { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+.badge-expired{ background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.4); }
+
+.badge-app-pending   { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-app-accepted  { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-app-rejected  { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-app-cancelled { background: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
 
 /* Meta info dòng */
 .post-meta {
@@ -328,3 +334,378 @@
   color: var(--color-muted);
 }
 .empty-state p { font-size: 15px; margin: 8px 0 0; }
+
+/* ==========================================================
+   T3CCE75 - Style cho Bài của tôi & Người ứng tuyển
+   ========================================================== */
+
+/* Top Navigation Tabs */
+.team-nav-tabs {
+  display: flex;
+  gap: 8px;
+  background: #15161d;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+.team-nav-tab {
+  padding: 8px 18px;
+  border-radius: 7px;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+.team-nav-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.team-nav-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+/* Thống kê nhanh (Stats Grid) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  transition: border-color .2s;
+}
+.stat-card:hover { border-color: #383b4d; }
+.stat-val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+.stat-lbl {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Filter pills */
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: #181920;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all .2s;
+}
+.pill:hover:not(.active) {
+  background: #242631;
+  color: #fff;
+}
+.pill.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.pill-count {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* Card bài đăng của tôi */
+.my-post-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color .2s;
+}
+.my-post-card:hover {
+  border-color: #383b4d;
+}
+.my-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.my-post-title-wrap {
+  flex: 1;
+  min-width: 250px;
+}
+.my-post-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px;
+}
+.my-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.my-post-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Tiến độ tuyển */
+.recruit-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  margin: 12px 0;
+  background: #15161d;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+.progress-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: #242631;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width .3s ease;
+}
+
+/* Danh sách người ứng tuyển */
+.applicants-wrapper {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+.applicants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.applicants-header:hover h4 {
+  color: var(--color-primary);
+}
+.applicants-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.applicant-card {
+  background: #15161d;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.applicant-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.applicant-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #242631;
+  object-fit: cover;
+  border: 1px solid #383b4d;
+}
+.applicant-details {
+  display: flex;
+  flex-direction: column;
+}
+.applicant-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.applicant-profile-link {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.applicant-profile-link:hover {
+  color: var(--color-primary-dark);
+}
+.applicant-msg {
+  font-size: 13px;
+  color: #8e92a4;
+  margin-top: 3px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 2px solid var(--color-primary);
+}
+.applicant-date {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.applicant-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Nút chấp nhận / từ chối */
+.btn-accept {
+  background: #059669;
+  border: 1px solid #10b981;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-accept:hover {
+  background: #047857;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+.btn-reject {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-reject:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #ef4444;
+  color: #fff;
+}
+.btn-withdraw {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-withdraw:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fff;
+  border-color: #ef4444;
+}
+
+/* Modal Xem Hồ Sơ Người Chơi */
+.profile-modal-content {
+  text-align: center;
+  padding: 10px 0;
+}
+.profile-avatar-lg {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary);
+  margin: 0 auto 12px;
+  background: #15161d;
+  object-fit: cover;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
+}
+.profile-username {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+.profile-bio {
+  font-size: 14px;
+  color: var(--color-muted);
+  margin: 8px 0 16px;
+  line-height: 1.5;
+}
+.profile-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: #15161d;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+  font-size: 13px;
+}
+.profile-detail-item strong {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.profile-detail-item span {
+  color: #e2e8f0;
+  font-weight: 600;
+}
