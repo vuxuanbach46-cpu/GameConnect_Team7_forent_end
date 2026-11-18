@@ -1,0 +1,387 @@
+/* Mặc định: Dark Mode (Đồng bộ hệ thống GameConnect) */
+:root {
+  --bg-main: #0b0e14;
+  --bg-card: #131720;
+  --bg-input: #0f131a;
+  --bg-hover: #1a202c;
+  --border-color: #1e2433;
+  --border-focus: #ff5722;
+  --primary: #ff5722;
+  --primary-hover: #e64a19;
+  --text-main: #f3f4f6;
+  --text-muted: #8b949e;
+  --text-light: #5c6573;
+  --icon-box-bg: rgba(255, 87, 34, 0.1);
+  --icon-box-border: rgba(255, 87, 34, 0.25);
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --danger-border: #ef4444;
+  --danger-text: #fca5a5;
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --success-border: #10b981;
+  --success-text: #6ee7b7;
+}
+
+/* Chế độ Light Mode (Sáng, sắc nét, viền mảnh) */
+[data-theme="light"] {
+  --bg-main: #f4f6f9;
+  --bg-card: #ffffff;
+  --bg-input: #f8fafc;
+  --bg-hover: #f1f5f9;
+  --border-color: #e2e8f0;
+  --border-focus: #ff5722;
+  --primary: #ff5722;
+  --primary-hover: #e64a19;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-light: #94a3b8;
+  --icon-box-bg: #fff7ed;
+  --icon-box-border: #fed7aa;
+  --danger-bg: #fef2f2;
+  --danger-border: #fca5a5;
+  --danger-text: #991b1b;
+  --success-bg: #f0fdf4;
+  --success-border: #86efac;
+  --success-text: #166534;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Header */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 36px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.back-btn {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.back-btn:hover {
+  color: var(--text-main);
+  background-color: var(--bg-hover);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Nút chuyển đổi Light / Dark Mode */
+.theme-btn {
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.theme-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gc-logo {
+  background-color: var(--primary);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.gc-text {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+}
+
+/* Layout Container */
+.register-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.register-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.gaming-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--icon-box-bg);
+  border: 1px solid var(--icon-box-border);
+  color: var(--primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin: 0 auto 12px auto;
+}
+
+.card-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.card-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Alert Box */
+.alert-box {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.alert-box.hidden {
+  display: none;
+}
+
+.alert-box.error {
+  background-color: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+
+.alert-box.success {
+  background-color: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+
+/* Form Styles */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-light);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.input-wrapper input {
+  width: 100%;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 10px 12px 10px 38px;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    background-color 0.2s;
+}
+
+.input-wrapper input::placeholder {
+  color: var(--text-light);
+}
+
+.input-wrapper input:focus {
+  border-color: var(--border-focus);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.toggle-password:hover {
+  color: var(--text-muted);
+}
+
+/* Buttons */
+.btn-primary {
+  margin-top: 4px;
+  width: 100%;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.divider span {
+  padding: 0 10px;
+}
+
+/* Google Button */
+.btn-google {
+  width: 100%;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.btn-google img {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-google:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--text-muted);
+}
+
+/* Footer */
+.card-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.card-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.card-footer a:hover {
+  text-decoration: underline;
+}

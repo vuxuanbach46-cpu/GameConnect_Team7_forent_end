@@ -5,6 +5,7 @@ Khung frontend chung cho các nhóm thực tập lớp **HN-KS25-CNTT1**. Không
 - Layout chung (header + menu + footer) cho mọi trang
 - Module gọi API `js/api.js` dùng **axios**: cấu hình `baseURL` một lần, gom xử lý lỗi một chỗ bằng interceptor
 - Trang chủ kiểm tra kết nối **Frontend → Backend → MySQL**
+- Trang **Cộng đồng**: bảng tin, đăng bài kèm ảnh/gắn game, chỉnh sửa và xoá bài cá nhân; bản demo lưu bài viết trên trình duyệt
 - Trang **Items**: ví dụ CRUD đầy đủ (thêm / sửa / xoá / tìm kiếm) gọi sang backend FastAPI
 
 ## 1. Cấu trúc thư mục
@@ -13,9 +14,11 @@ Khung frontend chung cho các nhóm thực tập lớp **HN-KS25-CNTT1**. Không
 frontend/
 ├── index.html             # Trang chủ (kiểm tra kết nối)
 ├── pages/
+│   ├── community.html    # Bảng tin cộng đồng
 │   └── items.html         # Trang CRUD mẫu
 ├── css/
-│   └── style.css          # Style chung, đổi màu ở :root
+│   ├── style.css          # Style chung, đổi màu ở :root
+│   └── community.css      # Giao diện bảng tin cộng đồng
 ├── js/
 │   ├── config.js          # API_BASE_URL: địa chỉ backend
 │   ├── api.js             # axios instance + api.get / post / put / delete
@@ -23,6 +26,7 @@ frontend/
 │   ├── layout.js          # Chèn header/menu/footer vào mọi trang
 │   └── pages/             # Mỗi trang 1 file JS riêng
 │       ├── home.js
+│       ├── community.js
 │       └── items.js
 └── assets/images/         # Ảnh, logo, icon
 ```
@@ -75,6 +79,8 @@ Trình duyệt (FE: 127.0.0.1:5500) --axios--> Backend FastAPI (127.0.0.1:8000/a
    { href: "pages/products.html", label: "Sản phẩm" },
    ```
 
+Trang Cộng đồng hiện dùng dữ liệu mẫu; bài viết do người dùng tạo được lưu trong `localStorage` của trình duyệt. Khi backend có API bài viết, có thể thay lớp lưu cục bộ trong `js/pages/community.js` bằng các lời gọi API tương ứng.
+
 Lưu ý khi tạo trang:
 
 - Trang trong `pages/` để `<body data-root="../">`; trang ở thư mục gốc để `data-root="./"`.
@@ -91,3 +97,9 @@ Lưu ý khi tạo trang:
 | Console (F12) báo `blocked by CORS policy` | Kiểm tra `CORS_ORIGINS` trong `backend/.env`, sửa xong nhớ chạy lại backend |
 | Menu/header không hiện | Sai `data-root` ở thẻ `<body>`, hoặc sai đường dẫn file JS. Mở F12 → Console để xem lỗi |
 | Sửa code mà trang không đổi | Tải lại cứng: `Ctrl + F5` |
+
+## 6. Nhật ký kiểm thử Task T3CC5DE
+- Người thực hiện: Bùi Nguyễn Thanh An (B25DTCN059)
+- Trạng thái: Đã kiểm tra kết nối Frontend -> Backend FastAPI -> MySQL 8.0 thành công.
+- CRUD mẫu trên trang Items (`pages/items.html`) hoạt động chính xác.
+
