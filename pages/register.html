@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký tài khoản | GameConnect</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../css/register.css" />
+  </head>
+  <body>
+    <!-- Thanh điều hướng tích hợp nút chuyển đổi Light / Dark Mode -->
+    <header class="top-nav">
+      <a href="../index.html" class="back-btn">
+        <i class="fa-solid fa-chevron-left"></i> Trang chủ
+      </a>
+
+      <div class="nav-right">
+        <!-- Nút chuyển đổi giao diện Sáng / Tối -->
+        <button
+          type="button"
+          id="theme-toggle"
+          class="theme-btn"
+          title="Chuyển đổi giao diện Sáng / Tối"
+        >
+          <i class="fa-solid fa-sun" id="theme-icon"></i>
+          <span id="theme-text">Light Mode</span>
+        </button>
+
+        <div class="brand-badge">
+          <span class="gc-logo">GC</span>
+          <span class="gc-text">GAMECONNECT</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="register-container">
+      <div class="register-card">
+        <div class="card-header">
+          <div class="gaming-icon">
+            <i class="fa-solid fa-gamepad"></i>
+          </div>
+          <h1>Tạo tài khoản GameConnect</h1>
+          <p>Tham gia cộng đồng và kết nối cùng đồng đội</p>
+        </div>
+
+        <div id="alert-box" class="alert-box hidden"></div>
+
+        <form id="register-form" class="register-form">
+          <div class="form-group">
+            <label for="username">Tên người chơi (Username)</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-user input-icon"></i>
+              <input
+                type="text"
+                id="username"
+                placeholder="VD: ZeroCool, HuySniper..."
+                minlength="2"
+                maxlength="50"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Địa chỉ Email</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-envelope input-icon"></i>
+              <input
+                type="email"
+                id="email"
+                placeholder="name@example.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mật khẩu</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-lock input-icon"></i>
+              <input
+                type="password"
+                id="password"
+                placeholder="Tối thiểu 6 ký tự"
+                required
+              />
+              <button type="button" class="toggle-password" id="toggle-pwd">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password">Xác nhận mật khẩu</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-shield-check input-icon"></i>
+              <input
+                type="password"
+                id="confirm-password"
+                placeholder="Nhập lại mật khẩu"
+                required
+              />
+            </div>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn-primary">
+            Đăng ký ngay
+          </button>
+        </form>
+
+        <div class="divider">
+          <span>Hoặc tiếp tục với</span>
+        </div>
+
+        <button type="button" id="google-login-btn" class="btn-google">
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google"
+          />
+          <span>Google</span>
+        </button>
+
+        <div class="card-footer">
+          <p>Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
+        </div>
+      </div>
+    </main>
+
+    <!-- 👇 BẮT BUỘC PHẢI CÓ ĐẦY ĐỦ CÁC SCRIPT NÀY Ở CUỐI BODY 👇 -->
+    <!-- 1. Thư viện Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 2. File cấu hình API_BASE_URL -->
+    <script src="../js/config.js"></script>
+    <!-- 3. File định nghĩa đối tượng `api` -->
+    <script src="../js/api.js"></script>
+    <!-- 4. File logic xử lý của trang đăng ký -->
+    <script src="../js/register.js"></script>
+  </body>
+</html>

@@ -1,3 +1,8 @@
+// Kiểm tra đăng nhập: Người dùng chưa đăng nhập -> chuyển về file index
+if (!localStorage.getItem("access_token")) {
+  window.location.href = "../index.html";
+}
+
 // =========================================================================
 // Trang Bạn Bè & Kết Nối (UI/UX Mock Data — Chưa cần kết nối Backend)
 // 4 Tab tương ứng với hình mẫu:

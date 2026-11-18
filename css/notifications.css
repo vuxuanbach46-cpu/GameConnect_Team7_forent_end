@@ -1,0 +1,669 @@
+/* ==========================================================
+   GameConnect — Notification Bell & Notification Page
+   TÀI NGUYÊN CHUNG: dùng lại trên mọi trang, chỉ cần nhúng
+   css/notifications.css + js/notifications.js
+   ========================================================== */
+
+/* ==================== NOTIFICATION BELL (HEADER) ==================== */
+.gc-notif-bell-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gc-notif-bell-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text-secondary, #94a3b8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.gc-notif-bell-btn:hover,
+.gc-notif-bell-btn.is-open {
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text, #f1f5f9);
+  border-color: var(--fc-border, #232734);
+}
+
+/* Badge số chưa đọc */
+.gc-notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--fc-orange, #e85002);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: gcBadgePop 0.25s ease;
+}
+
+.gc-notif-badge.is-hidden {
+  display: none;
+}
+
+@keyframes gcBadgePop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* ==================== DROPDOWN THÔNG BÁO ==================== */
+.gc-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 380px;
+  max-height: 480px;
+  background: var(--fc-bg-card, #13161f);
+  border: 1px solid var(--fc-border-strong, #31374a);
+  border-radius: 12px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: gcDropSlide 0.18s ease;
+}
+
+.gc-notif-dropdown[hidden] {
+  display: none !important;
+}
+
+@keyframes gcDropSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header dropdown */
+.gc-notif-dd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--fc-border, #232734);
+  flex-shrink: 0;
+}
+
+.gc-notif-dd-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fc-text, #f1f5f9);
+}
+
+.gc-notif-dd-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gc-notif-dd-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fc-orange, #e85002);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.gc-notif-dd-link:hover {
+  opacity: 0.8;
+}
+
+/* Danh sách items */
+.gc-notif-dd-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong, #31374a) transparent;
+}
+
+.gc-notif-dd-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.gc-notif-dd-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gc-notif-dd-list::-webkit-scrollbar-thumb {
+  background: var(--fc-border-strong, #31374a);
+  border-radius: 999px;
+}
+
+/* Item thông báo trong dropdown */
+.gc-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: background-color 0.14s ease;
+  text-decoration: none;
+  color: inherit;
+  border-left: 3px solid transparent;
+}
+
+.gc-notif-item:hover {
+  background: var(--fc-bg-surface, #161922);
+}
+
+.gc-notif-item.is-unread {
+  border-left-color: var(--fc-orange, #e85002);
+  background: rgba(232, 80, 2, 0.04);
+}
+
+.gc-notif-item.is-unread:hover {
+  background: rgba(232, 80, 2, 0.08);
+}
+
+/* Icon theo type */
+.gc-notif-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.gc-notif-icon.type-friend_request {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+.gc-notif-icon.type-friend_accepted {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.gc-notif-icon.type-team_invite,
+.gc-notif-icon.type-PARTY_INVITE {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.gc-notif-icon.type-team_join {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.gc-notif-icon.type-match {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+}
+
+.gc-notif-icon.type-system {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+}
+
+/* Fallback cho các type chưa được định nghĩa */
+.gc-notif-icon.type-default {
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text-secondary, #94a3b8);
+}
+
+.gc-notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gc-notif-content {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fc-text, #f1f5f9);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.gc-notif-item.is-unread .gc-notif-content {
+  font-weight: 600;
+}
+
+.gc-notif-time {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--fc-text-muted, #64748b);
+  margin-top: 3px;
+}
+
+.gc-notif-item.is-unread .gc-notif-time {
+  color: var(--fc-orange, #e85002);
+}
+
+/* Chấm xanh chưa đọc */
+.gc-notif-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fc-orange, #e85002);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.gc-notif-item:not(.is-unread) .gc-notif-unread-dot {
+  visibility: hidden;
+}
+
+/* Footer dropdown */
+.gc-notif-dd-footer {
+  padding: 10px 18px;
+  border-top: 1px solid var(--fc-border, #232734);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.gc-notif-dd-footer a {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fc-text-secondary, #94a3b8);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.gc-notif-dd-footer a:hover {
+  color: var(--fc-text, #f1f5f9);
+}
+
+/* Empty state dropdown */
+.gc-notif-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--fc-text-muted, #64748b);
+}
+
+.gc-notif-empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.gc-notif-empty-text {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Loading state */
+.gc-notif-loading {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--fc-text-muted, #64748b);
+  font-size: 13px;
+}
+
+.gc-notif-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--fc-border, #232734);
+  border-top-color: var(--fc-orange, #e85002);
+  border-radius: 50%;
+  animation: gcSpin 0.6s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes gcSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== TRANG THÔNG BÁO ĐẦY ĐỦ ==================== */
+
+/* Page container */
+.gc-notif-page {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Page header */
+.gc-notif-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.gc-notif-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--fc-text, #f1f5f9);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gc-notif-page-title .gc-unread-pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(232, 80, 2, 0.12);
+  color: var(--fc-orange, #e85002);
+  border: 1px solid rgba(232, 80, 2, 0.25);
+}
+
+.gc-notif-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gc-notif-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--fc-border, #232734);
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text-secondary, #94a3b8);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.gc-notif-page-btn:hover {
+  background: var(--fc-bg-card-hover, #181c27);
+  border-color: var(--fc-border-strong, #31374a);
+  color: var(--fc-text, #f1f5f9);
+}
+
+.gc-notif-page-btn.is-primary {
+  background: var(--fc-orange, #e85002);
+  color: #ffffff;
+  border-color: var(--fc-orange, #e85002);
+}
+
+.gc-notif-page-btn.is-primary:hover {
+  background: var(--fc-orange-hover, #d14700);
+}
+
+/* Filter tabs */
+.gc-notif-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--fc-bg-card, #13161f);
+  border: 1px solid var(--fc-border, #232734);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.gc-notif-filter-btn {
+  padding: 8px 16px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text-secondary, #94a3b8);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.gc-notif-filter-btn:hover {
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text, #f1f5f9);
+}
+
+.gc-notif-filter-btn.active {
+  background: var(--fc-bg-surface, #161922);
+  border-color: var(--fc-border-strong, #31374a);
+  color: var(--fc-text, #f1f5f9);
+}
+
+/* Danh sách thông báo trang đầy đủ */
+.gc-notif-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Item thông báo trang đầy đủ */
+.gc-notif-page-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 22px;
+  background: var(--fc-bg-card, #13161f);
+  border: 1px solid var(--fc-border, #232734);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.gc-notif-page-item:hover {
+  background: var(--fc-bg-card-hover, #181c27);
+  border-color: var(--fc-border-strong, #31374a);
+}
+
+.gc-notif-page-item.is-unread {
+  border-left: 3px solid var(--fc-orange, #e85002);
+  background: rgba(232, 80, 2, 0.03);
+}
+
+.gc-notif-page-item.is-unread:hover {
+  background: rgba(232, 80, 2, 0.06);
+}
+
+.gc-notif-page-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+/* Reuse icon colors from dropdown */
+.gc-notif-page-icon.type-friend_request {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+.gc-notif-page-icon.type-friend_accepted {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.gc-notif-page-icon.type-team_invite,
+.gc-notif-page-icon.type-PARTY_INVITE {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.gc-notif-page-icon.type-team_join {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.gc-notif-page-icon.type-match {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+}
+
+.gc-notif-page-icon.type-system {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+}
+
+.gc-notif-page-icon.type-default {
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text-secondary, #94a3b8);
+}
+
+.gc-notif-page-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gc-notif-page-content {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fc-text, #f1f5f9);
+  line-height: 1.5;
+}
+
+.gc-notif-page-item.is-unread .gc-notif-page-content {
+  font-weight: 600;
+}
+
+.gc-notif-page-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.gc-notif-page-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fc-text-muted, #64748b);
+}
+
+.gc-notif-page-item.is-unread .gc-notif-page-time {
+  color: var(--fc-orange, #e85002);
+}
+
+.gc-notif-page-type-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--fc-bg-surface, #161922);
+  border: 1px solid var(--fc-border, #232734);
+  color: var(--fc-text-secondary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.gc-notif-page-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fc-orange, #e85002);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.gc-notif-page-item:not(.is-unread) .gc-notif-page-dot {
+  visibility: hidden;
+}
+
+/* Load more button */
+.gc-notif-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.gc-notif-load-more-btn {
+  padding: 10px 28px;
+  border-radius: 8px;
+  border: 1px solid var(--fc-border, #232734);
+  background: var(--fc-bg-card, #13161f);
+  color: var(--fc-text-secondary, #94a3b8);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gc-notif-load-more-btn:hover {
+  background: var(--fc-bg-card-hover, #181c27);
+  border-color: var(--fc-border-strong, #31374a);
+  color: var(--fc-text, #f1f5f9);
+}
+
+/* Empty state page */
+.gc-notif-page-empty {
+  text-align: center;
+  padding: 64px 24px;
+  background: var(--fc-bg-card, #13161f);
+  border: 1px dashed var(--fc-border-strong, #31374a);
+  border-radius: 12px;
+  color: var(--fc-text-secondary, #94a3b8);
+}
+
+.gc-notif-page-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.gc-notif-page-empty h3 {
+  color: var(--fc-text, #f1f5f9);
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.gc-notif-page-empty p {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ==================== OVERLAY ĐỂ CLICK RA NGOÀI ĐÓNG DROPDOWN ==================== */
+.gc-notif-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: transparent;
+}
+
+.gc-notif-overlay[hidden] {
+  display: none !important;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 480px) {
+  .gc-notif-dropdown {
+    width: calc(100vw - 24px);
+    right: -8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gc-notif-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gc-notif-page-item {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+}
