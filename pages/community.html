@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/friends.css">
   <link rel="stylesheet" href="../css/community.css">
+  <link rel="stylesheet" href="../css/notifications.css">
 </head>
 <body class="community-page fc-dark-body" data-root="../">
   <header id="app-header"></header>
@@ -283,12 +284,7 @@
         </div>
       </div>
       <button type="button" class="fc-right-icon-btn community-vs" aria-label="Đấu nhanh VS">VS</button>
-      <button type="button" class="fc-right-icon-btn" aria-label="Thông báo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-      </button>
+      <div id="gc-notif-bell"></div>
       <a class="fc-right-icon-btn" href="friends.html" aria-label="Bạn bè & Kết nối">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -307,5 +303,9 @@
   <script src="../js/utils.js"></script>
   <script src="../js/layout.js"></script>
   <script src="../js/pages/community.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
 </body>
 </html>
