@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // --- 0. NẾU ĐÃ ĐĂNG NHẬP -> CHUYỂN HƯỚNG VÀO FILE HOME ---
+  const existingToken = localStorage.getItem("access_token");
+  if (existingToken) {
+    window.location.href = "home.html";
+    return;
+  }
+
   // --- 1. XỬ LÝ CHUYỂN ĐỔI LIGHT / DARK MODE ---
   const themeToggleBtn = document.getElementById("theme-toggle");
   const themeIcon = document.getElementById("theme-icon");
@@ -68,6 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const confirmPassword = document.getElementById("confirm-password").value;
 
       // Validate sơ bộ ở frontend trước khi gọi API
+      if (username.length < 2) {
+        showAlert("Tên người dùng phải có ít nhất 2 ký tự!", "error");
+        return;
+      }
+
       if (password.length < 6) {
         showAlert("Mật khẩu phải có ít nhất 6 ký tự!", "error");
         return;
@@ -85,19 +97,56 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await api.post("/auth/register", {
           full_name: username,
+          username: username,
           email: email,
           password: password,
         });
 
         showAlert(
-          response.message || "Đăng ký thành công! Đang chuyển hướng...",
+          "Đăng ký thành công! Đang chuyển hướng vào trang chủ...",
           "success",
         );
+
+        // Lấy token từ phản hồi đăng ký hoặc tự động đăng nhập để lấy token
+        const resData = response.data || response;
+        let accessToken = resData.access_token;
+        let refreshToken = resData.refresh_token;
+        let role = resData.role;
+
+        // Fallback: nếu API register chưa cấp token, tự động đăng nhập ngay lập tức
+        if (!accessToken) {
+          try {
+            const loginRes = await api.post("/auth/login", {
+              email: email,
+              username: username,
+              password: password,
+            });
+            const loginData = loginRes.data || loginRes;
+            accessToken = loginData.access_token;
+            refreshToken = loginData.refresh_token;
+            role = loginData.role;
+          } catch (loginErr) {
+            console.warn("Tự động đăng nhập sau đăng ký không thành công:", loginErr);
+          }
+        }
+
+        // Lưu thông tin đăng nhập vào localStorage
+        if (accessToken) {
+          localStorage.setItem("access_token", accessToken);
+        }
+        if (refreshToken) {
+          localStorage.setItem("refresh_token", refreshToken);
+        }
+        if (role) {
+          localStorage.setItem("user_role", role);
+        }
+
         registerForm.reset();
 
+        // Chuyển hướng thẳng vào trang home.html
         setTimeout(() => {
-          window.location.href = "login.html";
-        }, 1200);
+          window.location.href = "home.html";
+        }, 800);
       } catch (error) {
         console.error("Lỗi đăng ký:", error);
         showAlert(
@@ -105,17 +154,19 @@ document.addEventListener("DOMContentLoaded", () => {
           "error",
         );
       } finally {
-        // Mở khóa lại nút bấm
         submitBtn.disabled = false;
         submitBtn.textContent = "Đăng ký ngay";
       }
     });
   }
 
-  // Xử lý nút đăng nhập Google OAuth (nếu có)
+  // Xử lý nút đăng nhập Google OAuth
   if (googleBtn) {
     googleBtn.addEventListener("click", () => {
-      window.location.href = `${CONFIG.API_BASE_URL}/auth/google/login`;
+      const baseUrl = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+        ? CONFIG.API_BASE_URL
+        : "http://127.0.0.1:8000";
+      window.location.href = `${baseUrl}/auth/google/login`;
     });
   }
 });

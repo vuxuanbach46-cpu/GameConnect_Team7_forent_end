@@ -7,6 +7,7 @@
   <link rel="icon" href="../assets/images/logo.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/notifications.css">
 </head>
 <body class="fc-dark-body" data-root="../">
   <header id="app-header"></header>
@@ -16,7 +17,7 @@
     <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
       <div class="fc-bar-group">
         <!-- Logo mới (Gamepad/Hexagon khác hẳn FACEIT) + Tên trang web -->
-        <a href="../index.html" class="fc-brand-link" title="GameConnect - Trang chủ">
+        <a href="home.html" class="fc-brand-link" title="GameConnect - Sảnh chính">
           <div class="fc-brand-logo">
             <!-- Icon tay cầm gaming hiện đại -->
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -302,12 +303,8 @@
 
       <button class="fc-right-icon-btn" title="Đấu nhanh VS" style="font-weight: 800; font-size: 12px;">VS</button>
 
-      <button class="fc-right-icon-btn" title="Thông báo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-      </button>
+      <!-- CHUÔNG THÔNG BÁO (Tài nguyên chung) -->
+      <div id="gc-notif-bell"></div>
 
       <button class="fc-right-icon-btn" data-quick-tab="received" title="Lời mời kết bạn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -349,6 +346,11 @@
   <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/layout.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // Khởi tạo chuông thông báo dùng chung
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
   <script src="../js/pages/friends.js"></script>
 </body>
 </html>
