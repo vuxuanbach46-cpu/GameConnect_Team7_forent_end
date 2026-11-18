@@ -1,0 +1,390 @@
+.team-detail-page {
+    max-width: 1000px;
+    padding-top: 28px;
+    padding-bottom: 48px;
+}
+
+.team-back {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--color-muted, #64748b);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.team-back:hover {
+    color: #6366f1;
+}
+
+.team-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.team-logo {
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    overflow: hidden;
+}
+
+.team-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.team-info-content h1 {
+    margin: 0 0 10px;
+    font-size: 26px;
+}
+
+#team-game {
+    margin-bottom: 12px;
+}
+
+#team-description {
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+
+#team-count {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.team-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.team-section {
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.team-section h2 {
+    font-size: 20px;
+    margin: 0 0 20px;
+}
+
+.team-section h3 {
+    font-size: 16px;
+    margin: 0 0 16px;
+}
+
+.team-member,
+.team-request {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.team-member:last-child,
+.team-request:last-child {
+    border-bottom: none;
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.member-avatar {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.member-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.member-role {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.captain-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.member-actions,
+.request-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.team-detail-page .btn {
+    cursor: pointer;
+}
+
+.team-detail-page .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.team-detail-page [hidden] {
+    display: none !important;
+}
+
+#team-message {
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+#team-message:empty {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .team-detail-page {
+        padding-top: 20px;
+    }
+
+    .team-info {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .team-logo {
+        width: 80px;
+        height: 80px;
+        font-size: 24px;
+    }
+
+    .team-info-content h1 {
+        font-size: 22px;
+    }
+
+    .team-section {
+        padding: 18px;
+    }
+
+    .team-member,
+    .team-request {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .member-actions,
+    .request-actions {
+        width: 100%;
+    }
+}
+
+/* Giao diện chi tiết đội theo theme GameConnect */
+
+.team-detail-page {
+    width: min(100% - 32px, 1000px);
+    margin: 0 auto;
+    padding: 32px 0 60px;
+}
+
+.team-detail-page .card {
+    background: var(--bg-card, #181920);
+    color: var(--text-main, #f4f4f6);
+    border: 1px solid var(--border-color, #242631);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.team-detail-page .team-back {
+    color: var(--text-muted, #8e92a4);
+}
+
+.team-detail-page .team-back:hover {
+    color: var(--accent-orange, #f97316);
+}
+
+.team-detail-page .team-logo {
+    background: linear-gradient(135deg, #f97316, #c2410c);
+    color: white;
+}
+
+.team-detail-page h1,
+.team-detail-page h2,
+.team-detail-page h3 {
+    color: var(--text-main, #f4f4f6);
+}
+
+.team-detail-page .muted,
+.team-detail-page .member-role {
+    color: var(--text-muted, #8e92a4);
+}
+
+.team-detail-page .team-member,
+.team-detail-page .team-request {
+    border-bottom: 1px solid var(--border-color, #242631);
+}
+
+.team-detail-page .member-avatar {
+    background: #3b261b;
+    color: #fb923c;
+}
+
+.team-detail-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 9px 16px;
+    border: 1px solid #383b4d;
+    border-radius: 8px;
+    background: #242631;
+    color: #f4f4f6;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.team-detail-page .btn:hover {
+    background: #343746;
+    transform: translateY(-1px);
+}
+
+.team-detail-page .btn-primary {
+    background: var(--accent-orange, #f97316);
+    border-color: var(--accent-orange, #f97316);
+    color: white;
+}
+
+.team-detail-page .btn-primary:hover {
+    background: var(--accent-orange-hover, #ea580c);
+    border-color: var(--accent-orange-hover, #ea580c);
+}
+
+.team-detail-page .team-section {
+    margin-top: 24px;
+}
+
+.team-detail-page #join-status {
+    color: #fb923c;
+    font-weight: 500;
+}
+
+.team-detail-page #team-message {
+    color: #4ade80;
+}
+
+@media (max-width: 640px) {
+    .team-detail-page {
+        width: calc(100% - 24px);
+    }
+
+    .team-detail-page .team-info {
+        padding: 20px;
+    }
+
+    .team-detail-page .btn {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
+
+/* Header GameConnect */
+#app-header {
+    background: #181920;
+    border-bottom: 1px solid #242631;
+}
+
+#app-header .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+#app-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f4f4f6;
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+#app-header .nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+#app-header .nav a {
+    color: #8e92a4;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+#app-header .nav a:hover,
+#app-header .nav a.active {
+    color: #f97316;
+}
+
+/* Footer GameConnect */
+#app-footer {
+    margin-top: 40px;
+    padding: 24px;
+    border-top: 1px solid #242631;
+    color: #8e92a4;
+    font-size: 13px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    #app-header .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #app-header .nav {
+        gap: 12px;
+    }
+}
