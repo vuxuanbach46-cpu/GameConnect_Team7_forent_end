@@ -24,7 +24,7 @@ http.interceptors.request.use((config) => {
     config.url.includes("/auth/google")
   );
   if (!isAuthPublic) {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token") || localStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
