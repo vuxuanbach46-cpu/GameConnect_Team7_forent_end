@@ -1,4 +1,6 @@
 const COMMUNITY_STORAGE_KEY = "gameconnect-community-posts";
+const COMMUNITY_COMMENTS_KEY = "gameconnect-community-comments";
+const COMMUNITY_LIKES_KEY = "gameconnect-community-liked-posts";
 const CURRENT_USER = {
   id: "me",
   name: "Minh Nguyễn",
@@ -109,7 +111,7 @@ let activeGame = "";
 let visibleCount = 3;
 let editingId = null;
 let draftImage = "";
-const likedPostIds = new Set();
+let likedPostIds = new Set();
 
 function loadUserPosts() {
   try {
@@ -135,6 +137,33 @@ function saveUserPosts() {
     showToast(`Không thể lưu bài viết trên thiết bị: ${error.message}`, "error");
     return false;
   }
+}
+
+function loadCommunityLikes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(COMMUNITY_LIKES_KEY) || "[]");
+    likedPostIds = new Set(Array.isArray(saved) ? saved : []);
+  } catch (_error) {
+    likedPostIds = new Set();
+  }
+}
+
+function saveCommunityLikes() {
+  localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify([...likedPostIds]));
+}
+
+function getComments(postId) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(COMMUNITY_COMMENTS_KEY) || "{}");
+    return saved && Array.isArray(saved[postId]) ? saved[postId] : [];
+  } catch (_error) {
+    return [];
+  }
+}
+
+function getCommentCount(post) {
+  const savedCount = getComments(post.id).length;
+  return savedCount > 0 ? savedCount : Number(post.comments || 0);
 }
 
 function getAllPosts() {
@@ -187,9 +216,14 @@ function renderPost(post) {
           <button type="button" class="post-action ${liked ? "liked" : ""}" data-action="like" data-id="${safeId}" aria-pressed="${liked}">
             <span class="action-icon" aria-hidden="true">${liked ? "♥" : "♡"}</span><span>${Number(post.likes || 0) + (liked ? 1 : 0)}</span>
           </button>
-          <span class="post-action"><span class="action-icon" aria-hidden="true">▢</span><span>${Number(post.comments || 0)} bình luận</span></span>
+          <button type="button" class="post-action" data-action="detail" data-scroll-comments="true" data-id="${safeId}">
+            <span class="action-icon" aria-hidden="true">▢</span><span>${getCommentCount(post)} bình luận</span>
+          </button>
         </div>
-        <button type="button" class="post-action post-save" data-action="save" aria-label="Lưu bài viết">♧</button>
+        <div class="post-actions-right">
+          <button type="button" class="post-detail-button" data-action="detail" data-id="${safeId}">Xem chi tiết <span aria-hidden="true">→</span></button>
+          <button type="button" class="post-action post-save" data-action="save" aria-label="Lưu bài viết">♧</button>
+        </div>
       </footer>
     </article>`;
 }
@@ -337,6 +371,7 @@ document.querySelectorAll(".filter-button").forEach((button) => {
       item.classList.toggle("active", selected);
       item.setAttribute("aria-pressed", String(selected));
     });
+    loadCommunityLikes();
     renderFeed();
   });
 });
@@ -370,7 +405,13 @@ feedList.addEventListener("click", (event) => {
   if (button.dataset.action === "like") {
     if (likedPostIds.has(postId)) likedPostIds.delete(postId);
     else likedPostIds.add(postId);
+    saveCommunityLikes();
     renderFeed();
+    return;
+  }
+  if (button.dataset.action === "detail") {
+    const commentsHash = button.dataset.scrollComments ? "#comments" : "";
+    window.location.href = `community-detail.html?id=${encodeURIComponent(postId)}${commentsHash}`;
     return;
   }
   if (button.dataset.action === "edit") {
