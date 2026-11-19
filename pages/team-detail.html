@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đội | GameConnect</title>
+    <link rel="icon" href="../assets/images/logo.svg">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/team-detail.css">
+</head>
+
+<body data-root="../">
+    <header id="app-header"></header>
+
+    <main class="container team-detail-page">
+        <a href="teams.html" class="team-back">← Danh sách đội</a>
+
+        <section class="card team-info">
+            <div class="team-logo" id="team-logo">GC</div>
+            <div class="team-info-content">
+                <h1 id="team-name">Đang tải thông tin đội...</h1>
+                <p id="team-game" class="muted"></p>
+                <p id="team-description"></p>
+                <p id="team-count"></p>
+
+                <div class="team-actions">
+                    <button id="btn-join" class="btn btn-primary" hidden>Xin vào đội</button>
+                    <button id="btn-leave" class="btn" hidden>Rời đội</button>
+                    <span id="join-status" class="muted"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card team-section">
+            <h2>Danh sách thành viên</h2>
+            <div id="member-list"></div>
+        </section>
+
+        <section class="card team-section" id="captain-panel" hidden>
+            <h2>Quản lý đội</h2>
+            <h3>Yêu cầu tham gia đang chờ duyệt</h3>
+            <div id="request-list"></div>
+        </section>
+
+        <p id="team-message" role="status"></p>
+    </main>
+
+    <footer id="app-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/team-detail.js"></script>
+</body>
+
+</html>
