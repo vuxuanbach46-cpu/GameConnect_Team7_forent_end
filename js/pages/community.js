@@ -104,6 +104,9 @@ const loadMoreButton = document.getElementById("load-more");
 const feedStatus = document.getElementById("feed-status");
 const feedEmpty = document.getElementById("feed-empty");
 const activeGameFilter = document.getElementById("active-game-filter");
+const searchForm = document.getElementById("post-search-form");
+const searchInput = document.getElementById("post-search");
+const searchSummary = document.getElementById("search-summary");
 
 let userPosts = loadUserPosts();
 let activeFilter = "all";
@@ -112,6 +115,10 @@ let visibleCount = 3;
 let editingId = null;
 let draftImage = "";
 let likedPostIds = new Set();
+let searchMode = "";
+let searchResults = [];
+let searchLoading = false;
+let searchError = "";
 
 function loadUserPosts() {
   try {
@@ -168,6 +175,33 @@ function getCommentCount(post) {
 
 function getAllPosts() {
   return [...userPosts, ...DEMO_POSTS].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+function extractPostList(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.posts)) return payload.posts;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
+}
+
+function normalizeApiPost(post) {
+  const author = post.author || post.author_name || post.user_name || "Game thủ";
+  const handle = post.handle || post.username || post.author_handle || "";
+  const content = post.content || post.body || post.title || "";
+  return {
+    id: String(post.id ?? post.post_id ?? `api-${Math.random()}`),
+    author,
+    handle: handle ? (String(handle).startsWith("@") ? String(handle) : `@${handle}`) : "@gameconnect",
+    avatar: String(post.avatar || author).slice(0, 1).toUpperCase(),
+    game: post.game || post.game_name || "",
+    content,
+    image: post.image || post.image_url || "",
+    createdAt: post.createdAt || post.created_at || post.created || new Date().toISOString(),
+    likes: Number(post.likes || post.like_count || 0),
+    comments: Number(post.comments || post.comment_count || 0),
+    visual: Boolean(post.visual),
+  };
 }
 
 function timeAgo(value) {
@@ -229,6 +263,43 @@ function renderPost(post) {
 }
 
 function renderFeed() {
+  if (searchLoading) {
+    feedList.innerHTML = `
+      <div class="feed-skeleton" aria-label="Đang tải kết quả"><span></span><span></span><span></span></div>
+      <div class="feed-skeleton" aria-label="Đang tải kết quả"><span></span><span></span><span></span></div>`;
+    feedEmpty.hidden = true;
+    loadMoreButton.hidden = true;
+    feedStatus.textContent = "Đang tìm bài viết...";
+    return;
+  }
+  if (searchError) {
+    feedList.innerHTML = "";
+    feedEmpty.hidden = false;
+    feedEmpty.innerHTML = `
+      <span aria-hidden="true">!</span>
+      <strong>Không thể tải bài viết</strong>
+      <p>${escapeHtml(searchError)}</p>
+      <button type="button" class="feed-retry" id="search-retry">Thử lại</button>`;
+    loadMoreButton.hidden = true;
+    feedStatus.textContent = "";
+    return;
+  }
+  if (searchMode) {
+    feedList.innerHTML = searchResults.map(renderPost).join("");
+    feedEmpty.hidden = searchResults.length > 0;
+    if (searchResults.length === 0) {
+      feedEmpty.innerHTML = `
+        <span aria-hidden="true">⌕</span>
+        <strong>Không tìm thấy bài viết</strong>
+        <p>Thử từ khoá ngắn hơn hoặc thay đổi hashtag.</p>`;
+    }
+    loadMoreButton.hidden = true;
+    feedStatus.textContent = searchResults.length
+      ? `Tìm thấy ${searchResults.length} bài viết.`
+      : "";
+    return;
+  }
+
   const posts = getAllPosts().filter((post) =>
     (activeFilter !== "mine" || post.authorId === CURRENT_USER.id) &&
     (!activeGame || post.game === activeGame),
@@ -246,6 +317,90 @@ function renderFeed() {
   activeGameFilter.innerHTML = activeGame
     ? `Đang xem bài viết về <strong>${escapeHtml(COMMUNITY_GAMES[activeGame]?.label || activeGame)}</strong><button type="button" data-clear-game aria-label="Bỏ lọc game">Bỏ lọc ×</button>`
     : "";
+}
+
+async function searchPosts(query) {
+  const keyword = query.trim();
+  if (!keyword) {
+    clearSearch();
+    return;
+  }
+
+  searchMode = keyword;
+  searchLoading = true;
+  searchError = "";
+  searchResults = [];
+  searchSummary.hidden = false;
+  searchSummary.innerHTML = `Đang tìm <strong>${escapeHtml(keyword)}</strong><button type="button" data-clear-search>Bỏ tìm kiếm ×</button>`;
+  loadCommunityLikes();
+  loadCommunityLikes();
+  renderFeed();
+  loadFeaturedPosts();
+
+  const isHashtag = keyword.startsWith("#");
+  const hashtag = isHashtag ? keyword.slice(1).replace(/^#+/, "") : "";
+  const q = isHashtag ? "" : keyword;
+
+  try {
+    const payload = await api.get("/posts/search", {
+      ...(q ? { q } : {}),
+      ...(hashtag ? { hashtag } : {}),
+      page: 1,
+      limit: 20,
+    });
+    searchResults = extractPostList(payload).map(normalizeApiPost);
+  } catch (error) {
+    searchError = error?.message || "Backend không phản hồi. Vui lòng thử lại.";
+  } finally {
+    searchLoading = false;
+    searchSummary.innerHTML = searchError
+      ? `Từ khoá <strong>${escapeHtml(keyword)}</strong><button type="button" data-clear-search>Bỏ tìm kiếm ×</button>`
+      : `Kết quả cho <strong>${escapeHtml(keyword)}</strong><button type="button" data-clear-search>Bỏ tìm kiếm ×</button>`;
+    renderFeed();
+  }
+}
+
+function clearSearch() {
+  searchMode = "";
+  searchLoading = false;
+  searchError = "";
+  searchResults = [];
+  searchInput.value = "";
+  searchSummary.hidden = true;
+  searchSummary.innerHTML = "";
+  renderFeed();
+}
+
+async function loadFeaturedPosts() {
+  const featuredList = document.getElementById("featured-list");
+  featuredList.innerHTML = `
+    <div class="featured-loading" aria-label="Đang tải bài nổi bật">
+      <span></span><span></span><span></span>
+    </div>`;
+
+  try {
+    const payload = await api.get("/posts/featured", { days: 7, limit: 5 });
+    const posts = extractPostList(payload).map(normalizeApiPost);
+    if (!posts.length) {
+      featuredList.innerHTML = '<p class="featured-message">Chưa có bài nổi bật trong 7 ngày qua.</p>';
+      return;
+    }
+    featuredList.innerHTML = posts.map((post, index) => `
+      <button type="button" class="featured-item" data-featured-id="${escapeHtml(post.id)}">
+        <span class="featured-rank">${String(index + 1).padStart(2, "0")}</span>
+        <span class="featured-copy">
+          <strong>${escapeHtml(post.content)}</strong>
+          <small>${escapeHtml(post.author)} · ${Number(post.likes || 0)} lượt thích</small>
+        </span>
+      </button>`).join("");
+  } catch (error) {
+    featuredList.innerHTML = `
+      <div class="featured-error">
+        <strong>Không tải được bài nổi bật</strong>
+        <p>${escapeHtml(error?.message || "Backend không phản hồi.")}</p>
+        <button type="button" id="featured-retry">Thử lại</button>
+      </div>`;
+  }
 }
 
 function updateCharCount() {
@@ -363,8 +518,28 @@ document.getElementById("remove-image").addEventListener("click", () => {
 });
 contentInput.addEventListener("input", updateCharCount);
 cancelEditButton.addEventListener("click", resetComposer);
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  searchPosts(searchInput.value);
+});
+searchSummary.addEventListener("click", (event) => {
+  if (event.target.closest("[data-clear-search]")) clearSearch();
+});
+feedEmpty.addEventListener("click", (event) => {
+  if (event.target.closest("#search-retry")) searchPosts(searchMode);
+});
+document.getElementById("refresh-featured").addEventListener("click", loadFeaturedPosts);
+document.getElementById("featured-list").addEventListener("click", (event) => {
+  const featuredItem = event.target.closest("[data-featured-id]");
+  if (featuredItem) {
+    window.location.href = `community-detail.html?id=${encodeURIComponent(featuredItem.dataset.featuredId)}`;
+    return;
+  }
+  if (event.target.closest("#featured-retry")) loadFeaturedPosts();
+});
 document.querySelectorAll(".filter-button").forEach((button) => {
   button.addEventListener("click", () => {
+    if (searchMode || searchLoading || searchError) clearSearch();
     activeFilter = button.dataset.filter;
     document.querySelectorAll(".filter-button").forEach((item) => {
       const selected = item === button;
@@ -378,6 +553,7 @@ document.querySelectorAll(".filter-button").forEach((button) => {
 
 document.querySelectorAll("[data-game-filter]").forEach((button) => {
   button.addEventListener("click", () => {
+    if (searchMode || searchLoading || searchError) clearSearch();
     activeGame = button.dataset.gameFilter;
     activeFilter = "all";
     visibleCount = 3;

@@ -34,10 +34,31 @@ document.documentElement.style.overflowY = "auto";
 document.body.style.height = "auto";
 document.body.style.overflowY = "auto";
 
-function loadPost() {
+async function loadPost() {
   let userPosts = [];
   try { userPosts = JSON.parse(localStorage.getItem(COMMUNITY_STORAGE_KEY) || "[]"); } catch (_error) {}
   post = userPosts.find((item) => item.id === postId) || DEMO_POSTS.find((item) => item.id === postId);
+  if (!post && postId) {
+    try {
+      const payload = await api.get(`/posts/${encodeURIComponent(postId)}`);
+      const author = payload.author || payload.author_name || payload.user_name || "Game thủ";
+      post = {
+        id: String(payload.id ?? payload.post_id ?? postId),
+        author,
+        handle: payload.handle || payload.username || "@gameconnect",
+        avatar: String(payload.avatar || author).slice(0, 1).toUpperCase(),
+        game: payload.game || payload.game_name || "",
+        content: payload.content || payload.body || payload.title || "",
+        image: payload.image || payload.image_url || "",
+        createdAt: payload.createdAt || payload.created_at || payload.created || new Date().toISOString(),
+        likes: Number(payload.likes || payload.like_count || 0),
+        comments: Number(payload.comments || payload.comment_count || 0),
+        visual: Boolean(payload.visual),
+      };
+    } catch (_error) {
+      post = null;
+    }
+  }
 }
 
 function loadLikes() {
@@ -239,14 +260,16 @@ document.getElementById("comment-list").addEventListener("click", (event) => {
   }
 });
 
-loadPost();
-loadLikes();
-renderPost();
-if (post) {
-  renderComments();
-  if (window.location.hash === "#comments") {
-    requestAnimationFrame(() => {
-      document.getElementById("comments").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+(async function initCommunityDetail() {
+  await loadPost();
+  loadLikes();
+  renderPost();
+  if (post) {
+    renderComments();
+    if (window.location.hash === "#comments") {
+      requestAnimationFrame(() => {
+        document.getElementById("comments").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }
-}
+})();

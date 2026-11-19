@@ -197,7 +197,14 @@
               <h2>Dòng thời gian</h2>
               <p>Câu chuyện mới nhất từ game thủ</p>
             </div>
+            <form id="post-search-form" class="post-search-form" role="search">
+              <label class="sr-only" for="post-search">Tìm bài viết</label>
+              <span class="post-search-icon" aria-hidden="true">⌕</span>
+              <input id="post-search" type="search" maxlength="120" placeholder="Tìm từ khoá hoặc #hashtag">
+              <button type="submit">Tìm</button>
+            </form>
           </div>
+          <div id="search-summary" class="search-summary" hidden></div>
           <div id="active-game-filter" class="active-game-filter" hidden></div>
           <div id="feed-list" class="feed-list" aria-live="polite"></div>
           <div id="feed-empty" class="feed-empty" hidden>
@@ -211,6 +218,18 @@
         </div>
 
         <aside class="community-aside">
+          <section class="aside-card featured-card">
+            <div class="aside-title">
+              <div><p class="eyebrow">LAST 7 DAYS</p><h2>Bài nổi bật</h2></div>
+              <button id="refresh-featured" class="featured-refresh" type="button" aria-label="Tải lại bài nổi bật">↻</button>
+            </div>
+            <div id="featured-list" class="featured-list" aria-live="polite">
+              <div class="featured-loading" aria-label="Đang tải bài nổi bật">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </section>
+
           <section class="aside-card welcome-card">
             <div class="welcome-glow" aria-hidden="true"></div>
             <p class="eyebrow">YOUR NEXT GG</p>
