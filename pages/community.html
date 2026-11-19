@@ -31,17 +31,14 @@
           </div>
         </a>
         <div class="fc-nav-divider"></div>
-        <a href="../index.html" class="fc-nav-item" title="Trang chủ">
-          <span class="fc-nav-icon" aria-hidden="true">⌂</span><span class="fc-nav-label">Trang chủ</span>
-        </a>
-        <a href="friends.html" class="fc-nav-item" title="Tìm kiếm người chơi">
+        <button class="fc-nav-item" id="btn-focus-search" type="button" title="Tìm kiếm người chơi">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </span><span class="fc-nav-label">Tìm kiếm</span>
-        </a>
+        </button>
         <button class="fc-nav-item" type="button" title="Kênh Esport">
           <span class="fc-nav-icon"><span class="fc-game-pill">GC</span></span><span class="fc-nav-label">Kênh Esport</span>
         </button>
@@ -87,6 +84,7 @@
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
+            <span class="fc-nav-badge" id="sidebar-req-badge">10</span>
           </span><span class="fc-nav-label">Bạn bè & Kết nối</span>
         </a>
         <button class="fc-nav-item" type="button" title="Tạo phòng đội">
@@ -198,7 +196,14 @@
               <h2>Dòng thời gian</h2>
               <p>Câu chuyện mới nhất từ game thủ</p>
             </div>
+            <form id="post-search-form" class="post-search-form" role="search">
+              <label class="sr-only" for="post-search">Tìm bài viết</label>
+              <span class="post-search-icon" aria-hidden="true">⌕</span>
+              <input id="post-search" type="search" maxlength="120" placeholder="Tìm từ khoá hoặc #hashtag">
+              <button type="submit">Tìm</button>
+            </form>
           </div>
+          <div id="search-summary" class="search-summary" hidden></div>
           <div id="active-game-filter" class="active-game-filter" hidden></div>
           <div id="feed-list" class="feed-list" aria-live="polite"></div>
           <div id="feed-empty" class="feed-empty" hidden>
@@ -212,6 +217,18 @@
         </div>
 
         <aside class="community-aside">
+          <section class="aside-card featured-card">
+            <div class="aside-title">
+              <div><p class="eyebrow">LAST 7 DAYS</p><h2>Bài nổi bật</h2></div>
+              <button id="refresh-featured" class="featured-refresh" type="button" aria-label="Tải lại bài nổi bật">↻</button>
+            </div>
+            <div id="featured-list" class="featured-list" aria-live="polite">
+              <div class="featured-loading" aria-label="Đang tải bài nổi bật">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </section>
+
           <section class="aside-card welcome-card">
             <div class="welcome-glow" aria-hidden="true"></div>
             <p class="eyebrow">YOUR NEXT GG</p>
