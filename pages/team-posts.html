@@ -6,123 +6,351 @@
   <title>Tìm đồng đội | GameConnect</title>
   <link rel="icon" href="../assets/images/logo.svg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/community.css">
+  <link rel="stylesheet" href="../css/notifications.css">
   <link rel="stylesheet" href="../css/team-posts.css">
 </head>
-<body data-root="../">
+<body class="fc-dark-body" data-root="../">
   <header id="app-header"></header>
 
-  <main class="container" style="padding-top:24px;padding-bottom:40px;">
-
-    <!-- ===== TOP TABS ===== -->
-    <div class="team-nav-tabs">
-      <a href="team-posts.html" class="team-nav-tab active">
-        <i class="fa-solid fa-gamepad"></i> Khám phá bài đăng
-      </a>
-      <a href="my-team-posts.html" class="team-nav-tab">
-        <i class="fa-solid fa-clipboard-list"></i> Bài đăng của tôi
-      </a>
-      <a href="my-team-posts.html?tab=applied" class="team-nav-tab">
-        <i class="fa-solid fa-inbox"></i> Tôi đã ứng tuyển
-      </a>
-    </div>
-
-    <!-- ===== BỘ LỌC ===== -->
-    <section class="card filter-bar">
-      <div class="filter-row">
-        <!-- Tìm kiếm từ khoá -->
-        <div class="filter-group filter-group--wide">
-          <label for="filter-q">🔍 Từ khoá</label>
-          <input id="filter-q" type="search" placeholder="Tìm theo tiêu đề, mô tả...">
-        </div>
-
-        <!-- Game -->
-        <div class="filter-group">
-          <label for="filter-game">🎮 Game</label>
-          <select id="filter-game">
-            <option value="">-- Tất cả game --</option>
-          </select>
-        </div>
-
-        <!-- Rank -->
-        <div class="filter-group">
-          <label for="filter-rank">🏆 Rank</label>
-          <select id="filter-rank" disabled>
-            <option value="">-- Tất cả rank --</option>
-          </select>
-        </div>
-
-        <!-- Vai trò -->
-        <div class="filter-group">
-          <label for="filter-role">🎯 Vai trò</label>
-          <select id="filter-role" disabled>
-            <option value="">-- Tất cả vai trò --</option>
-          </select>
-        </div>
-
-        <!-- Khu vực -->
-        <div class="filter-group">
-          <label for="filter-region">🌏 Khu vực</label>
-          <select id="filter-region">
-            <option value="">-- Tất cả --</option>
-            <option value="VN">VN</option>
-            <option value="SEA">SEA</option>
-            <option value="NA">NA</option>
-            <option value="EU">EU</option>
-          </select>
-        </div>
-
-        <!-- Nút lọc / reset -->
-        <div class="filter-group filter-group--actions">
-          <label>&nbsp;</label>
-          <div style="display:flex;gap:8px;">
-            <button id="btn-filter" class="btn btn-primary">Lọc</button>
-            <button id="btn-reset-filter" class="btn">Xoá lọc</button>
+  <div class="fc-app-shell">
+    <!-- ==================== THANH BAR BÊN TRÁI (EXPANDABLE SIDEBAR) ==================== -->
+    <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
+      <div class="fc-bar-group">
+        <!-- Logo Brand -->
+        <a href="home.html" class="fc-brand-link" title="GameConnect - Sảnh chính">
+          <div class="fc-brand-logo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <line x1="15" y1="13" x2="15.01" y2="13"></line>
+              <line x1="18" y1="11" x2="18.01" y2="11"></line>
+              <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+            </svg>
           </div>
+          <div class="fc-brand-text">
+            <span class="fc-brand-title">GameConnect</span>
+            <span class="fc-brand-sub">GAMING HUB</span>
+          </div>
+        </a>
+
+        <div class="fc-nav-divider"></div>
+
+        <!-- Tìm kiếm nhanh -->
+        <a href="friends.html" class="fc-nav-item" title="Tìm kiếm người chơi">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm kiếm</span>
+        </a>
+
+        <!-- Kênh Game -->
+        <button class="fc-nav-item" type="button" title="Kênh Esport">
+          <span class="fc-nav-icon">
+            <span class="fc-game-pill">GC</span>
+          </span>
+          <span class="fc-nav-label">Kênh Esport</span>
+        </button>
+
+        <div class="fc-nav-divider"></div>
+
+        <!-- Tìm đội nhanh (ACTIVE) -->
+        <a href="team-posts.html" class="fc-nav-item active" title="Tìm đội nhanh">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm đội nhanh</span>
+        </a>
+
+        <!-- Bài của tôi & Ứng tuyển -->
+        <a href="my-team-posts.html" class="fc-nav-item" title="Bài của tôi & Ứng tuyển">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bài của tôi</span>
+        </a>
+
+        <!-- Bảng xếp hạng -->
+        <button class="fc-nav-item" type="button" title="Bảng xếp hạng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10M12 20V4M6 20v-6"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bảng xếp hạng</span>
+        </button>
+
+        <!-- Thống kê -->
+        <button class="fc-nav-item" type="button" title="Thống kê cá nhân">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Thống kê</span>
+        </button>
+
+        <!-- Bảng tin cộng đồng -->
+        <a href="community.html" class="fc-nav-item" title="Bảng tin cộng đồng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bảng tin</span>
+        </a>
+
+        <!-- Bạn bè & Kết nối -->
+        <a href="friends.html" class="fc-nav-item" title="Bạn bè & Kết nối">
+          <span class="fc-nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bạn bè & Kết nối</span>
+        </a>
+
+        <!-- Tạo phòng đội -->
+        <button class="fc-nav-item" type="button" title="Tạo phòng đội">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tạo phòng đội</span>
+        </button>
+
+        <!-- Tìm phòng -->
+        <button class="fc-nav-item" type="button" title="Tìm phòng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm phòng</span>
+        </button>
+      </div>
+
+      <div class="fc-bar-group">
+        <a href="items.html" class="fc-nav-item" title="Cửa hàng vật phẩm">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Cửa hàng</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ==================== KHU VỰC CHÍNH Ở GIỮA ==================== -->
+    <main class="fc-main-area">
+      <!-- TOP TABBAR -->
+      <header class="fc-top-tabbar">
+        <a href="home.html" class="fc-tab-back-home" title="Về sảnh chính">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Sảnh chính</span>
+        </a>
+
+        <nav class="fc-tabs-nav" role="tablist" aria-label="Khám phá bài đăng">
+          <a href="team-posts.html" class="fc-tab-btn active" role="tab" aria-selected="true" style="text-decoration:none;">
+            <span>KHÁM PHÁ BÀI ĐĂNG</span>
+          </a>
+
+          <a href="my-team-posts.html" class="fc-tab-btn" role="tab" aria-selected="false" style="text-decoration:none;">
+            <span>BÀI ĐĂNG CỦA TÔI</span>
+          </a>
+
+          <a href="my-team-posts.html?tab=applied" class="fc-tab-btn" role="tab" aria-selected="false" style="text-decoration:none;">
+            <span>TÔI ĐÃ ỨNG TUYỂN</span>
+          </a>
+        </nav>
+      </header>
+
+      <!-- CUỘN NỘI DUNG -->
+      <div class="fc-content-scroll">
+        <div class="fc-content-container">
+
+          <!-- TIÊU ĐỀ SECTION -->
+          <div class="community-heading">
+            <div>
+              <p class="eyebrow"><span class="eyebrow-mark"></span> GAMECONNECT LFG</p>
+              <h1>Tìm đồng đội</h1>
+              <p class="heading-copy">Tìm kiếm đồng đội hợp tính, đúng mức rank và vai trò để cùng leo rank.</p>
+            </div>
+            <div class="heading-live">
+              <button id="btn-open-create" class="btn btn-primary" style="padding: 7px 16px; font-size: 13px; font-weight: 700;">
+                <i class="fa-solid fa-plus"></i> Đăng bài tìm đội
+              </button>
+            </div>
+          </div>
+
+          <!-- ===== BỘ LỌC TÌM KIẾM ===== -->
+          <section class="filter-bar">
+            <div class="filter-row">
+              <!-- Tìm kiếm từ khoá -->
+              <div class="filter-group filter-group--wide">
+                <label for="filter-q">🔍 Từ khoá</label>
+                <input id="filter-q" type="search" placeholder="Tìm theo tiêu đề, mô tả...">
+              </div>
+
+              <!-- Game -->
+              <div class="filter-group">
+                <label for="filter-game">🎮 Game</label>
+                <select id="filter-game">
+                  <option value="">-- Tất cả game --</option>
+                </select>
+              </div>
+
+              <!-- Rank -->
+              <div class="filter-group">
+                <label for="filter-rank">🏆 Rank</label>
+                <select id="filter-rank" disabled>
+                  <option value="">-- Tất cả rank --</option>
+                </select>
+              </div>
+
+              <!-- Vai trò -->
+              <div class="filter-group">
+                <label for="filter-role">🎯 Vai trò</label>
+                <select id="filter-role" disabled>
+                  <option value="">-- Tất cả vai trò --</option>
+                </select>
+              </div>
+
+              <!-- Khu vực -->
+              <div class="filter-group">
+                <label for="filter-region">🌏 Khu vực</label>
+                <select id="filter-region">
+                  <option value="">-- Tất cả --</option>
+                  <option value="VN">VN</option>
+                  <option value="SEA">SEA</option>
+                  <option value="NA">NA</option>
+                  <option value="EU">EU</option>
+                </select>
+              </div>
+
+              <!-- Nút lọc / reset -->
+              <div class="filter-group filter-group--actions">
+                <label>&nbsp;</label>
+                <div style="display:flex;gap:8px;">
+                  <button id="btn-filter" class="btn btn-primary" style="padding:8px 14px;font-size:13px;">Lọc</button>
+                  <button id="btn-reset-filter" class="btn" style="padding:8px 14px;font-size:13px;">Xoá</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== TIÊU ĐỀ DANH SÁCH ===== -->
+          <div class="list-header" style="margin-bottom:16px;">
+            <h2 style="margin:0;font-size:18px;font-weight:800;letter-spacing:-.3px;">
+              Danh sách bài đăng <span id="total-count" class="muted" style="font-size:13px;font-weight:600;"></span>
+            </h2>
+          </div>
+
+          <!-- ===== DANH SÁCH CARD ===== -->
+          <div id="post-grid" class="post-grid">
+            <div class="post-skeleton"></div>
+            <div class="post-skeleton"></div>
+            <div class="post-skeleton"></div>
+          </div>
+
+          <!-- ===== PHÂN TRANG ===== -->
+          <div id="pagination" class="pagination"></div>
+
         </div>
       </div>
-    </section>
+    </main>
 
-    <!-- ===== HEADER DANH SÁCH ===== -->
-    <div class="list-header" style="margin-bottom:12px;">
-      <h2 style="margin:0;">Bài đăng tìm đồng đội <span id="total-count" class="muted" style="font-size:14px;font-weight:400;"></span></h2>
-      <button id="btn-open-create" class="btn btn-primary">+ Đăng bài</button>
-    </div>
+    <!-- ==================== THANH BAR BÊN PHẢI ==================== -->
+    <aside class="fc-right-bar" aria-label="Thanh trạng thái nhanh">
+      <div class="fc-avatar-menu-wrapper">
+        <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Tài khoản & Giao diện">
+          <img id="user-avatar-img" src="https://api.dicebear.com/9.x/adventurer/svg?seed=GameConnect&backgroundColor=b6e3f4" alt="Avatar của bạn" class="fc-self-avatar">
+          <span class="fc-status-dot"></span>
+        </button>
 
-    <!-- ===== DANH SÁCH CARD ===== -->
-    <div id="post-grid" class="post-grid">
-      <div class="post-skeleton"></div>
-      <div class="post-skeleton"></div>
-      <div class="post-skeleton"></div>
-    </div>
+        <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
+          <div class="fc-avatar-dropdown-header">
+            <strong id="user-header-name">Gamer</strong>
+            <span>● Đang trực tuyến</span>
+          </div>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <div class="fc-avatar-dropdown-label">Giao diện hiển thị</div>
+          <button type="button" class="fc-theme-option" data-set-theme="dark">
+            <span>🌙 Chế độ Tối (Dark)</span>
+            <span class="fc-theme-check" id="check-theme-dark">✓</span>
+          </button>
+          <button type="button" class="fc-theme-option" data-set-theme="light">
+            <span>☀️ Chế độ Sáng (Light)</span>
+            <span class="fc-theme-check" id="check-theme-light"></span>
+          </button>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <button type="button" id="btn-header-logout" class="fc-theme-option" style="color: #ef4444;">
+            <span>🚪 Đăng xuất</span>
+          </button>
+        </div>
+      </div>
 
-    <!-- ===== PHÂN TRANG ===== -->
-    <div id="pagination" class="pagination"></div>
-
-  </main>
+      <button class="fc-right-icon-btn" title="Đấu nhanh VS" style="font-weight: 800; font-size: 12px;">VS</button>
+      <div id="gc-notif-bell"></div>
+      <a href="friends.html" class="fc-right-icon-btn" title="Bạn bè & Kết nối">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </a>
+    </aside>
+  </div>
 
   <!-- ===== MODAL TẠO / SỬA BÀI ===== -->
   <div id="modal-overlay" class="modal-overlay" hidden>
     <div class="modal">
       <div class="modal-header">
-        <h3 id="modal-title">Đăng bài tìm đồng đội</h3>
+        <h3 id="modal-title"><i class="fa-solid fa-gamepad" style="color:var(--tp-orange);"></i> Đăng bài tìm đồng đội</h3>
         <button id="btn-close-modal" class="btn-icon" title="Đóng">✕</button>
       </div>
       <div class="modal-body">
         <form id="post-form" novalidate>
-          <!-- Game (bắt buộc) -->
           <label for="f-game">Game <span class="required">*</span></label>
           <select id="f-game" name="game_id" required>
             <option value="">-- Chọn game --</option>
           </select>
 
-          <!-- Tiêu đề -->
           <label for="f-title">Tiêu đề <span class="required">*</span></label>
           <input id="f-title" name="title" type="text" maxlength="150" required
             placeholder="VD: [VN] Tìm Jungle + Support leo Plat">
 
-          <!-- Rank min/max -->
           <div class="form-row">
             <div>
               <label for="f-min-rank">Rank tối thiểu</label>
@@ -138,21 +366,17 @@
             </div>
           </div>
 
-          <!-- Vai trò cần tuyển -->
           <label>Vai trò cần tuyển</label>
           <div id="f-roles-wrap" class="role-checkboxes">
             <span class="muted" style="font-size:13px;">Chọn game trước để hiện vai trò</span>
           </div>
 
-          <!-- Số người cần tuyển -->
           <label for="f-needed">Số người cần tuyển <span class="required">*</span></label>
           <input id="f-needed" name="needed_players" type="number" min="1" max="50" value="1" required>
 
-          <!-- Giờ chơi -->
           <label for="f-playtime">Khung giờ chơi</label>
           <input id="f-playtime" name="play_time" type="text" placeholder="VD: 20:00-23:00" maxlength="100">
 
-          <!-- Khu vực -->
           <label for="f-region">Khu vực / Server</label>
           <select id="f-region" name="region">
             <option value="">-- Không chọn --</option>
@@ -162,12 +386,10 @@
             <option value="EU">EU</option>
           </select>
 
-          <!-- Mô tả -->
           <label for="f-desc">Mô tả</label>
           <textarea id="f-desc" name="description" rows="3"
             placeholder="Mic on bắt buộc, không toxic, chơi nghiêm túc..."></textarea>
 
-          <!-- Hạn hiển thị -->
           <label for="f-expires">Hạn hiển thị (tối đa 7 ngày)</label>
           <input id="f-expires" name="expires_at" type="datetime-local">
 
@@ -182,6 +404,7 @@
     </div>
   </div>
 
+  <div id="fc-toast-container" class="fc-toast-container"></div>
   <footer id="app-footer"></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
@@ -189,6 +412,11 @@
   <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/layout.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // Khởi tạo chuông thông báo
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
   <script src="../js/pages/team-posts.js"></script>
 </body>
 </html>

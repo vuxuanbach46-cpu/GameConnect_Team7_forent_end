@@ -68,6 +68,7 @@ let activeAppStatusFilter = "ALL";
 // 3. Khởi tạo & Tab routing
 // ============================================================
 document.addEventListener("DOMContentLoaded", async () => {
+  initUserHeaderAndTheme();
   await loadGamesCatalog();
 
   // Kiểm tra query parameter ?tab=applied
@@ -83,6 +84,65 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadMyPosts();
   loadMyApplications();
 });
+
+function initUserHeaderAndTheme() {
+  const nameEl = document.getElementById("user-header-name");
+  const avatarEl = document.getElementById("user-avatar-img");
+  if (currentUser) {
+    if (nameEl) nameEl.textContent = currentUser.username || "Game thủ";
+    if (avatarEl) {
+      avatarEl.src = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(currentUser.username || "Gamer")}&backgroundColor=b6e3f4`;
+    }
+  }
+
+  // Theme support
+  const applyTheme = (theme) => {
+    const isLight = theme === "light";
+    document.body.classList.toggle("fc-light-mode", isLight);
+    const checkDark = document.getElementById("check-theme-dark");
+    const checkLight = document.getElementById("check-theme-light");
+    if (checkDark) checkDark.textContent = isLight ? "" : "✓";
+    if (checkLight) checkLight.textContent = isLight ? "✓" : "";
+    document.querySelectorAll(".fc-theme-option[data-set-theme]").forEach((btn) => {
+      const selected = btn.dataset.setTheme === theme;
+      btn.classList.toggle("active", selected);
+    });
+    localStorage.setItem("gc_friends_theme", theme);
+  };
+
+  applyTheme(localStorage.getItem("gc_friends_theme") || "dark");
+
+  const avatarMenuButton = document.getElementById("btn-avatar-menu");
+  const avatarDropdownMenu = document.getElementById("avatar-dropdown-menu");
+  if (avatarMenuButton && avatarDropdownMenu) {
+    avatarMenuButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      avatarDropdownMenu.hidden = !avatarDropdownMenu.hidden;
+    });
+
+    document.querySelectorAll(".fc-theme-option[data-set-theme]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        applyTheme(btn.dataset.setTheme);
+        avatarDropdownMenu.hidden = true;
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!avatarDropdownMenu.hidden && !avatarDropdownMenu.contains(e.target)) {
+        avatarDropdownMenu.hidden = true;
+      }
+    });
+  }
+
+  const logoutBtn = document.getElementById("btn-header-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("access_token");
+      window.location.href = "login.html";
+    });
+  }
+}
 
 function switchTab(tabName) {
   if (tabName === "applied") {
