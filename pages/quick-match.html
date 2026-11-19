@@ -7,6 +7,7 @@
   <link rel="icon" href="../assets/images/logo.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/notifications.css">
   <link rel="stylesheet" href="../css/quick-match.css">
 </head>
 <body class="fc-dark-body" data-root="../">
@@ -104,7 +105,7 @@
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
-            <span class="fc-nav-badge">4</span>
+            <span class="fc-nav-badge" id="sidebar-req-badge" style="display: none;">0</span>
           </span>
           <span class="fc-nav-label">Bạn bè & Kết nối</span>
         </a>
@@ -289,7 +290,7 @@
             <div class="qm-lobby-head">
               <div class="qm-lobby-title" id="qm-lobby-title">Sảnh đội của bạn</div>
               <div class="qm-lobby-meta">
-                <span class="qm-lobby-count" id="qm-lobby-count">2/5 người</span>
+                <span class="qm-lobby-count" id="qm-lobby-count">1/5 người</span>
                 <button type="button" class="fc-btn fc-btn-danger-ghost qm-leave-btn" id="btn-leave-lobby" hidden>Rời phòng</button>
               </div>
             </div>
@@ -333,7 +334,7 @@
       <div class="fc-avatar-menu-wrapper">
         <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Nhấn để mở tuỳ chọn giao diện Sáng / Tối">
           <img
-            src="https://api.dicebear.com/9.x/adventurer/svg?seed=CaptianVN&backgroundColor=b6e3f4"
+            src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4"
             alt="Avatar của bạn"
             class="fc-self-avatar"
           >
@@ -342,7 +343,7 @@
 
         <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
           <div class="fc-avatar-dropdown-header">
-            <strong>CaptainVN</strong>
+            <strong>Đang tải...</strong>
             <span>● Đang trực tuyến</span>
           </div>
           <div class="fc-avatar-dropdown-divider"></div>
@@ -360,14 +361,10 @@
 
       <button class="fc-right-icon-btn" title="Đấu nhanh VS" style="font-weight: 800; font-size: 12px;">VS</button>
 
-      <button class="fc-right-icon-btn" title="Thông báo">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-      </button>
+      <!-- CHUÔNG THÔNG BÁO (Tài nguyên chung) -->
+      <div id="gc-notif-bell"></div>
 
-      <a href="friends.html" class="fc-right-icon-btn" title="Lời mời kết bạn">
+      <a href="friends.html?tab=received" class="fc-right-icon-btn" title="Lời mời kết bạn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="8.5" cy="7" r="4"></circle>
@@ -385,7 +382,7 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          <span class="qm-right-party-count" id="qm-right-party-count">2</span>
+          <span class="qm-right-party-count" id="qm-right-party-count">1</span>
         </button>
 
         <a href="friends.html" class="fc-right-icon-btn" title="Mở trang Bạn bè">
@@ -412,6 +409,11 @@
   <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/layout.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // Khởi tạo chuông thông báo dùng chung
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
   <script src="../js/pages/quick-match.js"></script>
 </body>
 </html>

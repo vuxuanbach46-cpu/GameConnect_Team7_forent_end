@@ -1,14 +1,29 @@
+// Kiểm tra đăng nhập: Người dùng chưa đăng nhập -> chuyển về file index
+if (!localStorage.getItem("access_token")) {
+  window.location.href = "../index.html";
+}
+
 /* ==========================================================
    GameConnect — Trang Tìm đội nhanh (Quick Team Finder)
-   Chỉ dùng dữ liệu mẫu (mock) cho giao diện — không gọi API.
-   Dùng chung hệ thống class/biến màu của friends.css
+   100% Dữ liệu thật từ Backend FastAPI qua module `api` (js/api.js)
+   Không sử dụng dữ liệu giả (Mock Data).
    ========================================================== */
 "use strict";
 
 const QM_IMG = "../assets/images/";
 
+// Lưu ánh xạ dữ liệu thật từ Database (/api/games, /api/user-games/me)
+const QM_DB = {
+  connected: false,
+  gameIdByKey: {},
+  keyByGameId: {},
+  ranksByKey: {}, // key -> [{ id, rank_name, rank_order }]
+  rolesByKey: {}, // key -> [{ id, role_name }]
+  myUserGameByKey: {} // key -> UserGameResponse thật của tài khoản đang đăng nhập
+};
+
 // =========================================================================
-// 1. DỮ LIỆU CẤU HÌNH: GAME, RANK, VỊ TRÍ
+// 1. BỘ ICON RANK TĨNH ĐỂ ÁNH XẠ HIỂN THỊ CHO TỪNG TỰA GAME
 // =========================================================================
 function qmBuildValorantRanks() {
   const tiers = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal"];
@@ -63,7 +78,7 @@ const QM_RANKS = {
   "cs2-premier": QM_PREMIER_RANKS,
   aov: QM_AOV_RANKS,
   lol: QM_LOL_RANKS,
-  tft: QM_LOL_RANKS // Đấu Trường Chân Lý dùng chung rank với Liên Minh Huyền Thoại
+  tft: QM_LOL_RANKS
 };
 
 const QM_GAMES = {
@@ -96,76 +111,33 @@ const QM_GAMES = {
 
 const QM_GAME_ORDER = ["valorant", "cs2", "aov", "lol", "tft"];
 
-// Hồ sơ rank hiện tại của tôi theo từng hệ thống rank
-const QM_ME_PROFILE = {
-  valorant: { rankIdx: 19, points: 64, floor: 0, next: 100, unit: "RR", region: "#1.245 VN" },
-  "cs2-faceit": { rankIdx: 7, points: 1680, floor: 1531, next: 1751, unit: "ELO", region: "#312 VN" },
-  "cs2-premier": { rankIdx: 3, points: 16240, floor: 15000, next: 20000, unit: "CS Rating", region: "#428 VN", premierScore: 16240 },
-  aov: { rankIdx: 4, points: 24, floor: 0, next: 30, unit: "Sao", region: "#2.108 VN" },
-  lol: { rankIdx: 6, points: 56, floor: 0, next: 100, unit: "LP", region: "#864 VN" },
-  tft: { rankIdx: 4, points: 72, floor: 0, next: 100, unit: "LP", region: "#1.530 VN" }
-};
-
 // =========================================================================
-// 2. DỮ LIỆU MẪU: NGƯỜI CHƠI, BẠN BÈ ONLINE, PHÒNG ĐANG MỞ
+// 2. DỮ LIỆU THẬT TỪ BACKEND (KHỞI TẠO RỖNG — KHÔNG CÓ DỮ LIỆU GIẢ)
 // =========================================================================
-function qmAvatar(seed, bg) {
-  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=${bg || "b6e3f4"}`;
+function qmDiceBearAvatar(username) {
+  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(String(username || "user"))}`;
 }
 
+// Thông tin tài khoản thật đang đăng nhập (cập nhật từ GET /user/me & GET /api/profiles/me)
 const QM_ME = {
   id: 0,
-  name: "CaptainVN",
-  avatar: qmAvatar("CaptianVN", "b6e3f4"),
-  verified: "gold",
-  tier: 0.7,
+  username: "",
+  name: "Đang tải...",
+  avatar: qmDiceBearAvatar("user"),
+  verified: null,
   isMe: true
 };
 
-const QM_PEOPLE = [
-  { id: 1, name: "LinhBae", avatar: qmAvatar("LinhBae", "ffd5dc"), verified: "blue", tier: 0.62, status: "online" },
-  { id: 2, name: "BaoClutch", avatar: qmAvatar("BaoClutch", "c0aede"), verified: "blue", tier: 0.55, status: "online" },
-  { id: 3, name: "HuySniper", avatar: qmAvatar("HuySniper", "c0aede"), verified: "gold", tier: 0.85, status: "room" },
-  { id: 4, name: "DuyenAlice", avatar: qmAvatar("DuyenAlice", "ffdfbf"), verified: null, tier: 0.5, status: "online" },
-  { id: 5, name: "TuanJungle", avatar: qmAvatar("TuanJungle", "d1d4f9"), verified: "blue", tier: 0.68, status: "online" },
-  { id: 6, name: "QuanViper", avatar: qmAvatar("QuanViper", "b6e3f4"), verified: null, tier: 0.6, status: "room" },
-  { id: 7, name: "MinhFaceit", avatar: qmAvatar("MinhFaceit9", "ffd5dc"), verified: null, tier: 0.72, status: "online" },
-  { id: 8, name: "KhoiTapHead", avatar: qmAvatar("KhoiTapHead", "ffdfbf"), verified: "blue", tier: 0.58, status: "online" },
-  { id: 9, name: "PhucConqueror", avatar: qmAvatar("PhucConqueror", "c0aede"), verified: "gold", tier: 0.9, status: "online" },
-  { id: 10, name: "NamFlorentino", avatar: qmAvatar("NamFlorentino", "d1d4f9"), verified: null, tier: 0.52, status: "online" }
-];
+// Danh sách bạn bè thật từ GET /friend-requests/friends
+const QM_PEOPLE = [];
+const QM_RIGHT_FRIENDS = [];
 
-// Bạn bè hiển thị ở thanh phải (đang online)
-const QM_RIGHT_FRIENDS = [1, 2, 3, 4, 5];
+// Danh sách phòng thật từ GET /api/matchmaking/rooms & GET /api/team-posts
+const QM_ROOMS = [];
 
 function qmPersonById(id) {
-  return QM_PEOPLE.find((p) => p.id === id);
+  return QM_PEOPLE.find((p) => Number(p.id) === Number(id));
 }
-
-// Phòng đang mở (mô phỏng bảng team_posts). min/max là tỉ lệ 0..1 trên thang rank của game đó
-const QM_ROOMS = [
-  { id: 1, host: { name: "ZeroCool", avatar: qmAvatar("ZeroCool", "b6e3f4"), verified: "gold" }, game: "valorant", queue: "ranked", vibe: "tryhard", mic: true, region: "VN", min: 0.62, max: 0.9, filled: 3, needs: ["Controller"] },
-  { id: 2, host: { name: "ViperMain", avatar: qmAvatar("ViperMain", "ffd5dc"), verified: "blue" }, game: "valorant", queue: "ranked", vibe: "tryhard", mic: false, region: "VN", min: 0.5, max: 0.8, filled: 4, needs: ["Sentinel"] },
-  { id: 3, host: { name: "HuySova", avatar: qmAvatar("HuySova", "b6e3f4"), verified: null }, game: "valorant", queue: "ranked", vibe: "chill", mic: false, region: "VN", min: 0.3, max: 0.65, filled: 2, needs: ["Duelist", "Initiator"] },
-  { id: 4, host: { name: "NhiPhoenix", avatar: qmAvatar("NhiPhoenix", "ffdfbf"), verified: null }, game: "valorant", queue: "unrated", vibe: "chill", mic: false, region: "SEA", min: 0, max: 1, filled: 1, needs: ["Duelist", "Controller", "Sentinel"] },
-  { id: 5, host: { name: "SEA_Reyna", avatar: qmAvatar("SEAReyna", "c0aede"), verified: "blue" }, game: "valorant", queue: "ranked", vibe: "tryhard", mic: true, region: "SEA", min: 0.7, max: 1, filled: 3, needs: ["Initiator"] },
-
-  { id: 6, host: { name: "KienFaceit10", avatar: qmAvatar("KienFaceit10", "c0aede"), verified: "gold" }, game: "cs2", cs2Mode: "faceit", queue: "ranked", vibe: "tryhard", mic: true, region: "VN", min: 0.5, max: 0.95, filled: 3, needs: ["AWPer", "Support"] },
-  { id: 7, host: { name: "TrungPremier", avatar: qmAvatar("TrungPremier", "ffd5dc"), verified: "blue" }, game: "cs2", cs2Mode: "premier", queue: "ranked", vibe: "tryhard", mic: false, region: "VN", min: 0.5, max: 0.9, filled: 2, needs: ["Entry", "Lurker"] },
-  { id: 8, host: { name: "MirageKing", avatar: qmAvatar("MirageKing", "d1d4f9"), verified: null }, game: "cs2", cs2Mode: "faceit", queue: "ranked", vibe: "chill", mic: false, region: "VN", min: 0.3, max: 0.7, filled: 4, needs: ["IGL"] },
-  { id: 9, host: { name: "DustLover", avatar: qmAvatar("DustLover", "ffdfbf"), verified: null }, game: "cs2", cs2Mode: "faceit", queue: "unrated", vibe: "chill", mic: false, region: "VN", min: 0, max: 1, filled: 2, needs: ["Support", "Entry"] },
-
-  { id: 10, host: { name: "BaoConqueror", avatar: qmAvatar("BaoConqueror", "ffd5dc"), verified: "gold" }, game: "aov", queue: "ranked", vibe: "tryhard", mic: true, region: "VN", min: 0.5, max: 1, filled: 3, needs: ["Jungle", "Support"] },
-  { id: 11, host: { name: "DuyenAlice", avatar: qmAvatar("DuyenAlice", "ffdfbf"), verified: "blue" }, game: "aov", queue: "ranked", vibe: "chill", mic: false, region: "VN", min: 0.25, max: 0.7, filled: 2, needs: ["Mid", "ADC"] },
-  { id: 12, host: { name: "AoVVuiVe", avatar: qmAvatar("AoVVuiVe", "b6e3f4"), verified: null }, game: "aov", queue: "unrated", vibe: "chill", mic: false, region: "VN", min: 0, max: 1, filled: 1, needs: ["Top", "Jungle", "Support"] },
-
-  { id: 13, host: { name: "TuanJungle", avatar: qmAvatar("TuanJungle", "d1d4f9"), verified: "gold" }, game: "lol", queue: "ranked", vibe: "tryhard", mic: true, region: "VN", min: 0.55, max: 0.95, filled: 3, needs: ["Jungle", "ADC"] },
-  { id: 14, host: { name: "YasuoVN", avatar: qmAvatar("YasuoVN", "c0aede"), verified: null }, game: "lol", queue: "ranked", vibe: "chill", mic: false, region: "VN", min: 0.3, max: 0.7, filled: 2, needs: ["Mid", "Support"] },
-  { id: 15, host: { name: "ARAMFan", avatar: qmAvatar("ARAMFan", "ffd5dc"), verified: null }, game: "lol", queue: "unrated", vibe: "chill", mic: false, region: "VN", min: 0, max: 1, filled: 3, needs: ["Top", "Mid"] },
-
-  { id: 16, host: { name: "HoangTFTMaster", avatar: qmAvatar("HoangTFT", "ffdfbf"), verified: "gold" }, game: "tft", queue: "ranked", vibe: "tryhard", mic: false, region: "VN", min: 0.5, max: 1, filled: 3, needs: ["Fast 8", "Fast 9"] },
-  { id: 17, host: { name: "ChessChill", avatar: qmAvatar("ChessChill", "b6e3f4"), verified: null }, game: "tft", queue: "ranked", vibe: "chill", mic: false, region: "VN", min: 0.2, max: 0.7, filled: 2, needs: ["Reroll", "Flex"] }
-];
 
 // =========================================================================
 // 3. TRẠNG THÁI TRANG
@@ -183,30 +155,34 @@ const qm = {
   searching: false,
   seconds: 0,
   timerId: null,
+  pollId: null,
   menuPos: null,
   posted: false,
   myRoom: null,
-  lobby: null
+  lobby: null,
+  loadingRooms: false
 };
 
 // Vị trí 5 ô: ô giữa (2) là đội trưởng, thứ tự lấp đầy thành viên từ trong ra ngoài
 const QM_POSITIONS = [0, 1, 2, 3, 4];
 const QM_FILL_ORDER = [1, 3, 0, 4];
 
+// Sảnh mặc định của tôi: chỉ có 1 mình tôi ở ô Đội trưởng giữa, 4 ô xung quanh trống
 function qmCreateOwnLobby() {
   return {
     mode: "own",
     roomId: null,
+    gameCode: null,
     leader: QM_ME,
     config: null,
-    members: { 3: { person: qmPersonById(1) } },
+    members: {},
     pending: {},
     need: {}
   };
 }
 
 // =========================================================================
-// 4. HÀM TIỆN ÍCH
+// 4. HÀM TIỆN ÍCH & ÁNH XẠ RANK
 // =========================================================================
 function qmEsc(value) {
   return String(value ?? "")
@@ -226,12 +202,58 @@ function qmRanks() {
   return QM_RANKS[qmCtxKey()];
 }
 
+// Tìm vị trí icon rank tương ứng với tên rank thật trong DB
+function qmMatchRankIdxByName(ctxKey, rankName) {
+  if (!rankName) return -1;
+  const ranks = QM_RANKS[ctxKey] || [];
+  const lower = String(rankName).trim().toLowerCase();
+
+  let idx = ranks.findIndex((r) => r.name.toLowerCase() === lower);
+  if (idx !== -1) return idx;
+
+  idx = ranks.findIndex((r) => r.name.toLowerCase().includes(lower) || lower.includes(r.name.toLowerCase()));
+  if (idx !== -1) return idx;
+
+  // Hỗ trợ tiếng Việt -> tiếng Anh cho Valorant / LoL / AOV / CS2
+  const aliasPairs = [
+    ["sắt", "iron"],
+    ["đồng", "bronze"],
+    ["bạc", "silver"],
+    ["vàng", "gold"],
+    ["bạch kim", "platinum"],
+    ["lục bảo", "emerald"],
+    ["kim cương", "diamond"],
+    ["thăng hoa", "ascendant"],
+    ["bất tử", "immortal"],
+    ["tinh anh", "veteran"],
+    ["cao thủ", "master"],
+    ["đại cao thủ", "grandmaster"],
+    ["chiến tướng", "conqueror"],
+    ["thách đấu", "challenger"]
+  ];
+  for (const [vi, en] of aliasPairs) {
+    if (lower.includes(vi) || lower.includes(en)) {
+      const hit = ranks.findIndex((r) => {
+        const rn = r.name.toLowerCase();
+        return rn.includes(vi) || rn.includes(en);
+      });
+      if (hit !== -1) return hit;
+    }
+  }
+  return -1;
+}
+
 function qmRange() {
   const key = qmCtxKey();
+  const total = QM_RANKS[key].length;
   if (!qm.ranges[key]) {
-    const total = QM_RANKS[key].length;
-    const me = QM_ME_PROFILE[key].rankIdx;
-    qm.ranges[key] = { min: Math.max(0, me - 2), max: Math.min(total - 1, me + 2) };
+    const ug = QM_DB.myUserGameByKey[qm.game];
+    const myIdx = ug && ug.rank ? qmMatchRankIdxByName(key, ug.rank.rank_name) : -1;
+    if (myIdx >= 0) {
+      qm.ranges[key] = { min: Math.max(0, myIdx - 2), max: Math.min(total - 1, myIdx + 2) };
+    } else {
+      qm.ranges[key] = { min: 0, max: total - 1 };
+    }
   }
   return qm.ranges[key];
 }
@@ -247,6 +269,10 @@ function qmIdxToFrac(idx) {
 }
 
 function qmRolesOfGame() {
+  const dbRoles = QM_DB.rolesByKey[qm.game];
+  if (Array.isArray(dbRoles) && dbRoles.length > 0) {
+    return dbRoles.map((r) => r.role_name);
+  }
   return QM_GAMES[qm.game].roles;
 }
 
@@ -288,7 +314,6 @@ const QM_FLAG_VN = `
     <polygon points="15,4 16.76,9.42 22.46,9.42 17.85,12.76 19.61,18.18 15,14.84 10.39,18.18 12.15,12.76 7.54,9.42 13.24,9.42" fill="#ffff00"/>
   </svg>`;
 
-// Nhãn khu vực (dùng cờ SVG vì Windows không hiển thị emoji cờ quốc gia)
 function qmRegionLabel(region) {
   return region === "VN" ? `${QM_FLAG_VN} VN` : "🌏 SEA";
 }
@@ -299,7 +324,6 @@ const QM_CROWN = `
     <rect x="2" y="18" width="22" height="2" rx="1"/>
   </svg>`;
 
-// Khung điểm CS2 Premier (đổi màu theo điểm) — cùng cách vẽ với trang Bạn bè
 function qmPremierPalette(score) {
   if (score >= 30000) return { bar: "#ffd700", bg1: "#6b5300", bg2: "#2e2300", stripe: "#b89000", text: "#ffe766" };
   if (score >= 25000) return { bar: "#eb4b4b", bg1: "#5e1919", bg2: "#290a0a", stripe: "#9e2a2a", text: "#ff8080" };
@@ -332,26 +356,42 @@ function qmPremierBadge(score) {
     </div>`;
 }
 
-// Rank của một người chơi trong sảnh theo game/hệ thống rank hiện tại
-function qmPersonRankIdx(person) {
-  if (person.isMe) return QM_ME_PROFILE[qmCtxKey()].rankIdx;
-  return qmFracToIdx(person.tier ?? 0.5);
-}
-
+// Hiển thị Rank của người chơi trong ô sảnh (Dùng đúng dữ liệu thật từ DB)
 function qmRankBlock(person, big) {
+  const ctxKey = qmCtxKey();
   const ranks = qmRanks();
-  const idx = qmPersonRankIdx(person);
-  const rank = ranks[idx];
 
-  if (qmCtxKey() === "cs2-premier") {
-    const score = person.isMe ? QM_ME_PROFILE["cs2-premier"].premierScore : rank.min + 700 + (person.id || 0) * 90;
-    return `<div class="qm-slot-rank">${qmPremierBadge(score)}<span class="qm-slot-rank-name">${qmEsc(rank.name)}</span></div>`;
+  if (person.isMe) {
+    const myUg = QM_DB.myUserGameByKey[qm.game];
+    if (!myUg || !myUg.rank || !myUg.rank.rank_name) {
+      return `
+        <div class="qm-slot-rank">
+          <span class="qm-slot-rank-name">Chưa khai báo Rank</span>
+        </div>`;
+    }
+    const rName = myUg.rank.rank_name;
+    const idx = qmMatchRankIdxByName(ctxKey, rName);
+    const rankObj = idx >= 0 ? ranks[idx] : ranks[0];
+    return `
+      <div class="qm-slot-rank">
+        <img src="${rankObj.icon}" alt="${qmEsc(rName)}" class="qm-slot-rank-icon" ${big ? 'style="width:56px;height:56px;"' : ""}>
+        <span class="qm-slot-rank-name">${qmEsc(rName)}</span>
+      </div>`;
   }
 
+  if (!person.rankName) {
+    return `
+      <div class="qm-slot-rank">
+        <span class="qm-slot-rank-name">Chưa xếp hạng</span>
+      </div>`;
+  }
+
+  const idx = qmMatchRankIdxByName(ctxKey, person.rankName);
+  const icon = person.rankIcon || (idx >= 0 ? ranks[idx].icon : "");
   return `
     <div class="qm-slot-rank">
-      <img src="${rank.icon}" alt="${qmEsc(rank.name)}" class="qm-slot-rank-icon" ${big ? 'style="width:56px;height:56px;"' : ""}>
-      <span class="qm-slot-rank-name">${qmEsc(rank.name)}</span>
+      ${icon ? `<img src="${icon}" alt="${qmEsc(person.rankName)}" class="qm-slot-rank-icon" ${big ? 'style="width:56px;height:56px;"' : ""}>` : ""}
+      <span class="qm-slot-rank-name">${qmEsc(person.rankName)}</span>
     </div>`;
 }
 
@@ -360,7 +400,7 @@ function qmLobbyMemberCount() {
 }
 
 // =========================================================================
-// 5. RENDER BANNER (3 KHỐI)
+// 5. RENDER BANNER (3 KHỐI) — HIỂN THỊ ĐÚNG HỒ SƠ RANK THẬT CỦA TÀI KHOẢN
 // =========================================================================
 function qmRenderGameDropdown() {
   const game = QM_GAMES[qm.game];
@@ -385,38 +425,57 @@ function qmRenderGameDropdown() {
 function qmRenderMeRank() {
   const key = qmCtxKey();
   const ranks = qmRanks();
-  const me = QM_ME_PROFILE[key];
-  const rank = ranks[me.rankIdx];
-  const nextRank = ranks[me.rankIdx + 1];
-  const progress = Math.max(0, Math.min(1, (me.points - me.floor) / (me.next - me.floor)));
-  const remain = me.next - me.points;
+  const myUg = QM_DB.myUserGameByKey[qm.game];
+  const gameObj = QM_GAMES[qm.game];
 
-  const badge = key === "cs2-premier"
-    ? `<div class="qm-me-premier">${qmPremierBadge(me.premierScore)}</div>`
-    : `<img src="${rank.icon}" alt="${qmEsc(rank.name)}" class="qm-me-icon">`;
+  // Nếu người dùng chưa khai báo rank cho tựa game này trong DB (/api/user-games/me)
+  if (!myUg || !myUg.rank || !myUg.rank.rank_name) {
+    document.getElementById("qm-me-rank").innerHTML = `
+      <div class="qm-me-top">
+        <img src="${gameObj.logo}" alt="${qmEsc(gameObj.name)}" class="qm-me-icon" style="opacity:0.45;">
+        <div class="qm-me-info">
+          <span class="qm-me-name">Chưa khai báo Rank</span>
+          <span class="qm-me-points">${myUg && myUg.in_game_id ? `ID trong game: ${qmEsc(myUg.in_game_id)}` : "Bạn chưa cập nhật hồ sơ cho tựa game này"}</span>
+          <span class="qm-me-region">Tài khoản: ${qmEsc(QM_ME.name)}</span>
+        </div>
+      </div>
+      <div class="qm-progress">
+        <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:0%"></div></div>
+        <div class="qm-progress-text">
+          <span>Cập nhật hồ sơ game để đồng bộ Rank của bạn</span>
+          <strong>0%</strong>
+        </div>
+      </div>`;
+    return;
+  }
 
-  const pointsText = key === "cs2-premier"
-    ? `${me.points.toLocaleString("en-US")} ${me.unit}`
-    : `${me.points.toLocaleString("en-US")} ${me.unit}`;
+  const rName = myUg.rank.rank_name;
+  const idx = qmMatchRankIdxByName(key, rName);
+  const rankIdx = idx >= 0 ? idx : 0;
+  const rank = ranks[rankIdx];
+  const nextRank = ranks[rankIdx + 1];
+  const progressPct = ranks.length > 1 ? Math.round(((rankIdx + 1) / ranks.length) * 100) : 100;
+  const roleText = myUg.role && myUg.role.role_name ? `Vị trí chính: ${myUg.role.role_name}` : "Đã khai báo hồ sơ game";
+  const inGameText = myUg.in_game_id ? `In-game ID: ${myUg.in_game_id}` : `Tài khoản: ${QM_ME.name}`;
 
   const progressText = nextRank
-    ? `Còn <strong>${remain.toLocaleString("en-US")} ${me.unit}</strong> để lên ${qmEsc(nextRank.name)}`
+    ? `Bậc tiếp theo: <strong>${qmEsc(nextRank.name)}</strong>`
     : "Bạn đang ở bậc rank cao nhất";
 
   document.getElementById("qm-me-rank").innerHTML = `
     <div class="qm-me-top">
-      ${badge}
+      <img src="${rank.icon}" alt="${qmEsc(rName)}" class="qm-me-icon">
       <div class="qm-me-info">
-        <span class="qm-me-name">${qmEsc(rank.name)}</span>
-        <span class="qm-me-points">${pointsText}</span>
-        <span class="qm-me-region">Hạng khu vực ${qmEsc(me.region)}</span>
+        <span class="qm-me-name">${qmEsc(rName)}</span>
+        <span class="qm-me-points">${qmEsc(roleText)}</span>
+        <span class="qm-me-region">${qmEsc(inGameText)}</span>
       </div>
     </div>
     <div class="qm-progress">
-      <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${Math.round(progress * 100)}%"></div></div>
+      <div class="qm-progress-bar"><div class="qm-progress-fill" style="width:${progressPct}%"></div></div>
       <div class="qm-progress-text">
         <span>${progressText}</span>
-        <strong>${Math.round(progress * 100)}%</strong>
+        <strong>${progressPct}%</strong>
       </div>
     </div>`;
 }
@@ -430,7 +489,6 @@ function qmRenderModeButtons() {
   const micBtn = document.getElementById("btn-toggle-mic");
   micBtn.setAttribute("aria-pressed", qm.mic ? "true" : "false");
 
-  // Chỉ hiện lựa chọn FACEIT / Premier khi chọn CS2 + Xếp hạng
   document.getElementById("field-cs2-mode").hidden = !(qm.game === "cs2" && qm.queue === "ranked");
 }
 
@@ -530,10 +588,9 @@ function qmRenderSearchState() {
 }
 
 // =========================================================================
-// 7. RENDER SẢNH 5 Ô
+// 7. RENDER SẢNH 5 Ô (100% THÀNH VIÊN THẬT TỪ BACKEND)
 // =========================================================================
 function qmLobbyConfig() {
-  // Cấu hình hiển thị trên thẻ đội trưởng (của tôi: theo banner, đang vào phòng người khác: theo phòng đó)
   if (qm.lobby.mode === "joined" && qm.lobby.config) return qm.lobby.config;
   return { queue: qm.queue, vibe: qm.vibe, mic: qm.mic, region: qm.region };
 }
@@ -563,8 +620,7 @@ function qmRenderLeaderSlot() {
 
 function qmRenderMemberSlot(pos, member) {
   const person = member.person;
-  const roles = qmRolesOfGame();
-  const role = roles[((person.id || 0) + pos) % roles.length];
+  const roles = Array.isArray(person.roles) && person.roles.length > 0 ? person.roles : [];
   const canRemove = qm.lobby.mode === "own" || person.isMe;
   const displayName = person.isMe ? `Bạn (${person.name})` : person.name;
 
@@ -577,7 +633,7 @@ function qmRenderMemberSlot(pos, member) {
         ${qmVerifiedBadge(person.verified)}
       </div>
       ${qmRankBlock(person, false)}
-      <div class="qm-slot-tags"><span class="fc-role-tag">${qmEsc(role)}</span></div>
+      ${roles.length ? `<div class="qm-slot-tags">${roles.map((r) => `<span class="fc-role-tag">${qmEsc(r)}</span>`).join("")}</div>` : ""}
     </div>`;
 }
 
@@ -585,17 +641,18 @@ function qmRenderPendingSlot(pos, person) {
   return `
     <div class="qm-slot is-pending" data-pos="${pos}">
       <span class="qm-spinner"></span>
-      <div class="qm-slot-pending-text">Đang chờ ${qmEsc(person.name)}...</div>
+      <div class="qm-slot-pending-text">Đã mời ${qmEsc(person.name)}...</div>
     </div>`;
 }
 
 function qmRenderSlotMenu(pos) {
   const lobby = qm.lobby;
   const inLobbyIds = new Set([
-    ...Object.values(lobby.members).map((m) => m.person.id),
-    ...Object.values(lobby.pending).map((p) => p.id)
+    Number(lobby.leader.id),
+    ...Object.values(lobby.members).map((m) => Number(m.person.id)),
+    ...Object.values(lobby.pending).map((p) => Number(p.id))
   ]);
-  const friends = QM_PEOPLE.filter((p) => !inLobbyIds.has(p.id) && p.id !== lobby.leader.id);
+  const friends = QM_PEOPLE.filter((p) => !inLobbyIds.has(Number(p.id)));
 
   const friendHtml = friends.length
     ? friends
@@ -608,7 +665,7 @@ function qmRenderSlotMenu(pos) {
         </button>`
         )
         .join("")
-    : `<div class="qm-slot-empty-text" style="padding:6px 4px;">Không còn bạn bè online để mời</div>`;
+    : `<div class="qm-slot-empty-text" style="padding:6px 4px;">Chưa có bạn bè để mời</div>`;
 
   const roles = qmRolesOfGame();
   const currentNeed = lobby.need[pos];
@@ -665,14 +722,16 @@ function qmRenderLobby() {
   document.getElementById("qm-right-party-count").textContent = count;
 
   const isJoined = lobby.mode === "joined";
+  const hasRealRoom = Boolean(lobby.roomId);
+  const codeSuffix = lobby.gameCode && !String(lobby.gameCode).includes("*") ? ` · Mã phòng: ${lobby.gameCode}` : "";
   document.getElementById("qm-lobby-title").textContent = isJoined
-    ? `Phòng của ${lobby.leader.name}`
-    : "Sảnh đội của bạn";
-  document.getElementById("btn-leave-lobby").hidden = !isJoined;
+    ? `Phòng của ${lobby.leader.name}${codeSuffix}`
+    : `Sảnh đội của bạn (${QM_ME.name})${codeSuffix}`;
+  document.getElementById("btn-leave-lobby").hidden = !(isJoined || (hasRealRoom && count > 1));
 }
 
 // =========================================================================
-// 8. DANH SÁCH PHÒNG ĐANG MỞ
+// 8. DANH SÁCH PHÒNG ĐANG MỞ (KẾT HỢP /api/matchmaking/rooms & /api/team-posts)
 // =========================================================================
 function qmRoomRankRange(room) {
   const ranks = qmRanks();
@@ -683,13 +742,11 @@ function qmRoomRankRange(room) {
 
 function qmRoomMatches(room) {
   if (room.game !== qm.game) return false;
-  if (room.queue !== qm.queue) return false;
-  if (room.vibe !== qm.vibe) return false;
+  if (room.queue && room.queue !== qm.queue) return false;
+  if (room.vibe && room.vibe !== qm.vibe) return false;
   if (qm.mic && !room.mic) return false;
-  if (qm.region === "VN" && room.region !== "VN") return false;
-  if (qm.game === "cs2" && qm.queue === "ranked" && room.cs2Mode !== qm.cs2Mode) return false;
-
-  if (qm.roles.size > 0 && !room.needs.some((r) => qm.roles.has(r))) return false;
+  if (qm.region === "VN" && room.region && room.region !== "VN") return false;
+  if (qm.roles.size > 0 && room.needs.length > 0 && !room.needs.some((r) => qm.roles.has(r))) return false;
 
   const range = qmRange();
   const { lo, hi } = qmRoomRankRange(room);
@@ -697,14 +754,14 @@ function qmRoomMatches(room) {
 }
 
 function qmGetFilteredRooms() {
-  const rooms = QM_ROOMS.filter(qmRoomMatches);
-  return rooms;
+  return QM_ROOMS.filter(qmRoomMatches);
 }
 
 function qmRenderRoomRow(room) {
-  const game = QM_GAMES[room.game];
+  const game = QM_GAMES[room.game] || QM_GAMES.valorant;
   const { lo, hi, ranks } = qmRoomRankRange(room);
-  const filled = room.mine ? qmLobbyMemberCount() : room.filled;
+  const filled = room.filled || 1;
+  const maxPlayers = room.maxPlayers || 5;
 
   const dots = [0, 1, 2, 3, 4].map((i) => `<span class="qm-dot ${i < filled ? "is-filled" : ""}"></span>`).join("");
 
@@ -712,17 +769,20 @@ function qmRenderRoomRow(room) {
     `<span class="fc-role-tag">${qmQueueLabel(room.queue)}</span>`,
     `<span class="fc-role-tag">${qmVibeLabel(room.vibe)}</span>`,
     room.mic ? `<span class="fc-role-tag">🎤 Mic</span>` : "",
-    `<span class="fc-role-tag">${qmRegionLabel(room.region)}</span>`,
-    room.game === "cs2" && room.queue === "ranked" ? `<span class="fc-role-tag">${room.cs2Mode === "faceit" ? "FACEIT" : "Premier"}</span>` : ""
+    `<span class="fc-role-tag">${qmRegionLabel(room.region || "VN")}</span>`
   ].join("");
 
-  const needsText = room.needs.length ? `Cần: ${room.needs.join(", ")}` : "Đang tuyển mọi vị trí";
+  const needsText = room.title
+    ? `${room.title}${room.needs.length ? ` · Cần: ${room.needs.join(", ")}` : ""}`
+    : (room.needs.length ? `Cần: ${room.needs.join(", ")}` : "Đang tuyển thành viên");
 
   const button = room.mine
-    ? `<button type="button" class="fc-btn fc-btn-danger-ghost" data-room-action="unpost">Gỡ bài</button>`
-    : filled >= 5
+    ? (room.source === "team_post"
+        ? `<button type="button" class="fc-btn fc-btn-danger-ghost" data-room-action="unpost" data-post-id="${room.backendPostId}">Gỡ bài</button>`
+        : `<button type="button" class="fc-btn fc-btn-secondary" data-room-action="open-my-lobby">Sảnh của bạn</button>`)
+    : filled >= maxPlayers
     ? `<button type="button" class="fc-btn fc-btn-secondary" disabled>Đã đầy</button>`
-    : `<button type="button" class="fc-btn fc-btn-join" data-room-action="join" data-room-id="${room.id}">+ Tham gia ngay</button>`;
+    : `<button type="button" class="fc-btn fc-btn-join" data-room-action="join" data-room-key="${room.key}">+ Tham gia ngay</button>`;
 
   return `
     <article class="fc-player-row qm-room-row ${room.mine ? "is-mine" : ""}">
@@ -732,7 +792,7 @@ function qmRenderRoomRow(room) {
           <span class="fc-presence-badge fc-presence-ingame"></span>
         </div>
         <div class="fc-player-meta">
-          <div class="fc-player-subhead is-inroom">${room.mine ? "PHÒNG CỦA BẠN" : "ĐANG TRONG PHÒNG"}</div>
+          <div class="fc-player-subhead is-inroom">${room.mine ? "PHÒNG CỦA BẠN" : (room.source === "match_room" ? "SẢNH GHÉP ĐỘI TRỰC TIẾP" : "BÀI ĐĂNG TUYỂN NGƯỜI")}</div>
           <div class="fc-player-name-row">
             <span class="fc-player-name">${qmEsc(room.host.name)}</span>
             ${qmVerifiedBadge(room.host.verified)}
@@ -744,7 +804,7 @@ function qmRenderRoomRow(room) {
       <div class="fc-player-games">
         <div class="qm-room-slots">
           <span class="qm-slot-dots">${dots}</span>
-          <span class="qm-room-slots-text">${filled}/5 người</span>
+          <span class="qm-room-slots-text">${filled}/${maxPlayers} người</span>
         </div>
         <div class="fc-game-main">
           <img src="${game.logo}" alt="${qmEsc(game.name)}" class="fc-row-game-logo">
@@ -772,8 +832,7 @@ function qmRenderRoomRow(room) {
 }
 
 function qmRenderRooms() {
-  const filtered = qmGetFilteredRooms();
-  const rooms = qm.posted && qm.myRoom ? [qm.myRoom, ...filtered] : filtered;
+  const rooms = qmGetFilteredRooms();
 
   document.getElementById("qm-rooms-count").textContent = rooms.length;
   document.getElementById("qm-rooms-heading").textContent =
@@ -783,8 +842,8 @@ function qmRenderRooms() {
   if (rooms.length === 0) {
     listEl.innerHTML = `
       <div class="fc-empty-state">
-        <h3>Chưa có phòng nào phù hợp</h3>
-        <p>Thử nới khoảng rank, đổi phong cách chơi hoặc bấm “Đăng phòng tuyển người” để tự mở phòng.</p>
+        <h3>${qm.loadingRooms ? "Đang tải danh sách phòng..." : "Chưa có dữ liệu phòng đang mở"}</h3>
+        <p>${qm.loadingRooms ? "Vui lòng chờ giây lát..." : "Hiện chưa có phòng nào khớp bộ lọc trong hệ thống. Bạn có thể bấm “Đăng phòng tuyển người” để mở phòng mới."}</p>
       </div>`;
     return;
   }
@@ -792,11 +851,18 @@ function qmRenderRooms() {
 }
 
 // =========================================================================
-// 9. THANH PHẢI: BẠN BÈ ĐANG ONLINE
+// 9. THANH PHẢI: BẠN BÈ THẬT ĐANG ONLINE
 // =========================================================================
 function qmRenderRightFriends() {
-  document.getElementById("qm-right-online").innerHTML = QM_RIGHT_FRIENDS.map((id) => {
+  const el = document.getElementById("qm-right-online");
+  if (!el) return;
+  if (QM_RIGHT_FRIENDS.length === 0) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = QM_RIGHT_FRIENDS.map((id) => {
     const p = qmPersonById(id);
+    if (!p) return "";
     return `
       <button type="button" class="qm-right-friend" data-right-friend="${p.id}" title="${qmEsc(p.name)} — ${p.status === "room" ? "Đang trong phòng" : "Đang online"}">
         <img src="${p.avatar}" alt="${qmEsc(p.name)}">
@@ -806,8 +872,437 @@ function qmRenderRightFriends() {
 }
 
 // =========================================================================
-// 10. LOGIC SẢNH: MỜI, XÓA, TÌM TRẬN, ĐĂNG PHÒNG, THAM GIA PHÒNG
+// 10. KẾT NỐI 100% API BACKEND THẬT
 // =========================================================================
+function qmCanCallApi() {
+  return typeof api !== "undefined" && Boolean(localStorage.getItem("access_token"));
+}
+
+function qmResolveAvatar(rawAvatar, username) {
+  if (rawAvatar && typeof rawAvatar === "string" && rawAvatar.trim()) {
+    const trimmed = rawAvatar.trim();
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:") || trimmed.startsWith("../")) {
+      return trimmed;
+    }
+    const base = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : "http://127.0.0.1:8000";
+    return `${base}${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
+  }
+  return qmDiceBearAvatar(username);
+}
+
+function qmDetectGameKey(rawName) {
+  const s = String(rawName || "").trim().toLowerCase();
+  if (s.includes("valorant")) return "valorant";
+  if (s.includes("cs2") || s.includes("counter-strike") || s.includes("counter strike")) return "cs2";
+  if (s.includes("liên quân") || s.includes("lien quan") || s.includes("aov") || s.includes("arena of valor")) return "aov";
+  if (s.includes("chân lý") || s.includes("chan ly") || s.includes("tft") || s.includes("đtcl") || s.includes("teamfight")) return "tft";
+  if (s.includes("liên minh") || s.includes("lien minh") || s.includes("lol") || s.includes("league")) return "lol";
+  return null;
+}
+
+function qmCurrentGameId() {
+  return QM_DB.gameIdByKey[qm.game] || 1;
+}
+
+function qmRankIdForUiIndex(gameKey, uiIdx) {
+  const dbRanks = QM_DB.ranksByKey[gameKey];
+  if (!Array.isArray(dbRanks) || dbRanks.length === 0) return null;
+  const uiRanks = QM_RANKS[gameKey === "cs2" ? `cs2-${qm.cs2Mode}` : gameKey] || [];
+  const frac = uiRanks.length > 1 ? uiIdx / (uiRanks.length - 1) : 0;
+  const dbIdx = Math.min(dbRanks.length - 1, Math.max(0, Math.round(frac * (dbRanks.length - 1))));
+  return dbRanks[dbIdx]?.id || null;
+}
+
+function qmFracForDbRankId(gameKey, rankId, fallbackFrac) {
+  if (!rankId) return fallbackFrac;
+  const dbRanks = QM_DB.ranksByKey[gameKey];
+  if (!Array.isArray(dbRanks) || dbRanks.length === 0) return fallbackFrac;
+  const idx = dbRanks.findIndex((r) => Number(r.id) === Number(rankId));
+  if (idx === -1) return fallbackFrac;
+  return dbRanks.length > 1 ? idx / (dbRanks.length - 1) : fallbackFrac;
+}
+
+function qmRoleIdsForNames(gameKey, roleNames) {
+  const dbRoles = QM_DB.rolesByKey[gameKey];
+  if (!Array.isArray(dbRoles) || dbRoles.length === 0) return [];
+  const wanted = (roleNames || []).map((n) => String(n).toLowerCase());
+  return dbRoles
+    .filter((r) => wanted.some((w) => String(r.role_name || "").toLowerCase().includes(w) || w.includes(String(r.role_name || "").toLowerCase())))
+    .map((r) => r.id);
+}
+
+function qmRoleNamesForIds(gameKey, roleIds) {
+  const dbRoles = QM_DB.rolesByKey[gameKey];
+  if (!Array.isArray(dbRoles) || !Array.isArray(roleIds) || roleIds.length === 0) return [];
+  const idSet = new Set(roleIds.map((x) => Number(x)));
+  return dbRoles.filter((r) => idSet.has(Number(r.id))).map((r) => r.role_name);
+}
+
+function qmBuildLabelString() {
+  if (qm.queue === "unrated") return "Unrank";
+  return qm.vibe === "tryhard" ? "Hard rank" : "Chill rank";
+}
+
+function qmParseRoomLabel(rawLabel) {
+  const s = String(rawLabel || "").trim().toUpperCase();
+  if (s === "THUONG" || s.includes("UNRANK") || s.includes("UNRATED") || s.includes("THƯỜNG")) {
+    return { queue: "unrated", vibe: "chill" };
+  }
+  if (s === "CHILL_RANK" || s.includes("CHILL") || s === "KHONG_TOXIC") {
+    return { queue: "ranked", vibe: "chill" };
+  }
+  if (s === "HARD_RANK" || s.includes("HARD") || s.includes("TRYHARD")) {
+    return { queue: "ranked", vibe: "tryhard" };
+  }
+  return { queue: qm.queue, vibe: qm.vibe };
+}
+
+// Áp dụng dữ liệu MatchRoomOut thật từ Backend vào sảnh 5 ô
+function qmApplyBackendRoomToLobby(roomData) {
+  if (!roomData || !Array.isArray(roomData.members) || roomData.members.length === 0) return;
+
+  const gameKey = QM_DB.keyByGameId[roomData.game_id] || qmDetectGameKey(roomData.game_name) || qm.game;
+  if (gameKey && QM_GAMES[gameKey]) {
+    qm.game = gameKey;
+  }
+
+  const hostMember = roomData.members.find((m) => m.is_host) || roomData.members[0];
+  const myId = Number(QM_ME.id);
+  const isMyHost = Boolean(
+    (myId > 0 && Number(roomData.host_id) === myId) ||
+    (hostMember && hostMember.username === QM_ME.username)
+  );
+
+  const leaderPerson = isMyHost
+    ? QM_ME
+    : {
+        id: Number(hostMember.user_id),
+        name: hostMember.display_name || hostMember.username || `User#${hostMember.user_id}`,
+        avatar: qmResolveAvatar(hostMember.avatar, hostMember.username),
+        verified: hostMember.rank_name ? "gold" : null,
+        rankName: hostMember.rank_name || null,
+        rankIcon: hostMember.rank_icon || null,
+        roles: Array.isArray(hostMember.roles) ? hostMember.roles : []
+      };
+
+  const otherMembers = roomData.members.filter((m) => Number(m.user_id) !== Number(hostMember.user_id));
+  const membersMap = {};
+  QM_FILL_ORDER.slice(0, otherMembers.length).forEach((pos, idx) => {
+    const m = otherMembers[idx];
+    const isMeMember = (myId > 0 && Number(m.user_id) === myId) || m.username === QM_ME.username;
+    membersMap[pos] = {
+      person: isMeMember
+        ? QM_ME
+        : {
+            id: Number(m.user_id),
+            name: m.display_name || m.username || `User#${m.user_id}`,
+            avatar: qmResolveAvatar(m.avatar, m.username),
+            verified: m.rank_name ? "blue" : null,
+            rankName: m.rank_name || null,
+            rankIcon: m.rank_icon || null,
+            roles: Array.isArray(m.roles) ? m.roles : []
+          }
+    };
+  });
+
+  const parsedLabel = qmParseRoomLabel(roomData.label);
+
+  qm.lobby = {
+    mode: isMyHost ? "own" : "joined",
+    roomId: Number(roomData.id),
+    gameCode: roomData.game_code || null,
+    leader: leaderPerson,
+    config: { queue: parsedLabel.queue, vibe: parsedLabel.vibe, mic: qm.mic, region: qm.region },
+    members: membersMap,
+    pending: {},
+    need: qm.lobby ? (qm.lobby.need || {}) : {}
+  };
+}
+
+// Tạo / cập nhật sảnh đội trên Backend (POST /api/matchmaking/lobby)
+async function qmSyncLobbyWithBackend() {
+  if (!qmCanCallApi() || qm.lobby.mode === "joined") return null;
+  const range = qmRange();
+  const payload = {
+    game_id: qmCurrentGameId(),
+    max_players: 5,
+    min_rank_id: qmRankIdForUiIndex(qm.game, range.min),
+    max_rank_id: qmRankIdForUiIndex(qm.game, range.max),
+    label: qmBuildLabelString()
+  };
+  try {
+    const res = await api.post("/api/matchmaking/lobby", payload);
+    const roomData = res?.data || res;
+    if (roomData && roomData.id) {
+      qmApplyBackendRoomToLobby(roomData);
+      qmRenderLobby();
+    }
+    return roomData;
+  } catch (_) {
+    return null;
+  }
+}
+
+// Tải danh sách phòng thật đang mở: kết hợp GET /api/matchmaking/rooms & GET /api/team-posts
+async function qmFetchOpenRoomsAndPosts() {
+  if (typeof api === "undefined") return;
+  qm.loadingRooms = true;
+  qmRenderRooms();
+
+  const gameId = qmCurrentGameId();
+  const [roomsSettled, postsSettled] = await Promise.allSettled([
+    api.get("/api/matchmaking/rooms", { game_id: gameId }),
+    api.get("/api/team-posts", { game_id: gameId, status: "OPEN" })
+  ]);
+
+  const combined = [];
+
+  // 1. Phòng MatchRoom đang WAITING từ /api/matchmaking/rooms
+  if (roomsSettled.status === "fulfilled" && roomsSettled.value) {
+    const rawRooms = Array.isArray(roomsSettled.value?.data)
+      ? roomsSettled.value.data
+      : (Array.isArray(roomsSettled.value) ? roomsSettled.value : []);
+
+    rawRooms.forEach((r) => {
+      const gKey = QM_DB.keyByGameId[r.game_id] || qmDetectGameKey(r.game_name) || qm.game;
+      const hostMember = Array.isArray(r.members) ? (r.members.find((m) => m.is_host) || r.members[0]) : null;
+      const hostName = hostMember
+        ? (hostMember.display_name || hostMember.username)
+        : (r.room_name || `Phòng #${r.id}`);
+      const hostAvatar = hostMember
+        ? qmResolveAvatar(hostMember.avatar, hostMember.username)
+        : qmDiceBearAvatar(hostName);
+      const parsedLabel = qmParseRoomLabel(r.label);
+      const isMine = Number(r.host_id) === Number(QM_ME.id) && Number(QM_ME.id) > 0;
+
+      combined.push({
+        key: `room-${r.id}`,
+        source: "match_room",
+        id: Number(r.id),
+        matchRoomId: Number(r.id),
+        mine: isMine,
+        title: r.room_name || "",
+        host: {
+          id: Number(r.host_id),
+          name: hostName,
+          avatar: hostAvatar,
+          verified: hostMember && hostMember.rank_name ? "gold" : null
+        },
+        game: gKey,
+        cs2Mode: qm.cs2Mode,
+        queue: parsedLabel.queue,
+        vibe: parsedLabel.vibe,
+        mic: false,
+        region: "VN",
+        min: qmFracForDbRankId(gKey, r.min_rank_id, 0),
+        max: qmFracForDbRankId(gKey, r.max_rank_id, 1),
+        filled: Number(r.current_players) || 1,
+        maxPlayers: Number(r.max_players) || 5,
+        needs: []
+      });
+    });
+  }
+
+  // 2. Bài đăng tìm đội từ /api/team-posts
+  if (postsSettled.status === "fulfilled" && postsSettled.value) {
+    const resVal = postsSettled.value;
+    const items = Array.isArray(resVal?.items)
+      ? resVal.items
+      : (Array.isArray(resVal?.data?.items) ? resVal.data.items : []);
+
+    items.forEach((post) => {
+      const gKey = QM_DB.keyByGameId[post.game_id] || qm.game;
+      const titleText = String(post.title || "");
+      const descText = String(post.description || "");
+      const textLower = (titleText + " " + descText).toLowerCase();
+      const isUnrated = textLower.includes("unrated") || textLower.includes("đấu thường");
+      const isChill = textLower.includes("chill") || textLower.includes("vui vẻ");
+      const hasMic = textLower.includes("mic");
+      const neededCount = Math.min(4, Math.max(1, Number(post.needed_players) || 1));
+      const filledCount = Math.max(1, Math.min(4, 5 - neededCount));
+      const roleNames = qmRoleNamesForIds(gKey, post.role_ids);
+      const isMine = Number(post.user_id) === Number(QM_ME.id) && Number(QM_ME.id) > 0;
+      const friendMatch = QM_PEOPLE.find((p) => Number(p.id) === Number(post.user_id));
+      const hostName = isMine
+        ? QM_ME.name
+        : (friendMatch ? friendMatch.name : `User #${post.user_id}`);
+      const hostAvatar = isMine
+        ? QM_ME.avatar
+        : (friendMatch ? friendMatch.avatar : qmDiceBearAvatar(hostName));
+
+      if (isMine) {
+        qm.posted = true;
+        qm.myRoom = { backendPostId: Number(post.id) };
+      }
+
+      combined.push({
+        key: `post-${post.id}`,
+        source: "team_post",
+        id: Number(post.id),
+        backendPostId: Number(post.id),
+        mine: isMine,
+        title: titleText,
+        host: {
+          id: Number(post.user_id),
+          name: hostName,
+          avatar: hostAvatar,
+          verified: isMine ? QM_ME.verified : (friendMatch ? friendMatch.verified : null)
+        },
+        game: gKey,
+        cs2Mode: qm.cs2Mode,
+        queue: isUnrated ? "unrated" : "ranked",
+        vibe: isChill ? "chill" : "tryhard",
+        mic: hasMic,
+        region: post.region === "SEA" ? "SEA" : "VN",
+        min: qmFracForDbRankId(gKey, post.min_rank_id, 0),
+        max: qmFracForDbRankId(gKey, post.max_rank_id, 1),
+        filled: filledCount,
+        maxPlayers: 5,
+        needs: roleNames
+      });
+    });
+  }
+
+  QM_ROOMS.length = 0;
+  QM_ROOMS.push(...combined);
+  qm.loadingRooms = false;
+  qmRenderSearchState();
+  qmRenderRooms();
+}
+
+// Khởi tạo tải toàn bộ dữ liệu thật từ Backend
+async function qmLoadBackendData() {
+  if (typeof api === "undefined") return;
+
+  // 1. Lấy danh mục Game, Rank, Role từ GET /api/games
+  try {
+    const gamesRes = await api.get("/api/games");
+    const gamesList = Array.isArray(gamesRes) ? gamesRes : (Array.isArray(gamesRes?.data) ? gamesRes.data : []);
+    gamesList.forEach((g) => {
+      const key = qmDetectGameKey(g.name);
+      if (key) {
+        QM_DB.gameIdByKey[key] = Number(g.id);
+        QM_DB.keyByGameId[Number(g.id)] = key;
+        if (Array.isArray(g.ranks) && g.ranks.length > 0) {
+          QM_DB.ranksByKey[key] = [...g.ranks].sort((a, b) => (a.rank_order || 0) - (b.rank_order || 0));
+        }
+        if (Array.isArray(g.roles) && g.roles.length > 0) {
+          QM_DB.rolesByKey[key] = g.roles;
+        }
+      }
+    });
+    QM_DB.connected = true;
+  } catch (err) {
+    console.error("[QuickMatch] Lỗi tải /api/games:", err);
+  }
+
+  if (!qmCanCallApi()) return;
+
+  // 2. Lấy tài khoản thật đang đăng nhập: GET /user/me + GET /api/profiles/me
+  try {
+    const meRes = await api.get("/user/me");
+    const meData = meRes?.data || meRes || {};
+    QM_ME.id = Number(meData.id) || 0;
+    QM_ME.username = meData.username || "";
+    QM_ME.name = meData.username || "Người chơi";
+    QM_ME.avatar = qmDiceBearAvatar(QM_ME.username);
+
+    try {
+      const profRes = await api.get("/api/profiles/me");
+      const prof = profRes?.data || profRes || {};
+      if (prof.display_name) QM_ME.name = prof.display_name;
+      if (prof.avatar) QM_ME.avatar = qmResolveAvatar(prof.avatar, QM_ME.username);
+      if (typeof prof.has_mic === "boolean") qm.mic = prof.has_mic;
+      if (prof.region === "SEA" || prof.region === "VN") qm.region = prof.region;
+    } catch (_) {
+      // Tài khoản chưa tạo GamerProfile (404) -> dùng username & avatar DiceBear theo username thật
+    }
+
+    const nameStrong = document.querySelector("#avatar-dropdown-menu .fc-avatar-dropdown-header strong");
+    if (nameStrong) nameStrong.textContent = QM_ME.name;
+    const selfAvatarImg = document.querySelector(".fc-self-avatar");
+    if (selfAvatarImg) {
+      selfAvatarImg.src = QM_ME.avatar;
+      selfAvatarImg.alt = QM_ME.name;
+    }
+  } catch (err) {
+    console.error("[QuickMatch] Lỗi tải /user/me:", err);
+  }
+
+  // 3. Lấy hồ sơ game & rank thật của bản thân từ GET /api/user-games/me
+  try {
+    const myGamesRes = await api.get("/api/user-games/me");
+    const myGames = Array.isArray(myGamesRes) ? myGamesRes : (Array.isArray(myGamesRes?.data) ? myGamesRes.data : []);
+    QM_DB.myUserGameByKey = {};
+    myGames.forEach((ug) => {
+      const key = QM_DB.keyByGameId[ug.game_id] || qmDetectGameKey(ug.game?.name);
+      if (!key) return;
+      QM_DB.myUserGameByKey[key] = ug;
+      if (ug.user_id && !QM_ME.id) QM_ME.id = Number(ug.user_id);
+    });
+    QM_ME.verified = Object.keys(QM_DB.myUserGameByKey).length > 0 ? "blue" : null;
+    qm.ranges = {};
+  } catch (_) {}
+
+  // 4. Lấy danh sách bạn bè thật từ GET /friend-requests/friends & số lời mời từ GET /friend-requests/received
+  try {
+    const [frRes, recRes] = await Promise.allSettled([
+      api.get("/friend-requests/friends"),
+      api.get("/friend-requests/received", { status: "PENDING" })
+    ]);
+
+    if (recRes.status === "fulfilled" && recRes.value) {
+      const recArr = Array.isArray(recRes.value?.data) ? recRes.value.data : (Array.isArray(recRes.value) ? recRes.value : []);
+      const badge = document.getElementById("sidebar-req-badge");
+      if (badge) {
+        badge.textContent = recArr.length;
+        badge.style.display = recArr.length > 0 ? "flex" : "none";
+      }
+    }
+
+    if (frRes.status === "fulfilled" && frRes.value) {
+      const frList = Array.isArray(frRes.value?.data) ? frRes.value.data : (Array.isArray(frRes.value) ? frRes.value : []);
+      const mappedFriends = frList.map((f) => {
+        const uid = Number(f.user_id || f.friend_id || f.id);
+        const uname = f.display_name || f.username || `User#${uid}`;
+        const pg = f.primary_game || null;
+        return {
+          id: uid,
+          username: f.username || uname,
+          name: uname,
+          avatar: qmResolveAvatar(f.avatar, f.username || uname),
+          verified: pg && pg.rank_name ? "blue" : null,
+          rankName: pg ? pg.rank_name : null,
+          rankIcon: pg ? pg.rank_icon : null,
+          roles: pg && Array.isArray(pg.roles) ? pg.roles : [],
+          status: f.in_room ? "room" : "online"
+        };
+      });
+      QM_PEOPLE.length = 0;
+      QM_PEOPLE.push(...mappedFriends);
+      QM_RIGHT_FRIENDS.length = 0;
+      QM_RIGHT_FRIENDS.push(...mappedFriends.slice(0, 8).map((p) => p.id));
+      qmRenderRightFriends();
+    }
+  } catch (_) {}
+
+  // 5. Lấy sảnh đội 5 người hiện tại từ GET /api/matchmaking/my-team
+  try {
+    const teamRes = await api.get("/api/matchmaking/my-team");
+    const roomData = teamRes?.data || teamRes?.room || null;
+    if (roomData && roomData.id) {
+      qmApplyBackendRoomToLobby(roomData);
+    } else {
+      qm.lobby = qmCreateOwnLobby();
+    }
+  } catch (_) {
+    qm.lobby = qmCreateOwnLobby();
+  }
+
+  qmRefreshAll();
+  await qmFetchOpenRoomsAndPosts();
+}
+
 function qmRefreshAll() {
   qmRenderBanner();
   qmRenderSummary();
@@ -820,79 +1315,74 @@ function qmFirstFreePos() {
   return QM_FILL_ORDER.find((pos) => !qm.lobby.members[pos] && !qm.lobby.pending[pos]);
 }
 
-function qmInvite(pos, personId) {
+// Mời bạn bè thật vào sảnh: POST /api/matchmaking/invite/{friendId}
+async function qmInvite(pos, personId) {
   const person = qmPersonById(personId);
   if (!person || qm.lobby.members[pos] || qm.lobby.pending[pos]) return;
 
   qm.lobby.pending[pos] = person;
   qm.menuPos = null;
   qmRenderLobby();
-  qmShowToast(`📨 Đã gửi lời mời vào đội cho ${person.name}`);
 
-  const lobbyRef = qm.lobby;
-  setTimeout(() => {
-    if (qm.lobby !== lobbyRef || lobbyRef.pending[pos] !== person) return;
-    delete lobbyRef.pending[pos];
-    lobbyRef.members[pos] = { person };
+  try {
+    if (!qm.lobby.roomId) {
+      await qmSyncLobbyWithBackend();
+    }
+    const res = await api.post(`/api/matchmaking/invite/${personId}`);
+    qmShowToast(`📨 ${res?.message || `Đã gửi lời mời vào đội cho ${person.name}`}`);
+  } catch (err) {
+    delete qm.lobby.pending[pos];
     qmRenderLobby();
-    qmRenderRooms();
-    qmShowToast(`✅ ${person.name} đã tham gia sảnh đội`);
-  }, 2500);
+    qmShowToast(`⚠️ ${err?.message || "Không thể gửi lời mời vào đội"}`);
+  }
 }
 
-function qmRemoveMember(pos) {
+// Xóa thành viên khỏi sảnh: DELETE /api/matchmaking/members/{userId} (hoặc tự rời: POST /api/matchmaking/leave-team)
+async function qmRemoveMember(pos) {
   const member = qm.lobby.members[pos];
   if (!member) return;
 
-  if (qm.lobby.mode === "joined") {
-    qmLeaveRoom();
+  if (qm.lobby.mode === "joined" || member.person.isMe) {
+    await qmLeaveRoom();
     return;
   }
-  delete qm.lobby.members[pos];
-  qmRenderLobby();
-  qmRenderRooms();
-  qmShowToast(`Đã xóa ${member.person.name} khỏi đội`);
+
+  const targetUserId = member.person.id;
+  try {
+    const res = await api.delete(`/api/matchmaking/members/${targetUserId}`);
+    const roomData = res?.data || null;
+    if (roomData && roomData.id) {
+      qmApplyBackendRoomToLobby(roomData);
+    } else {
+      delete qm.lobby.members[pos];
+    }
+    qmRenderLobby();
+    await qmFetchOpenRoomsAndPosts();
+    qmShowToast(`Đã xóa ${member.person.name} khỏi đội`);
+  } catch (err) {
+    qmShowToast(`⚠️ ${err?.message || "Không thể xóa thành viên khỏi sảnh"}`);
+  }
 }
 
 function qmStopSearch() {
   if (qm.timerId) clearInterval(qm.timerId);
+  if (qm.pollId) clearInterval(qm.pollId);
   qm.timerId = null;
+  qm.pollId = null;
   qm.searching = false;
   qm.seconds = 0;
   qmRenderSearchState();
 }
 
-function qmFinishSearch() {
-  const lobby = qm.lobby;
-  const used = new Set([
-    lobby.leader.id,
-    ...Object.values(lobby.members).map((m) => m.person.id),
-    ...Object.values(lobby.pending).map((p) => p.id)
-  ]);
-  const pool = QM_PEOPLE.filter((p) => !used.has(p.id));
-  let added = 0;
-
-  QM_FILL_ORDER.forEach((pos) => {
-    if (lobby.members[pos] || lobby.pending[pos] || pool.length === 0) return;
-    const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
-    lobby.members[pos] = { person: pick };
-    added += 1;
-  });
-
-  qmStopSearch();
-  qmRenderLobby();
-  qmRenderRooms();
-  qmShowToast(`🎮 Đã tìm thấy đội! ${added} người chơi đã vào sảnh của bạn`);
-}
-
-function qmStartSearch() {
+// Tìm đội nhanh thật: POST /api/matchmaking/find-match (kèm kiểm tra định kỳ GET /api/matchmaking/my-team)
+async function qmStartSearch() {
   if (qm.searching) return;
 
   if (qm.lobby.mode === "joined") {
-    qmShowToast(`Bạn đang ở trong phòng của ${qm.lobby.leader.name}. Hãy chờ chủ phòng bắt đầu trận.`);
+    qmShowToast(`Bạn đang ở trong phòng của ${qm.lobby.leader.name}. Chỉ trưởng nhóm mới được bấm tìm trận.`);
     return;
   }
-  if (qmLobbyMemberCount() + Object.keys(qm.lobby.pending).length >= 5) {
+  if (qmLobbyMemberCount() >= 5) {
     qmShowToast("Đội của bạn đã đủ 5 người. Hãy vào game thôi! 🎮");
     return;
   }
@@ -902,131 +1392,197 @@ function qmStartSearch() {
   qm.menuPos = null;
   qmRenderLobby();
   qmRenderSearchState();
-  qmShowToast("🔍 Đang dò tìm phòng phù hợp với cấu hình của bạn...");
+
+  try {
+    const myUg = QM_DB.myUserGameByKey[qm.game];
+    const myRankId = myUg && myUg.rank_id ? myUg.rank_id : null;
+
+    const res = await api.post("/api/matchmaking/find-match", {
+      game_id: qmCurrentGameId(),
+      label: qmBuildLabelString(),
+      rank_id: myRankId
+    });
+    const matchData = res?.data || res;
+    if (matchData && matchData.room) {
+      qmApplyBackendRoomToLobby(matchData.room);
+      qmRenderLobby();
+      await qmFetchOpenRoomsAndPosts();
+    }
+    if (matchData && matchData.status === "MATCHED") {
+      qmStopSearch();
+      const codeHint = matchData.room?.game_code ? ` · Code Game: ${matchData.room.game_code}` : "";
+      qmShowToast(`🎮 ${matchData.message || "Đã ghép đội thành công!"}${codeHint}`);
+      return;
+    }
+    qmShowToast(`🔍 ${matchData?.message || "Đang trong hàng chờ tìm đồng đội..."}`);
+  } catch (err) {
+    qmStopSearch();
+    qmShowToast(`⚠️ ${err?.message || "Không thể bắt đầu tìm trận"}`);
+    return;
+  }
 
   qm.timerId = setInterval(() => {
     qm.seconds += 1;
     document.getElementById("qm-timer").textContent = qmFormatTime(qm.seconds);
-    if (qm.seconds >= 6) qmFinishSearch();
   }, 1000);
+
+  // Kiểm tra trạng thái sảnh thật từ Backend mỗi 4 giây trong lúc đang chờ
+  qm.pollId = setInterval(async () => {
+    try {
+      const teamRes = await api.get("/api/matchmaking/my-team");
+      const roomData = teamRes?.data || teamRes?.room || null;
+      if (roomData && roomData.id) {
+        qmApplyBackendRoomToLobby(roomData);
+        qmRenderLobby();
+        if (roomData.status === "FULL" || (Array.isArray(roomData.members) && roomData.members.length >= (roomData.max_players || 5))) {
+          qmStopSearch();
+          const codeHint = roomData.game_code ? ` · Code Game: ${roomData.game_code}` : "";
+          qmShowToast(`🎮 Đội đã đủ thành viên!${codeHint}`);
+        }
+      }
+    } catch (_) {}
+  }, 4000);
 }
 
-function qmCancelSearch() {
+// Hủy tìm trận thật: POST /api/matchmaking/cancel-search
+async function qmCancelSearch() {
   if (!qm.searching) return;
-  qmStopSearch();
-  qmShowToast("Đã huỷ tìm đội");
+  try {
+    const res = await api.post("/api/matchmaking/cancel-search");
+    qmStopSearch();
+    qmShowToast(res?.message || "Đã huỷ tìm đội");
+    const teamRes = await api.get("/api/matchmaking/my-team");
+    const roomData = teamRes?.data || teamRes?.room || null;
+    if (roomData && roomData.id) {
+      qmApplyBackendRoomToLobby(roomData);
+    } else {
+      qm.lobby = qmCreateOwnLobby();
+    }
+    qmRenderLobby();
+    await qmFetchOpenRoomsAndPosts();
+  } catch (err) {
+    qmStopSearch();
+    qmShowToast(`⚠️ ${err?.message || "Không thể huỷ tìm trận"}`);
+  }
 }
 
-function qmTogglePostRoom() {
+// Đăng / gỡ bài tuyển người thật: POST /api/team-posts & PATCH /api/team-posts/{postId}/close
+async function qmTogglePostRoom(explicitPostId) {
   if (qm.lobby.mode === "joined") {
     qmShowToast("Bạn cần rời phòng hiện tại trước khi đăng phòng tuyển người.");
     return;
   }
 
-  if (qm.posted) {
-    qm.posted = false;
-    qm.myRoom = null;
-    qmRenderSearchState();
-    qmRenderRooms();
-    qmShowToast("Đã gỡ bài tuyển người");
+  const postIdToClose = explicitPostId || (qm.myRoom && qm.myRoom.backendPostId);
+  if (qm.posted && postIdToClose) {
+    try {
+      await api.patch(`/api/team-posts/${postIdToClose}/close`);
+      qm.posted = false;
+      qm.myRoom = null;
+      qmRenderSearchState();
+      await qmFetchOpenRoomsAndPosts();
+      qmShowToast("Đã gỡ bài tuyển người");
+    } catch (err) {
+      qmShowToast(`⚠️ ${err?.message || "Không thể gỡ bài tuyển người"}`);
+    }
     return;
   }
 
   const range = qmRange();
   const needs = Object.values(qm.lobby.need);
   const roleNeeds = needs.length ? needs : Array.from(qm.roles);
+  const neededPlayers = Math.max(1, 5 - qmLobbyMemberCount());
 
-  qm.myRoom = {
-    id: "mine",
-    mine: true,
-    host: { name: QM_ME.name, avatar: QM_ME.avatar, verified: QM_ME.verified },
-    game: qm.game,
-    cs2Mode: qm.cs2Mode,
-    queue: qm.queue,
-    vibe: qm.vibe,
-    mic: qm.mic,
-    region: qm.region,
-    min: qmIdxToFrac(range.min),
-    max: qmIdxToFrac(range.max),
-    filled: 1,
-    needs: roleNeeds
-  };
-  qm.posted = true;
-  qmRenderSearchState();
-  qmRenderRooms();
-  qmShowToast("📣 Đã đăng phòng tuyển người lên danh sách phòng đang mở");
+  try {
+    await qmSyncLobbyWithBackend();
+    const postPayload = {
+      game_id: qmCurrentGameId(),
+      title: `[${qm.region}] Tuyển ${neededPlayers} người chơi ${QM_GAMES[qm.game].name} (${qmQueueLabel(qm.queue)} · ${qmVibeLabel(qm.vibe)})`,
+      min_rank_id: qmRankIdForUiIndex(qm.game, range.min),
+      max_rank_id: qmRankIdForUiIndex(qm.game, range.max),
+      needed_players: neededPlayers,
+      region: qm.region,
+      description: `${qm.mic ? "Bắt buộc có Mic. " : ""}${roleNeeds.length ? `Cần vị trí: ${roleNeeds.join(", ")}` : "Tuyển mọi vị trí"}`,
+      role_ids: qmRoleIdsForNames(qm.game, roleNeeds)
+    };
+    const created = await api.post("/api/team-posts", postPayload);
+    const postObj = created?.data || created;
+    if (postObj && postObj.id) {
+      qm.myRoom = { backendPostId: Number(postObj.id) };
+      qm.posted = true;
+    }
+    qmRenderSearchState();
+    await qmFetchOpenRoomsAndPosts();
+    qmShowToast("📣 Đã đăng phòng tuyển người lên danh sách phòng đang mở");
+  } catch (err) {
+    qmShowToast(`⚠️ ${err?.message || "Không thể đăng bài tuyển người"}`);
+  }
 }
 
-function qmJoinRoom(roomId) {
-  const room = QM_ROOMS.find((r) => String(r.id) === String(roomId));
+// Tham gia phòng đang mở thật: POST /api/matchmaking/join/{roomId} hoặc POST /api/team-posts/{postId}/applications
+async function qmJoinRoom(roomKey) {
+  const room = QM_ROOMS.find((r) => r.key === roomKey);
   if (!room) return;
 
-  if (qm.lobby.mode === "joined" && qm.lobby.roomId === room.id) {
-    qmShowToast("Bạn đã ở trong phòng này rồi");
-    return;
-  }
-  if (room.filled >= 5) {
-    qmShowToast("Phòng đã đủ người");
-    return;
-  }
-
-  // Rời phòng cũ nếu đang ở phòng khác
-  if (qm.lobby.mode === "joined") {
-    const oldRoom = QM_ROOMS.find((r) => r.id === qm.lobby.roomId);
-    if (oldRoom) oldRoom.filled = Math.max(1, oldRoom.filled - 1);
-  }
   if (qm.searching) qmStopSearch();
 
-  // Dựng sảnh của phòng: chủ phòng ở giữa, các thành viên khác + tôi ở các ô trống
-  const hostPerson = {
-    id: 1000 + room.id,
-    name: room.host.name,
-    avatar: room.host.avatar,
-    verified: room.host.verified,
-    tier: (room.min + room.max) / 2
-  };
+  // Nếu là sảnh MatchRoom đang WAITING -> gọi POST /api/matchmaking/join/{roomId}
+  if (room.source === "match_room" && room.matchRoomId) {
+    try {
+      const res = await api.post(`/api/matchmaking/join/${room.matchRoomId}`);
+      const roomData = res?.data || res;
+      if (roomData && roomData.id) {
+        qmApplyBackendRoomToLobby(roomData);
+      }
+      qmSwitchView("lobby");
+      qmRenderLobby();
+      await qmFetchOpenRoomsAndPosts();
+      qmShowToast(`🚪 Đã tham gia phòng của ${room.host.name}`);
+    } catch (err) {
+      qmShowToast(`⚠️ ${err?.message || "Không thể tham gia phòng này"}`);
+    }
+    return;
+  }
 
-  const others = QM_PEOPLE.filter((p) => p.name !== room.host.name);
-  const members = {};
-  const otherCount = Math.max(0, room.filled - 1);
-  QM_FILL_ORDER.slice(0, otherCount).forEach((pos, i) => {
-    members[pos] = { person: others[(room.id + i) % others.length] };
-  });
-  const myPos = QM_FILL_ORDER.find((pos) => !members[pos]);
-  members[myPos] = { person: QM_ME };
-
-  room.filled += 1;
-  qm.lobby = {
-    mode: "joined",
-    roomId: room.id,
-    leader: hostPerson,
-    config: { queue: room.queue, vibe: room.vibe, mic: room.mic, region: room.region },
-    members,
-    pending: {},
-    need: {}
-  };
-  qm.menuPos = null;
-
-  qmSwitchView("lobby");
-  qmRenderLobby();
-  qmRenderRooms();
-  qmShowToast(`🚪 Bạn đã vào phòng của ${room.host.name} (${room.filled}/5 người)`);
+  // Nếu là bài đăng TeamPost -> gọi POST /api/team-posts/{postId}/applications
+  if (room.source === "team_post" && room.backendPostId) {
+    try {
+      await api.post(`/api/team-posts/${room.backendPostId}/applications`, {
+        message: `Xin tham gia đội ${QM_GAMES[room.game]?.name || ""} từ Tìm đội nhanh`
+      });
+      qmShowToast(`📨 Đã gửi yêu cầu tham gia bài đăng của ${room.host.name}`);
+    } catch (err) {
+      qmShowToast(`⚠️ ${err?.message || "Không thể ứng tuyển vào bài đăng này"}`);
+    }
+  }
 }
 
-function qmLeaveRoom() {
-  if (qm.lobby.mode !== "joined") return;
-  const oldRoom = QM_ROOMS.find((r) => r.id === qm.lobby.roomId);
-  if (oldRoom) oldRoom.filled = Math.max(1, oldRoom.filled - 1);
+// Rời phòng thật: POST /api/matchmaking/leave-team
+async function qmLeaveRoom() {
+  try {
+    const res = await api.post("/api/matchmaking/leave-team");
+    qmShowToast(res?.message || "Bạn đã rời khỏi sảnh đội");
+  } catch (err) {
+    qmShowToast(`⚠️ ${err?.message || "Không thể rời phòng"}`);
+  }
 
-  const leaderName = qm.lobby.leader.name;
-  qm.lobby = qmCreateOwnLobby();
+  try {
+    const teamRes = await api.get("/api/matchmaking/my-team");
+    const roomData = teamRes?.data || teamRes?.room || null;
+    if (roomData && roomData.id) {
+      qmApplyBackendRoomToLobby(roomData);
+    } else {
+      qm.lobby = qmCreateOwnLobby();
+    }
+  } catch (_) {
+    qm.lobby = qmCreateOwnLobby();
+  }
+
   qm.menuPos = null;
   qmRenderLobby();
-  qmRenderRooms();
-  qmShowToast(`Bạn đã rời phòng của ${leaderName}`);
+  await qmFetchOpenRoomsAndPosts();
 }
 
-// Đánh dấu mục đang active trên thanh điều hướng trái: quick | create | find
 function qmSetNav(key) {
   qm.navKey = key;
   const map = { quick: "btn-nav-quick", create: "btn-nav-create-room", find: "btn-nav-find-room" };
@@ -1046,7 +1602,6 @@ function qmSwitchView(view, navKey) {
   document.getElementById("view-lobby").hidden = view !== "lobby";
   document.getElementById("view-rooms").hidden = view !== "rooms";
 
-  // Đồng bộ mục active ở thanh trái theo chế độ xem
   if (navKey) {
     qmSetNav(navKey);
   } else if (view === "rooms") {
@@ -1086,7 +1641,6 @@ function qmInit() {
 
   qmApplyTheme(localStorage.getItem("gc_friends_theme") || "dark");
 
-  // ----- Menu Avatar (đổi giao diện) -----
   const avatarBtn = document.getElementById("btn-avatar-menu");
   const avatarMenu = document.getElementById("avatar-dropdown-menu");
   avatarBtn.addEventListener("click", (e) => {
@@ -1102,7 +1656,6 @@ function qmInit() {
     });
   });
 
-  // ----- 3 Dropdown: Game, Min Rank, Max Rank -----
   const dropdowns = [
     { dd: "dd-game", btn: "btn-dd-game", menu: "menu-dd-game" },
     { dd: "dd-min", btn: "btn-dd-min", menu: "menu-dd-min" },
@@ -1136,7 +1689,7 @@ function qmInit() {
     });
   });
 
-  document.getElementById("menu-dd-game").addEventListener("click", (e) => {
+  document.getElementById("menu-dd-game").addEventListener("click", async (e) => {
     const item = e.target.closest("button[data-game]");
     if (!item) return;
     const nextGame = item.dataset.game;
@@ -1148,14 +1701,15 @@ function qmInit() {
     qm.lobby.need = {};
     qm.menuPos = null;
     if (qm.searching) qmStopSearch();
-    if (qm.lobby.mode === "joined") {
-      qmLeaveRoom();
-    }
     qmRefreshAll();
+    if (qm.lobby.roomId && qm.lobby.mode === "own") {
+      await qmSyncLobbyWithBackend();
+    }
+    await qmFetchOpenRoomsAndPosts();
     qmShowToast(`Đã chọn game: ${QM_GAMES[nextGame].name}`);
   });
 
-  function onRankPick(e) {
+  async function onRankPick(e) {
     const item = e.target.closest("button[data-rank-idx]");
     if (!item) return;
     const idx = Number(item.dataset.rankIdx);
@@ -1164,21 +1718,23 @@ function qmInit() {
 
     if (which === "min") {
       range.min = idx;
-      if (range.min > range.max) range.max = range.min; // Min cao hơn Max -> nâng Max lên bằng Min
+      if (range.min > range.max) range.max = range.min;
     } else {
       range.max = idx;
-      if (range.max < range.min) range.min = range.max; // Max thấp hơn Min -> hạ Min xuống bằng Max
+      if (range.max < range.min) range.min = range.max;
     }
     closeAllDropdowns();
     qmRenderRankDropdowns();
     qmRenderSummary();
     qmRenderRooms();
+    if (qm.lobby.roomId && qm.lobby.mode === "own") {
+      await qmSyncLobbyWithBackend();
+    }
   }
   document.getElementById("menu-dd-min").addEventListener("click", onRankPick);
   document.getElementById("menu-dd-max").addEventListener("click", onRankPick);
 
-  // ----- Nút chọn chế độ, phong cách, mic, khu vực -----
-  document.getElementById("qm-card-mode").addEventListener("click", (e) => {
+  document.getElementById("qm-card-mode").addEventListener("click", async (e) => {
     const queueBtn = e.target.closest("[data-queue]");
     const cs2Btn = e.target.closest("[data-cs2mode]");
     const vibeBtn = e.target.closest("[data-vibe]");
@@ -1196,9 +1752,11 @@ function qmInit() {
     qmRenderSummary();
     qmRenderLobby();
     qmRenderRooms();
+    if (qm.lobby.roomId && qm.lobby.mode === "own") {
+      await qmSyncLobbyWithBackend();
+    }
   });
 
-  // ----- Chip vị trí cần tìm -----
   document.getElementById("qm-role-chips").addEventListener("click", (e) => {
     const chip = e.target.closest("button[data-role]");
     if (!chip) return;
@@ -1214,12 +1772,13 @@ function qmInit() {
     qmRenderRooms();
   });
 
-  // ----- Chuyển chế độ xem (Sảnh đội / Danh sách phòng) -----
   document.querySelectorAll(".qm-view-btn").forEach((btn) => {
-    btn.addEventListener("click", () => qmSwitchView(btn.dataset.view));
+    btn.addEventListener("click", () => {
+      qmSwitchView(btn.dataset.view);
+      if (btn.dataset.view === "rooms") qmFetchOpenRoomsAndPosts();
+    });
   });
 
-  // ----- Thao tác trong sảnh 5 ô -----
   document.getElementById("qm-slots").addEventListener("click", (e) => {
     const target = e.target.closest("[data-action]");
     if (!target) return;
@@ -1248,32 +1807,33 @@ function qmInit() {
     }
   });
 
-  // ----- Thao tác trên danh sách phòng -----
   document.getElementById("qm-rooms-list").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-room-action]");
     if (!btn) return;
-    if (btn.dataset.roomAction === "join") qmJoinRoom(btn.dataset.roomId);
-    if (btn.dataset.roomAction === "unpost") qmTogglePostRoom();
+    const act = btn.dataset.roomAction;
+    if (act === "join") qmJoinRoom(btn.dataset.roomKey);
+    if (act === "unpost") qmTogglePostRoom(Number(btn.dataset.postId));
+    if (act === "open-my-lobby") qmSwitchView("lobby");
   });
 
   document.getElementById("btn-leave-lobby").addEventListener("click", qmLeaveRoom);
 
-  // ----- Thanh Match Bar -----
   document.getElementById("btn-find-match").addEventListener("click", qmStartSearch);
   document.getElementById("btn-cancel-search").addEventListener("click", qmCancelSearch);
-  document.getElementById("btn-post-room").addEventListener("click", qmTogglePostRoom);
+  document.getElementById("btn-post-room").addEventListener("click", () => qmTogglePostRoom());
 
-  // ----- Bạn bè online ở thanh phải: bấm để mời vào ô trống đầu tiên -----
   document.getElementById("qm-right-online").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-right-friend]");
     if (!btn) return;
     const person = qmPersonById(Number(btn.dataset.rightFriend));
+    if (!person) return;
     if (qm.lobby.mode === "joined") {
       qmShowToast("Bạn đang ở trong phòng của người khác nên không thể mời thêm.");
       return;
     }
-    const alreadyIn = Object.values(qm.lobby.members).some((m) => m.person.id === person.id) ||
-      Object.values(qm.lobby.pending).some((p) => p.id === person.id);
+    const alreadyIn =
+      Object.values(qm.lobby.members).some((m) => Number(m.person.id) === Number(person.id)) ||
+      Object.values(qm.lobby.pending).some((p) => Number(p.id) === Number(person.id));
     if (alreadyIn) {
       qmShowToast(`${person.name} đã ở trong sảnh đội của bạn`);
       return;
@@ -1289,7 +1849,6 @@ function qmInit() {
 
   document.getElementById("btn-right-party").addEventListener("click", () => qmSwitchView("lobby"));
 
-  // ----- Thanh điều hướng trái: Tạo phòng đội -> sảnh đội, Tìm phòng -> danh sách phòng -----
   document.getElementById("btn-nav-quick").addEventListener("click", (e) => {
     e.preventDefault();
     qmSwitchView("lobby", "quick");
@@ -1301,9 +1860,9 @@ function qmInit() {
   document.getElementById("btn-nav-find-room").addEventListener("click", (e) => {
     e.preventDefault();
     qmSwitchView("rooms", "find");
+    qmFetchOpenRoomsAndPosts();
   });
 
-  // ----- Đóng menu / dropdown khi bấm ra ngoài -----
   document.addEventListener("click", (e) => {
     if (!dropdowns.some(({ dd }) => dd.contains(e.target))) closeAllDropdowns();
 
@@ -1320,11 +1879,12 @@ function qmInit() {
   qmRenderRightFriends();
   qmRefreshAll();
 
-  // Mở đúng chế độ xem theo liên kết từ trang khác: quick-match.html?view=lobby | rooms
   const viewParam = new URLSearchParams(window.location.search).get("view");
   if (viewParam === "rooms") qmSwitchView("rooms", "find");
   else if (viewParam === "lobby") qmSwitchView("lobby", "create");
   else qmSwitchView("lobby", "quick");
+
+  qmLoadBackendData();
 }
 
 qmInit();
