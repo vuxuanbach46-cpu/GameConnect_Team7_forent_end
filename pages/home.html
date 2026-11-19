@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/notifications.css">
 </head>
 <body class="flex h-screen overflow-hidden select-none">
 
@@ -325,13 +326,21 @@
         <a href="home.html" title="Trận đấu nhanh (VS)" class="w-8 h-8 rounded-lg bg-orange-500 text-white text-xs font-extrabold flex items-center justify-center">
             VS
         </a>
-        <button title="Thông báo" class="hover:text-white transition"><i class="fa-regular fa-bell"></i></button>
+        <div id="gc-notif-bell"></div>
         <a href="friends.html" title="Thêm bạn bè" class="hover:text-white transition"><i class="fa-solid fa-user-plus"></i></a>
         <a href="friends.html" title="Danh sách bạn bè" class="hover:text-orange-500 transition"><i class="fa-solid fa-users"></i></a>
         <button title="Cài đặt" class="mt-auto hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
     </aside>
 
     <!-- SCRIPT BẢO VỆ ROUTE & HIỂN THỊ THÔNG TIN USER -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
     <script src="../js/home.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script>
+      NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+    </script>
 </body>
 </html>
