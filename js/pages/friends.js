@@ -877,6 +877,62 @@ const MOCK_DATA = {
       rankIcon: "../assets/images/ranks/lol/9.png",
       elo: "680 LP · ĐTCL Mùa Mới"
     }
+  ],
+
+  // 5. TAB DANH SÁCH CHẶN — những người bạn đã chặn (có thể bỏ chặn)
+  blocked: [
+    {
+      id: 501,
+      name: "Nguyễn Văn Toxic (ToxicKing)",
+      tag: "#TOXIC",
+      verified: false,
+      mutualFriends: 0,
+      avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=ToxicKing&backgroundColor=d1d4f9",
+      presence: "offline",
+      statusText: "ĐÃ CHẶN 3 NGÀY TRƯỚC",
+      subInfo: "",
+      game: "Valorant",
+      gameLevel: 120,
+      roles: ["Duelist"],
+      rankName: "Gold 2",
+      rankIcon: "../assets/images/ranks/valorant/Gold_2_Rank.png",
+      elo: "40 RR · Gold"
+    },
+    {
+      id: 502,
+      name: "Lê Quang Ping (SpamPing)",
+      tag: "#PING",
+      verified: false,
+      mutualFriends: 2,
+      avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=SpamPing&backgroundColor=ffd5dc",
+      presence: "offline",
+      statusText: "ĐÃ CHẶN 1 TUẦN TRƯỚC",
+      subInfo: "",
+      game: "Liên Minh Huyền Thoại",
+      gameLevel: 210,
+      roles: ["ADC"],
+      rankName: "Bạc (Silver)",
+      rankIcon: "../assets/images/ranks/lol/3.png",
+      elo: "30 LP · Đơn/Đôi"
+    },
+    {
+      id: 503,
+      name: "Phạm Văn Sus (SusAimbot)",
+      tag: "#SUS",
+      verified: false,
+      mutualFriends: 0,
+      avatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=SusAimbot&backgroundColor=ffdfbf",
+      presence: "offline",
+      statusText: "ĐÃ CHẶN 2 TUẦN TRƯỚC",
+      subInfo: "",
+      game: "CS2",
+      cs2RankLevel: 12,
+      roles: ["Rifler"],
+      cs2Mode: "faceit",
+      rankName: "FACEIT Level 4",
+      rankIcon: "../assets/images/ranks/faceit/4.svg",
+      elo: "1,050 ELO"
+    }
   ]
 };
 
@@ -904,6 +960,10 @@ const TAB_CONFIG = {
   suggestions: {
     heading: "GỢI Ý KẾT BẠN",
     summaryPrefix: "Ưu tiên người có bạn chung lên đầu, chưa có bạn chung ở dưới"
+  },
+  blocked: {
+    heading: "DANH SÁCH CHẶN",
+    summaryPrefix: "Người bị chặn không thể liên hệ với bạn"
   }
 };
 
@@ -1102,6 +1162,8 @@ function updateCounters() {
   document.getElementById("count-received").textContent = MOCK_DATA.received.length;
   document.getElementById("count-sent").textContent = MOCK_DATA.sent.length;
   document.getElementById("count-suggestions").textContent = MOCK_DATA.suggestions.length;
+  const countBlockedEl = document.getElementById("count-blocked");
+  if (countBlockedEl) countBlockedEl.textContent = MOCK_DATA.blocked.length;
 
   const sidebarBadge = document.getElementById("sidebar-req-badge");
   if (sidebarBadge) {
@@ -1115,6 +1177,14 @@ function updateCounters() {
 
 // Tạo nút bấm tương ứng với từng Tab
 function renderActionsForTab(player, tab) {
+  if (tab === "blocked") {
+    return `
+      <button class="fc-btn fc-btn-secondary" data-action="unblock" data-id="${player.id}">
+        Bỏ chặn
+      </button>
+    `;
+  }
+
   if (tab === "friends") {
     const mainBtn = player.inRoom
       ? `<button class="fc-btn fc-btn-join" data-action="join-room" data-id="${player.id}">
@@ -1405,8 +1475,8 @@ function renderPlayerList() {
   if (totalItems === 0) {
     listEl.innerHTML = `
       <div class="fc-empty-state">
-        <h3>Không tìm thấy người chơi nào</h3>
-        <p>Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc game / trạng thái ở phía trên.</p>
+        <h3>${currentTab === "blocked" && rawList.length === 0 ? "Bạn chưa chặn ai" : "Không tìm thấy người chơi nào"}</h3>
+        <p>${currentTab === "blocked" && rawList.length === 0 ? "Những người bạn chặn sẽ xuất hiện ở đây và bạn có thể bỏ chặn bất cứ lúc nào." : "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc game / trạng thái ở phía trên."}</p>
       </div>
     `;
     renderPagination(0, 1, 0, 0);
@@ -1419,7 +1489,9 @@ function renderPlayerList() {
       const friendStatus = currentTab === "friends" ? getFriendStatusLine(player) : null;
 
       const presenceClass =
-        currentTab === "friends"
+        currentTab === "blocked"
+          ? "fc-presence-offline"
+          : currentTab === "friends"
           ? friendStatus
             ? friendStatus.key === "inroom"
               ? "fc-presence-ingame"
@@ -1432,7 +1504,9 @@ function renderPlayerList() {
           : "fc-presence-offline";
 
       const subheadStatusClass =
-        currentTab === "friends"
+        currentTab === "blocked"
+          ? "is-blocked"
+          : currentTab === "friends"
           ? friendStatus
             ? friendStatus.key === "inroom"
               ? "is-inroom"
@@ -1454,7 +1528,7 @@ function renderPlayerList() {
         .join("");
 
       return `
-        <article class="fc-player-row">
+        <article class="fc-player-row ${currentTab === "blocked" ? "is-blocked" : ""}">
           <!-- Cột 1: Avatar + Tên + Trạng thái / Bạn chung -->
           <div class="fc-player-identity">
             <div class="fc-avatar-box">
@@ -1497,7 +1571,7 @@ function renderPlayerList() {
 
           <!-- Cột 4: Nút thao tác -->
           <div class="fc-player-actions">
-            ${renderActionsForTab(player, currentTab)}
+            ${renderActionsForTab(player, currentTab)}${currentTab === "blocked" ? "" : renderMoreMenu(player)}
           </div>
         </article>
       `;
@@ -1507,7 +1581,211 @@ function renderPlayerList() {
   renderPagination(totalItems, totalPages, startIdx, endIdx);
 }
 
-// Chuyển đổi giữa 4 Tab
+// =========================================================================
+// Chặn / Bỏ chặn & Xem hồ sơ (UI mẫu — chưa nối Backend)
+// =========================================================================
+let modalPendingId = null;
+
+// Nút 3 chấm nhỏ ở mỗi người chơi: rê chuột vào (hoặc bấm) để mở menu Xem hồ sơ / Chặn
+function renderMoreMenu(player) {
+  return `
+    <div class="fc-more-wrap">
+      <button type="button" class="fc-more-btn" data-more-toggle aria-haspopup="true" aria-label="Tùy chọn khác" title="Tùy chọn khác">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="5" cy="12" r="1.8"></circle>
+          <circle cx="12" cy="12" r="1.8"></circle>
+          <circle cx="19" cy="12" r="1.8"></circle>
+        </svg>
+      </button>
+      <div class="fc-more-menu" role="menu">
+        <button type="button" class="fc-more-item" role="menuitem" data-action="view-profile" data-id="${player.id}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Xem hồ sơ</span>
+        </button>
+        <button type="button" class="fc-more-item is-danger" role="menuitem" data-action="block-ask" data-id="${player.id}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+          </svg>
+          <span>Chặn</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function closeAllMoreMenus() {
+  document.querySelectorAll(".fc-more-wrap.is-open").forEach((w) => w.classList.remove("is-open"));
+}
+
+// Tìm người chơi ở bất kỳ tab nào (id là duy nhất giữa các tab)
+function findPlayerAnywhere(id) {
+  const keys = ["friends", "received", "sent", "suggestions", "blocked"];
+  for (const key of keys) {
+    const found = (MOCK_DATA[key] || []).find((x) => x.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
+function openModal(html) {
+  const root = document.getElementById("fc-modal");
+  const card = document.getElementById("fc-modal-card");
+  if (!root || !card) return;
+  card.innerHTML = html;
+  root.hidden = false;
+}
+
+function closeModal() {
+  const root = document.getElementById("fc-modal");
+  if (root) root.hidden = true;
+  modalPendingId = null;
+}
+
+// Hộp xác nhận chặn
+function openBlockConfirm(player) {
+  modalPendingId = player.id;
+  openModal(`
+    <div class="fc-modal-head">
+      <img src="${player.avatar}" alt="${escapeHtml(player.name)}" class="fc-modal-avatar">
+      <div>
+        <h3>Chặn ${escapeHtml(player.name)}?</h3>
+        <p>${escapeHtml(player.tag)}</p>
+      </div>
+    </div>
+    <ul class="fc-modal-list">
+      <li>Hai bên không thể mời kết bạn, mời vào đội hay nhắn tin cho nhau.</li>
+      <li>Nếu đang là bạn bè, hai người sẽ bị huỷ kết bạn.</li>
+      <li>Bạn có thể bỏ chặn bất cứ lúc nào trong tab “Danh sách chặn”.</li>
+    </ul>
+    <div class="fc-modal-actions">
+      <button type="button" class="fc-btn fc-btn-secondary" data-modal-close>Hủy</button>
+      <button type="button" class="fc-btn fc-btn-danger" data-modal-confirm-block>Chặn</button>
+    </div>
+  `);
+}
+
+// Hộp hồ sơ nhỏ (dữ liệu mẫu)
+function openProfile(player) {
+  modalPendingId = player.id;
+  const roleBadges = player.roles.map((r) => `<span class="fc-role-tag">${escapeHtml(r)}</span>`).join("");
+  const mutual = getMutualCount(player);
+  const gameLogo = GAME_LOGOS[player.game]
+    ? `<img src="${GAME_LOGOS[player.game]}" alt="${escapeHtml(player.game)}" class="fc-row-game-logo">`
+    : "";
+
+  openModal(`
+    <div class="fc-modal-head">
+      <img src="${player.avatar}" alt="${escapeHtml(player.name)}" class="fc-modal-avatar">
+      <div>
+        <h3>${escapeHtml(player.name)} ${renderVerifiedBadge(player)}</h3>
+        <p>${escapeHtml(player.tag)}${mutual > 0 ? ` · ${mutual} bạn chung` : ""}</p>
+      </div>
+    </div>
+
+    <div class="fc-profile-block">
+      <span class="fc-profile-label">Game chính</span>
+      <div class="fc-game-main">${gameLogo}<span>${escapeHtml(player.game)}</span>${renderGameHeaderBadge(player)}</div>
+      <div class="fc-role-tags">${roleBadges}</div>
+    </div>
+
+    <div class="fc-profile-block">
+      <span class="fc-profile-label">Mức rank</span>
+      <div class="fc-player-rank">
+        ${renderRankBadgeColumn(player)}
+        <div class="fc-rank-info">
+          <span class="fc-rank-title">${escapeHtml(player.rankName)}</span>
+          <span class="fc-rank-elo">${escapeHtml(player.elo)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fc-modal-actions">
+      <button type="button" class="fc-btn fc-btn-secondary" data-modal-close>Đóng</button>
+      <button type="button" class="fc-btn fc-btn-danger-ghost" data-modal-block-profile>Chặn</button>
+    </div>
+  `);
+}
+
+// Chặn: bỏ người này khỏi mọi tab, chuyển vào danh sách chặn (đang là bạn thì huỷ kết bạn)
+function blockPlayer(id) {
+  let target = null;
+  ["friends", "received", "sent", "suggestions"].forEach((key) => {
+    const idx = MOCK_DATA[key].findIndex((x) => x.id === id);
+    if (idx !== -1) {
+      const [removed] = MOCK_DATA[key].splice(idx, 1);
+      if (!target) target = removed;
+    }
+  });
+  if (!target) return;
+
+  target.presence = "offline";
+  target.inRoom = false;
+  target.statusText = "ĐÃ CHẶN VỪA XONG";
+  MOCK_DATA.blocked.unshift(target);
+
+  showFcToast(`🚫 Đã chặn ${target.name}`);
+  renderPlayerList();
+}
+
+// Bỏ chặn: đưa về tab Gợi ý kết bạn (không tự động thành bạn bè)
+function unblockPlayer(id) {
+  const idx = MOCK_DATA.blocked.findIndex((x) => x.id === id);
+  if (idx === -1) return;
+  const [target] = MOCK_DATA.blocked.splice(idx, 1);
+  target.statusText = "ĐÃ BỎ CHẶN · CÓ THỂ KẾT BẠN LẠI";
+  MOCK_DATA.suggestions.unshift(target);
+
+  showFcToast(`✅ Đã bỏ chặn ${target.name}. Bạn có thể tìm thấy họ ở tab Gợi ý kết bạn`);
+  renderPlayerList();
+}
+
+// Gắn sự kiện cho menu 3 chấm & hộp thoại
+function initBlockUi() {
+  const list = document.getElementById("players-list-container");
+  list.addEventListener("click", (e) => {
+    const toggle = e.target.closest("[data-more-toggle]");
+    if (!toggle) return;
+    e.stopPropagation();
+    const wrap = toggle.closest(".fc-more-wrap");
+    const willOpen = !wrap.classList.contains("is-open");
+    closeAllMoreMenus();
+    wrap.classList.toggle("is-open", willOpen);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".fc-more-wrap")) closeAllMoreMenus();
+  });
+
+  const modalRoot = document.getElementById("fc-modal");
+  if (!modalRoot) return;
+
+  modalRoot.addEventListener("click", (e) => {
+    if (e.target === modalRoot || e.target.closest("[data-modal-close]")) {
+      closeModal();
+      return;
+    }
+    if (e.target.closest("[data-modal-confirm-block]")) {
+      const id = modalPendingId;
+      closeModal();
+      if (id !== null) blockPlayer(id);
+      return;
+    }
+    if (e.target.closest("[data-modal-block-profile]")) {
+      const p = findPlayerAnywhere(modalPendingId);
+      if (p) openBlockConfirm(p);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modalRoot.hidden) closeModal();
+  });
+}
+
+// Chuyển đổi giữa các Tab
 function switchTab(tabName) {
   if (!TAB_CONFIG[tabName]) return;
   currentTab = tabName;
@@ -1529,6 +1807,25 @@ function handlePlayerAction(e) {
 
   const action = btn.dataset.action;
   const id = Number(btn.dataset.id);
+
+  if (action === "view-profile") {
+    closeAllMoreMenus();
+    const p = findPlayerAnywhere(id);
+    if (p) openProfile(p);
+    return;
+  }
+
+  if (action === "block-ask") {
+    closeAllMoreMenus();
+    const p = findPlayerAnywhere(id);
+    if (p) openBlockConfirm(p);
+    return;
+  }
+
+  if (action === "unblock") {
+    unblockPlayer(id);
+    return;
+  }
 
   if (action === "invite") {
     const p = MOCK_DATA.friends.find((x) => x.id === id);
@@ -1742,6 +2039,7 @@ function initFriendsPage() {
 
   // Sự kiện nút bấm trên từng người chơi
   document.getElementById("players-list-container").addEventListener("click", handlePlayerAction);
+  initBlockUi();
 
   // Sự kiện bấm chuyển trang hoặc đổi số người / trang
   const paginationEl = document.getElementById("pagination-container");

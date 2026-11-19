@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
   // --- 0. NẾU ĐÃ ĐĂNG NHẬP -> CHUYỂN HƯỚNG VÀO FILE HOME ---
   const existingToken = localStorage.getItem("access_token");
@@ -135,7 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const baseUrl = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
         ? CONFIG.API_BASE_URL
         : "http://127.0.0.1:8000";
-      window.location.href = `${baseUrl}/auth/google/login`;
+      const homeUrl = new URL("home.html", window.location.href).href;
+      window.location.href = `${baseUrl}/auth/google/login?redirect_to=${encodeURIComponent(homeUrl)}`;
     });
   }
 });

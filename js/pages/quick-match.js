@@ -1026,7 +1026,17 @@ function qmLeaveRoom() {
   qmShowToast(`Bạn đã rời phòng của ${leaderName}`);
 }
 
-function qmSwitchView(view) {
+// Đánh dấu mục đang active trên thanh điều hướng trái: quick | create | find
+function qmSetNav(key) {
+  qm.navKey = key;
+  const map = { quick: "btn-nav-quick", create: "btn-nav-create-room", find: "btn-nav-find-room" };
+  Object.entries(map).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("active", k === key);
+  });
+}
+
+function qmSwitchView(view, navKey) {
   qm.view = view;
   document.querySelectorAll(".qm-view-btn").forEach((btn) => {
     const active = btn.dataset.view === view;
@@ -1035,6 +1045,16 @@ function qmSwitchView(view) {
   });
   document.getElementById("view-lobby").hidden = view !== "lobby";
   document.getElementById("view-rooms").hidden = view !== "rooms";
+
+  // Đồng bộ mục active ở thanh trái theo chế độ xem
+  if (navKey) {
+    qmSetNav(navKey);
+  } else if (view === "rooms") {
+    qmSetNav("find");
+  } else if (qm.navKey === "find") {
+    qmSetNav("quick");
+  }
+
   const scrollEl = document.querySelector(".fc-content-scroll");
   if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -1269,9 +1289,19 @@ function qmInit() {
 
   document.getElementById("btn-right-party").addEventListener("click", () => qmSwitchView("lobby"));
 
-  // ----- Thanh điều hướng trái -----
-  document.getElementById("btn-nav-create-room").addEventListener("click", () => qmSwitchView("lobby"));
-  document.getElementById("btn-nav-find-room").addEventListener("click", () => qmSwitchView("rooms"));
+  // ----- Thanh điều hướng trái: Tạo phòng đội -> sảnh đội, Tìm phòng -> danh sách phòng -----
+  document.getElementById("btn-nav-quick").addEventListener("click", (e) => {
+    e.preventDefault();
+    qmSwitchView("lobby", "quick");
+  });
+  document.getElementById("btn-nav-create-room").addEventListener("click", (e) => {
+    e.preventDefault();
+    qmSwitchView("lobby", "create");
+  });
+  document.getElementById("btn-nav-find-room").addEventListener("click", (e) => {
+    e.preventDefault();
+    qmSwitchView("rooms", "find");
+  });
 
   // ----- Đóng menu / dropdown khi bấm ra ngoài -----
   document.addEventListener("click", (e) => {
@@ -1289,7 +1319,12 @@ function qmInit() {
 
   qmRenderRightFriends();
   qmRefreshAll();
-  qmSwitchView("lobby");
+
+  // Mở đúng chế độ xem theo liên kết từ trang khác: quick-match.html?view=lobby | rooms
+  const viewParam = new URLSearchParams(window.location.search).get("view");
+  if (viewParam === "rooms") qmSwitchView("rooms", "find");
+  else if (viewParam === "lobby") qmSwitchView("lobby", "create");
+  else qmSwitchView("lobby", "quick");
 }
 
 qmInit();
