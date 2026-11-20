@@ -1,21 +1,18 @@
-/*
- * GameConnect - Gamer profile
- * Frontend HTML/CSS/JS thuần. Các endpoint dưới đây gom tại một chỗ để khớp
- * với router FastAPI của nhóm. Backend cần trả game catalog theo cấu trúc
- * games[].ranks[] và games[].roles[] như module team-posts đang sử dụng.
- */
+/* GameConnect – Hồ sơ người chơi, tích hợp trực tiếp với FastAPI hiện tại. */
 
 const PROFILE_API = {
-  PROFILE_ME: "/game-profile/me",
-  PROFILE_BY_USERNAME: (username) => `/game-profile/${encodeURIComponent(username)}`,
-  PROFILE_UPDATE: "/game-profile/me",
-  AVATAR_UPLOAD: "/game-profile/me/avatar",
-  GAME_CATALOG: "/games",
-  MY_GAMES: "/user-games/me",
-  CREATE_USER_GAME: "/user-games",
-  USER_GAME_DETAIL: (id) => `/user-games/${encodeURIComponent(id)}`,
+  CURRENT_USER: "/user/me",
+  PROFILE_ME: "/api/profiles/me",
+  PROFILE_BY_USERNAME: (username) => `/api/profiles/${encodeURIComponent(username)}`,
+  PROFILE_CREATE: "/api/profiles/me",
+  PROFILE_UPDATE: "/api/profiles/me",
+  AVATAR_UPLOAD: "/api/profiles/me/avatar",
+  GAME_CATALOG: "/api/games",
+  MY_GAMES: "/api/user-games/me",
+  CREATE_USER_GAME: "/api/user-games/me",
+  USER_GAME_DETAIL: (id) => `/api/user-games/me/${encodeURIComponent(id)}`,
   MY_TEAMS: "/teams/me",
-  FRIEND_REQUESTS: "/friends/requests",
+  FRIEND_REQUESTS: "/friend-requests",
 };
 
 const GAME_IMAGE_FALLBACKS = [
@@ -26,73 +23,58 @@ const GAME_IMAGE_FALLBACKS = [
   { match: ["liên quân", "arena of valor", "aov"], src: "../assets/images/games/aov.png" },
 ];
 
+const $ = (id) => document.getElementById(id);
 const profileEls = {
-  alert: document.getElementById("profile-alert"),
-  avatar: document.getElementById("profile-avatar"),
-  displayName: document.getElementById("profile-display-name"),
-  username: document.getElementById("profile-username"),
-  region: document.getElementById("profile-region"),
-  playTime: document.getElementById("profile-play-time"),
-  mic: document.getElementById("profile-mic"),
-  bio: document.getElementById("profile-bio"),
-  status: document.getElementById("profile-status"),
-  heroAction: document.getElementById("profile-hero-action"),
-  gamesCount: document.getElementById("games-count"),
-  gamesList: document.getElementById("profile-games-list"),
-  teamsList: document.getElementById("profile-teams-list"),
-  editBtn: document.getElementById("btn-edit-profile"),
-  editModal: document.getElementById("edit-profile-modal"),
-  editForm: document.getElementById("edit-profile-form"),
-  editError: document.getElementById("edit-profile-error"),
-  avatarFile: document.getElementById("avatar-file"),
-  avatarPreview: document.getElementById("avatar-preview"),
-  addGameForm: document.getElementById("add-game-form"),
-  newGame: document.getElementById("new-game-id"),
-  newRank: document.getElementById("new-rank-id"),
-  newRole: document.getElementById("new-role-id"),
-  gamePreview: document.getElementById("selected-game-preview"),
-  addGameError: document.getElementById("add-game-error"),
+  alert: $("profile-alert"), avatar: $("profile-avatar"), displayName: $("profile-display-name"),
+  username: $("profile-username"), region: $("profile-region"), playTime: $("profile-play-time"),
+  mic: $("profile-mic"), bio: $("profile-bio"), status: $("profile-status"), heroAction: $("profile-hero-action"),
+  gamesCount: $("games-count"), gamesList: $("profile-games-list"), teamsList: $("profile-teams-list"),
+  editBtn: $("btn-edit-profile"), editModal: $("edit-profile-modal"), editForm: $("edit-profile-form"),
+  editError: $("edit-profile-error"), avatarFile: $("avatar-file"), avatarPreview: $("avatar-preview"),
+  addGameForm: $("add-game-form"), newGame: $("new-game-id"), newRank: $("new-rank-id"),
+  newRole: $("new-role-id"), gamePreview: $("selected-game-preview"), addGameError: $("add-game-error"),
 };
 
+let currentUser = null;
 let currentProfile = null;
 let gamesCatalog = [];
 let myGames = [];
 let myTeams = [];
-let isOwnProfile = !new URLSearchParams(window.location.search).has("username");
+let isOwnProfile = false;
+let profileCreated = false;
 let selectedAvatarFile = null;
 let previewObjectUrl = null;
 let catalogReady = false;
 
 function unwrapData(response) {
-  if (response && typeof response === "object" && response.data !== undefined) return response.data;
-  return response;
-}
-
-function asArray(value, keys = ["items", "results", "games", "teams", "data"]) {
-  if (Array.isArray(value)) return value;
-  if (!value || typeof value !== "object") return [];
-  for (const key of keys) if (Array.isArray(value[key])) return value[key];
-  return [];
-}
-
-function toNumberOrString(value) {
-  return value === undefined || value === null ? "" : String(value);
+  return response && typeof response === "object" && Object.prototype.hasOwnProperty.call(response, "data")
+    ? response.data : response;
 }
 
 function decodeTokenPayload() {
   const token = localStorage.getItem("access_token");
   if (!token || token.split(".").length < 2) return {};
   try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(decodeURIComponent(escape(atob(base64))));
-  } catch (_) {
-    return {};
-  }
+    const value = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = value + "=".repeat((4 - value.length % 4) % 4);
+    return JSON.parse(decodeURIComponent(escape(atob(padded))));
+  } catch (_) { return {}; }
 }
 
-function currentUsernameFromToken() {
-  const payload = decodeTokenPayload();
-  return payload.username || payload.email || payload.sub || localStorage.getItem("username") || "";
+function resolveImageUrl(value) {
+  if (!value) return "";
+  const raw = String(value).trim();
+  if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+  const apiRoot = (CONFIG.API_BASE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+  if (raw.startsWith("/")) return `${apiRoot}${raw}`;
+  if (raw.startsWith("../") || raw.startsWith("./")) return raw;
+  if (raw.startsWith("assets/") || raw.startsWith("images/")) return `../${raw}`;
+  return `${apiRoot}/${raw.replace(/^\//, "")}`;
+}
+
+function initials(value) {
+  const words = String(value || "GC").trim().split(/\s+/).filter(Boolean);
+  return (words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] || "GC").slice(0, 2)).toUpperCase();
 }
 
 function showProfileAlert(message, type = "info") {
@@ -111,40 +93,25 @@ function setInlineError(element, message = "") {
   element.hidden = !message;
 }
 
-function initials(value) {
-  const words = String(value || "GC").trim().split(/\s+/).filter(Boolean);
-  return (words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] || "GC").slice(0, 2)).toUpperCase();
-}
-
-function resolveImageUrl(value) {
-  if (!value) return "";
-  const raw = String(value).trim();
-  if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
-  if (raw.startsWith("/")) {
-    const base = (CONFIG.API_BASE_URL || "").replace(/\/api\/?$/, "").replace(/\/$/, "");
-    return `${base}${raw}`;
-  }
-  if (raw.startsWith("../") || raw.startsWith("./")) return raw;
-  if (raw.startsWith("assets/") || raw.startsWith("images/")) return `../${raw}`;
-  const apiRoot = (CONFIG.API_BASE_URL || "http://127.0.0.1:8000").replace(/\/api\/?$/, "").replace(/\/$/, "");
-  return `${apiRoot}/${raw.replace(/^\//, "")}`;
-}
-
 function getGameImage(game) {
-  const fromApi = game?.image_url || game?.image || game?.cover_image || game?.icon;
+  const fromApi = game?.image || game?.image_url || game?.cover_image || game?.icon;
   if (fromApi) return resolveImageUrl(fromApi);
   const name = String(game?.name || "").toLowerCase();
-  const matched = GAME_IMAGE_FALLBACKS.find((entry) => entry.match.some((term) => name.includes(term)));
-  return matched ? matched.src : "";
+  return GAME_IMAGE_FALLBACKS.find((item) => item.match.some((term) => name.includes(term)))?.src || "";
 }
 
-function renderAvatar(container, avatarUrl, name, className = "") {
+function renderAvatar(container, avatarUrl, name, extraClass = "") {
   const url = resolveImageUrl(avatarUrl);
   if (url) {
-    container.className = `profile-avatar ${className}`.trim();
+    container.className = `profile-avatar ${extraClass}`.trim();
     container.innerHTML = `<img src="${escapeHtml(url)}" alt="Ảnh đại diện ${escapeHtml(name || "người chơi")}">`;
+    const image = container.querySelector("img");
+    image.addEventListener("error", () => {
+      container.className = `profile-avatar profile-avatar-placeholder ${extraClass}`.trim();
+      container.textContent = initials(name);
+    }, { once: true });
   } else {
-    container.className = `profile-avatar profile-avatar-placeholder ${className}`.trim();
+    container.className = `profile-avatar profile-avatar-placeholder ${extraClass}`.trim();
     container.textContent = initials(name);
   }
 }
@@ -152,23 +119,24 @@ function renderAvatar(container, avatarUrl, name, className = "") {
 function findGame(gameId) {
   return gamesCatalog.find((game) => String(game.id) === String(gameId));
 }
-
 function findRank(game, rankId) {
   return game?.ranks?.find((rank) => String(rank.id) === String(rankId));
 }
-
 function findRole(game, roleId) {
   return game?.roles?.find((role) => String(role.id) === String(roleId));
 }
 
-function populateDependentSelect(select, entries, labelKey, placeholder, selectedValue = "") {
-  const opts = [...(entries || [])];
-  if (labelKey === "rank_name") opts.sort((a, b) => Number(a.rank_order || 0) - Number(b.rank_order || 0));
-  select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>` + opts.map((entry) =>
-    `<option value="${escapeHtml(entry.id)}">${escapeHtml(entry[labelKey] || entry.name || "")}</option>`
+function buildSelectOptions(entries, key, placeholder, selected = "") {
+  const sorted = [...(entries || [])];
+  if (key === "rank_name") sorted.sort((a, b) => Number(a.rank_order || 0) - Number(b.rank_order || 0));
+  return `<option value="">${escapeHtml(placeholder)}</option>` + sorted.map((entry) =>
+    `<option value="${escapeHtml(entry.id)}" ${String(entry.id) === String(selected) ? "selected" : ""}>${escapeHtml(entry[key] || entry.name || "")}</option>`
   ).join("");
-  select.disabled = !opts.length;
-  if (selectedValue !== "" && selectedValue !== null && selectedValue !== undefined) select.value = String(selectedValue);
+}
+
+function populateDependentSelect(select, entries, key, placeholder, selected = "") {
+  select.innerHTML = buildSelectOptions(entries, key, placeholder, selected);
+  select.disabled = !(entries || []).length;
 }
 
 function updateNewGameOptions() {
@@ -184,25 +152,18 @@ function updateNewGameOptions() {
 }
 
 function renderProfile(profile) {
-  const user = profile.user || {};
-  const displayName = profile.display_name || user.display_name || user.full_name || user.username || profile.username || "Game thủ";
-  const username = profile.username || user.username || currentUsernameFromToken() || "player";
-  const region = profile.region || "Chưa cập nhật khu vực";
-  const playTime = profile.play_time || "Chưa cập nhật giờ chơi";
-  const avatar = profile.avatar_url || profile.avatar || user.avatar_url || user.avatar || "";
-
+  const displayName = profile.display_name || currentUser?.username || "Game thủ";
+  const username = profile.username || currentUser?.username || "player";
   profileEls.displayName.textContent = displayName;
-  profileEls.username.textContent = username.startsWith("@") ? username : `@${username}`;
-  profileEls.region.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(region)}`;
-  profileEls.playTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${escapeHtml(playTime)}`;
+  profileEls.username.textContent = `@${String(username).replace(/^@/, "")}`;
+  profileEls.region.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(profile.region || "Chưa cập nhật khu vực")}`;
+  profileEls.playTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${escapeHtml(profile.play_time || "Chưa cập nhật giờ chơi")}`;
   profileEls.mic.innerHTML = `<i class="fa-solid fa-microphone"></i> ${profile.has_mic ? "Có microphone" : "Chưa bật microphone"}`;
   profileEls.bio.textContent = profile.bio || "Người chơi chưa cập nhật phần giới thiệu.";
-  renderAvatar(profileEls.avatar, avatar, displayName);
-
-  const isPublic = profile.is_public !== false;
+  renderAvatar(profileEls.avatar, profile.avatar, displayName);
+  const isPublic = Boolean(profile.is_public);
   profileEls.status.innerHTML = `<span></span>${isPublic ? "PUBLIC PLAYER" : "PRIVATE PLAYER"}`;
   profileEls.status.className = `status-chip${isPublic ? "" : " status-private"}`;
-
   profileEls.editBtn.hidden = !isOwnProfile;
   renderHeroAction(profile);
   document.title = `${displayName} | GameConnect`;
@@ -211,30 +172,36 @@ function renderProfile(profile) {
 function renderHeroAction(profile) {
   if (isOwnProfile) {
     profileEls.heroAction.innerHTML = `<button class="gc-btn gc-btn-outline" type="button" id="btn-edit-profile-hero"><i class="fa-solid fa-pen"></i> Chỉnh sửa</button>`;
-    document.getElementById("btn-edit-profile-hero").addEventListener("click", openEditModal);
+    $("btn-edit-profile-hero").addEventListener("click", openEditModal);
     return;
   }
-  const status = String(profile.friend_status || profile.relationship_status || "NONE").toUpperCase();
-  const targetId = profile.user_id || profile.id || profile.user?.id;
+  const status = String(profile.friend_status || "NONE").toUpperCase();
+  const targetId = profile.user_id;
+  const signedIn = Boolean(localStorage.getItem("access_token"));
+  if (!signedIn) {
+    profileEls.heroAction.innerHTML = `<a class="gc-btn gc-btn-primary" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Đăng nhập để kết bạn</a>`;
+    return;
+  }
   let label = "Kết bạn";
-  let disabled = false;
-  if (["FRIEND", "FRIENDS", "ACCEPTED", "CONNECTED"].includes(status)) { label = "Đã là bạn bè"; disabled = true; }
-  else if (["PENDING", "SENT", "REQUESTED"].includes(status)) { label = "Đã gửi lời mời"; disabled = true; }
-  else if (["RECEIVED", "INCOMING"].includes(status)) { label = "Có lời mời kết bạn"; disabled = true; }
-  profileEls.heroAction.innerHTML = `<button class="gc-btn gc-btn-primary" id="btn-profile-add-friend" type="button" ${disabled || !targetId ? "disabled" : ""}><i class="fa-solid fa-user-plus"></i> ${label}</button><a class="gc-btn gc-btn-quiet" href="friends.html"><i class="fa-solid fa-user-group"></i> Bạn bè</a>`;
-  const addBtn = document.getElementById("btn-profile-add-friend");
-  if (addBtn && !disabled && targetId) addBtn.addEventListener("click", () => sendFriendRequest(targetId, addBtn));
+  let disabled = !targetId;
+  if (status === "FRIEND") { label = "Đã là bạn bè"; disabled = true; }
+  else if (status === "SENT") { label = "Đã gửi lời mời"; disabled = true; }
+  else if (status === "RECEIVED") { label = "Có lời mời đang chờ"; disabled = true; }
+  profileEls.heroAction.innerHTML = `<button class="gc-btn gc-btn-primary" id="btn-profile-add-friend" type="button" ${disabled ? "disabled" : ""}><i class="fa-solid fa-user-plus"></i> ${label}</button><a class="gc-btn gc-btn-quiet" href="friends.html"><i class="fa-solid fa-user-group"></i> Bạn bè</a>`;
+  const button = $("btn-profile-add-friend");
+  if (button && !disabled) button.addEventListener("click", () => sendFriendRequest(Number(targetId), button));
 }
 
 async function sendFriendRequest(targetId, button) {
-  button.disabled = true;
   const oldHtml = button.innerHTML;
+  button.disabled = true;
   button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...`;
   try {
-    await api.post(PROFILE_API.FRIEND_REQUESTS, { receiver_id: targetId });
-    button.innerHTML = `<i class="fa-solid fa-check"></i> Đã gửi lời mời`;
-    currentProfile.friend_status = "PENDING";
-    showToast("Đã gửi lời mời kết bạn.", "success");
+    const result = unwrapData(await api.post(PROFILE_API.FRIEND_REQUESTS, { receiver_id: targetId }));
+    const wasAutoAccepted = result?.status === "ACCEPTED";
+    currentProfile.friend_status = wasAutoAccepted ? "FRIEND" : "SENT";
+    renderHeroAction(currentProfile);
+    showToast(wasAutoAccepted ? "Hai bạn đã trở thành bạn bè." : "Đã gửi lời mời kết bạn.", "success");
   } catch (error) {
     button.disabled = false;
     button.innerHTML = oldHtml;
@@ -246,88 +213,118 @@ function normalizeUserGame(item) {
   const nestedGame = item.game || {};
   const gameId = item.game_id ?? nestedGame.id;
   const game = findGame(gameId) || nestedGame;
-  const rankId = item.rank_id ?? item.rank?.id ?? "";
-  const roleId = item.role_id ?? item.role?.id ?? "";
-  return { ...item, game_id: gameId, rank_id: rankId, role_id: roleId, game };
+  return {
+    ...item,
+    game_id: gameId,
+    rank_id: item.rank_id ?? item.rank?.id ?? "",
+    role_id: item.role_id ?? item.role?.id ?? "",
+    game,
+  };
 }
 
 function renderGames() {
   profileEls.gamesCount.textContent = `${myGames.length}/5`;
   if (!myGames.length) {
-    profileEls.gamesList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-gamepad"></i><strong>Chưa có game yêu thích</strong><span>Thêm game bạn thường chơi để hiển thị rank và vai trò trên hồ sơ.</span></div>`;
+    profileEls.gamesList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-gamepad"></i><strong>Chưa có game yêu thích</strong><span>${isOwnProfile ? "Thêm game bạn thường chơi để hiển thị rank và vai trò trên hồ sơ." : "Người chơi chưa thêm game yêu thích vào hồ sơ."}</span></div>`;
     return;
   }
-
-  profileEls.gamesList.innerHTML = myGames.map((rawItem) => {
-    const item = normalizeUserGame(rawItem);
+  profileEls.gamesList.innerHTML = myGames.map((raw) => {
+    const item = normalizeUserGame(raw);
     const game = item.game || {};
-    const gameName = game.name || `Game #${item.game_id}`;
-    const rank = findRank(game, item.rank_id);
-    const role = findRole(game, item.role_id);
-    const rankName = rank?.rank_name || item.rank?.rank_name || item.rank_name || "Chưa chọn rank";
-    const roleName = role?.role_name || item.role?.role_name || item.role_name || "Chưa chọn vai trò";
+    const name = game.name || `Game #${item.game_id}`;
+    const rankName = findRank(game, item.rank_id)?.rank_name || item.rank?.rank_name || "Chưa chọn rank";
+    const roleName = findRole(game, item.role_id)?.role_name || item.role?.role_name || "Chưa chọn vai trò";
     const image = getGameImage(game);
-    const itemId = item.id;
-    return `
-      <article class="game-card" data-user-game-id="${escapeHtml(itemId)}">
-        ${image ? `<img class="game-card-image" src="${escapeHtml(image)}" alt="${escapeHtml(gameName)}">` : `<div class="game-card-image game-card-image-fallback"><i class="fa-solid fa-gamepad"></i></div>`}
-        <div class="game-card-main">
-          <h3 class="game-card-name">${escapeHtml(gameName)}</h3>
-          <div class="game-tags"><span class="game-tag"><i class="fa-solid fa-ranking-star"></i>${escapeHtml(rankName)}</span><span class="game-tag"><i class="fa-solid fa-crosshairs"></i>${escapeHtml(roleName)}</span></div>
-          ${item.in_game_id ? `<div class="game-card-id">ID game: ${escapeHtml(item.in_game_id)}</div>` : ""}
-        </div>
-        ${isOwnProfile ? `<div class="game-card-actions"><button class="icon-action" type="button" data-action="edit-game" title="Sửa rank/vai trò"><i class="fa-solid fa-pen"></i></button><button class="icon-action danger" type="button" data-action="delete-game" title="Xoá game"><i class="fa-solid fa-trash"></i></button></div>` : ""}
-        ${isOwnProfile ? `<div class="game-edit-wrap" hidden>
-          <select data-field="rank_id" aria-label="Rank">${buildSelectOptions(game.ranks || [], "rank_name", "Chọn rank", item.rank_id)}</select>
-          <select data-field="role_id" aria-label="Vai trò">${buildSelectOptions(game.roles || [], "role_name", "Chọn vai trò", item.role_id)}</select>
-          <button class="gc-btn gc-btn-primary" type="button" data-action="save-game-edit"><i class="fa-solid fa-check"></i> Lưu</button>
-        </div>` : ""}
-      </article>`;
+    return `<article class="game-card" data-user-game-id="${escapeHtml(item.id)}">
+      ${image ? `<img class="game-card-image" src="${escapeHtml(image)}" alt="${escapeHtml(name)}">` : `<div class="game-card-image game-card-image-fallback"><i class="fa-solid fa-gamepad"></i></div>`}
+      <div class="game-card-main"><h3 class="game-card-name">${escapeHtml(name)}</h3>
+      <div class="game-tags"><span class="game-tag"><i class="fa-solid fa-ranking-star"></i>${escapeHtml(rankName)}</span><span class="game-tag"><i class="fa-solid fa-crosshairs"></i>${escapeHtml(roleName)}</span></div>
+      ${item.in_game_id ? `<div class="game-card-id">ID game: ${escapeHtml(item.in_game_id)}</div>` : ""}</div>
+      ${isOwnProfile ? `<div class="game-card-actions"><button class="icon-action" type="button" data-action="edit-game" title="Sửa rank/vai trò"><i class="fa-solid fa-pen"></i></button><button class="icon-action danger" type="button" data-action="delete-game" title="Xóa game"><i class="fa-solid fa-trash"></i></button></div>
+      <div class="game-edit-wrap" hidden><select data-field="rank_id" aria-label="Rank">${buildSelectOptions(game.ranks || [], "rank_name", "Chọn rank", item.rank_id)}</select><select data-field="role_id" aria-label="Vai trò">${buildSelectOptions(game.roles || [], "role_name", "Chọn vai trò", item.role_id)}</select><button class="gc-btn gc-btn-primary" type="button" data-action="save-game-edit"><i class="fa-solid fa-check"></i> Lưu</button></div>` : ""}
+    </article>`;
   }).join("");
-}
-
-function buildSelectOptions(entries, key, placeholder, selected) {
-  const sorted = [...entries];
-  if (key === "rank_name") sorted.sort((a, b) => Number(a.rank_order || 0) - Number(b.rank_order || 0));
-  return `<option value="">${escapeHtml(placeholder)}</option>` + sorted.map((entry) =>
-    `<option value="${escapeHtml(entry.id)}" ${String(entry.id) === String(selected) ? "selected" : ""}>${escapeHtml(entry[key] || entry.name || "")}</option>`
-  ).join("");
+  profileEls.gamesList.querySelectorAll(".game-card-image").forEach((img) => img.addEventListener("error", () => { img.replaceWith(Object.assign(document.createElement("div"), { className: "game-card-image game-card-image-fallback", innerHTML: '<i class="fa-solid fa-gamepad"></i>' })); }, { once: true }));
 }
 
 function renderTeams() {
   if (!myTeams.length) {
-    profileEls.teamsList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-people-group"></i><strong>Chưa tham gia đội nào</strong><span>Tìm bài đăng tuyển đồng đội để tham gia một squad phù hợp.</span><a class="text-link" href="team-posts.html">Khám phá đội tuyển <i class="fa-solid fa-arrow-right"></i></a></div>`;
+    profileEls.teamsList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-people-group"></i><strong>Chưa tham gia đội nào</strong><span>${isOwnProfile ? "Khi bạn tham gia một đội, thông tin sẽ xuất hiện tại đây." : "Người chơi chưa tham gia đội nào được công khai."}</span>${isOwnProfile ? `<a class="text-link" href="team-posts.html">Tìm đồng đội <i class="fa-solid fa-arrow-right"></i></a>` : ""}</div>`;
     return;
   }
+
   profileEls.teamsList.innerHTML = myTeams.map((team) => {
-    const name = team.name || team.team_name || "Đội GameConnect";
-    const logo = resolveImageUrl(team.avatar || team.logo || team.image || "");
-    const meta = [team.game_name || team.game?.name, team.member_count ? `${team.member_count} thành viên` : ""].filter(Boolean).join(" · ");
+    const name = team.name || `Đội #${team.id}`;
+    const logo = resolveImageUrl(team.logo_url || "");
+    const gameName = team.game_name || "Game chưa xác định";
+    const memberCount = Number(team.member_count || 0);
+    const maxMembers = Number(team.max_members || 0);
+    const role = team.is_captain || team.member_role === "CAPTAIN" ? "Đội trưởng" : "Thành viên";
     return `<article class="team-card">
-      ${logo ? `<img class="team-avatar" src="${escapeHtml(logo)}" alt="${escapeHtml(name)}">` : `<div class="team-avatar team-avatar-fallback">${escapeHtml(initials(name))}</div>`}
-      <div class="team-info"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(meta || "Đội đang hoạt động")}</span>${team.member_role || team.role ? `<span class="team-role">${escapeHtml(team.member_role || team.role)}</span>` : ""}</div>
-      ${team.id ? `<a class="icon-action" href="team-detail.html?id=${encodeURIComponent(team.id)}" aria-label="Xem đội"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ""}
+      ${logo ? `<img class="team-avatar" src="${escapeHtml(logo)}" alt="Logo ${escapeHtml(name)}">` : `<div class="team-avatar team-avatar-fallback">${escapeHtml(initials(name))}</div>`}
+      <div class="team-info"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(gameName)} · ${memberCount}${maxMembers ? `/${maxMembers}` : ""} thành viên</span><span class="team-role">${role} · ${team.join_mode === "PUBLIC" ? "Công khai" : "Cần phê duyệt"}</span>${team.description ? `<span class="team-description">${escapeHtml(team.description)}</span>` : ""}</div>
     </article>`;
   }).join("");
+  profileEls.teamsList.querySelectorAll(".team-avatar").forEach((img) => {
+    if (img.tagName === "IMG") img.addEventListener("error", () => {
+      const fallback = document.createElement("div");
+      fallback.className = "team-avatar team-avatar-fallback";
+      fallback.textContent = initials(img.alt.replace(/^Logo /, ""));
+      img.replaceWith(fallback);
+    }, { once: true });
+  });
+}
+
+async function loadCurrentUser() {
+  const result = unwrapData(await api.get(PROFILE_API.CURRENT_USER));
+  if (!result || !result.id) throw new Error("Không lấy được thông tin tài khoản hiện tại.");
+  currentUser = result;
+  localStorage.setItem("username", result.username || "");
+  localStorage.setItem("user_id", String(result.id));
 }
 
 async function loadProfile() {
-  const username = new URLSearchParams(window.location.search).get("username");
-  const tokenUsername = currentUsernameFromToken();
-  isOwnProfile = !username || (tokenUsername && username.toLowerCase() === String(tokenUsername).toLowerCase());
+  const requestedUsername = new URLSearchParams(window.location.search).get("username");
+  isOwnProfile = !requestedUsername || (currentUser?.username && requestedUsername.toLowerCase() === currentUser.username.toLowerCase());
   profileEls.editBtn.hidden = !isOwnProfile;
 
-  const endpoint = isOwnProfile ? PROFILE_API.PROFILE_ME : PROFILE_API.PROFILE_BY_USERNAME(username);
-  const response = await api.get(endpoint);
-  currentProfile = unwrapData(response);
-  if (currentProfile?.profile) currentProfile = currentProfile.profile;
+  if (isOwnProfile) {
+    try {
+      currentProfile = unwrapData(await api.get(PROFILE_API.PROFILE_ME));
+      profileCreated = true;
+    } catch (error) {
+      if (error.status !== 404) throw error;
+      profileCreated = false;
+      currentProfile = {
+        user_id: currentUser.id,
+        username: currentUser.username,
+        display_name: currentUser.username,
+        bio: "",
+        region: "",
+        play_time: "",
+        has_mic: false,
+        is_public: false,
+        avatar: null,
+      };
+    }
+  } else {
+    currentProfile = unwrapData(await api.get(PROFILE_API.PROFILE_BY_USERNAME(requestedUsername)));
+    profileCreated = true;
+  }
+
   if (!currentProfile || typeof currentProfile !== "object") throw new Error("Dữ liệu hồ sơ không hợp lệ.");
+  currentProfile.username = currentProfile.username || currentUser?.username || requestedUsername;
   renderProfile(currentProfile);
+
+  if (isOwnProfile && !profileCreated) {
+    showProfileAlert("Bạn chưa tạo hồ sơ game thủ. Hãy bổ sung thông tin để hoàn tất hồ sơ.");
+    openEditModal();
+  }
 }
 
 async function loadCatalog() {
-  const response = await api.get(PROFILE_API.GAME_CATALOG);
-  gamesCatalog = asArray(unwrapData(response), ["items", "games", "results", "data"]);
+  const response = unwrapData(await api.get(PROFILE_API.GAME_CATALOG));
+  gamesCatalog = Array.isArray(response) ? response : [];
   catalogReady = true;
   profileEls.newGame.innerHTML = `<option value="">-- Chọn game --</option>` + gamesCatalog.map((game) =>
     `<option value="${escapeHtml(game.id)}">${escapeHtml(game.name)}</option>`
@@ -336,45 +333,35 @@ async function loadCatalog() {
 }
 
 async function loadMyGames() {
-  if (!isOwnProfile) {
-    // Hồ sơ công khai có thể được API profile trả kèm danh sách user_games.
-    myGames = asArray(currentProfile.user_games || currentProfile.games, ["items", "games", "user_games"]);
+  if (isOwnProfile) {
+    myGames = unwrapData(await api.get(PROFILE_API.MY_GAMES)) || [];
   } else {
-    try {
-      const response = await api.get(PROFILE_API.MY_GAMES);
-      myGames = asArray(unwrapData(response), ["items", "user_games", "games", "results"]);
-    } catch (error) {
-      if (Array.isArray(currentProfile.user_games)) myGames = currentProfile.user_games;
-      else throw error;
-    }
+    myGames = Array.isArray(currentProfile.user_games) ? currentProfile.user_games : [];
   }
   renderGames();
-  document.getElementById("btn-add-game-toggle").hidden = !isOwnProfile;
+  $("btn-add-game-toggle").hidden = !isOwnProfile;
 }
 
 async function loadMyTeams() {
-  if (!isOwnProfile) {
-    myTeams = asArray(currentProfile.teams || currentProfile.joined_teams, ["items", "teams"]);
+  if (isOwnProfile) {
+    myTeams = unwrapData(await api.get(PROFILE_API.MY_TEAMS)) || [];
   } else {
-    const response = await api.get(PROFILE_API.MY_TEAMS);
-    myTeams = asArray(unwrapData(response), ["items", "teams", "results"]);
+    myTeams = Array.isArray(currentProfile.teams) ? currentProfile.teams : [];
   }
   renderTeams();
 }
 
 function openEditModal() {
   if (!currentProfile || !isOwnProfile) return;
-  const displayName = currentProfile.display_name || currentProfile.user?.display_name || currentProfile.user?.username || "";
-  document.getElementById("edit-display-name").value = displayName;
-  document.getElementById("edit-bio").value = currentProfile.bio || "";
-  document.getElementById("edit-region").value = currentProfile.region || "";
-  document.getElementById("edit-play-time").value = currentProfile.play_time || "";
-  document.getElementById("edit-has-mic").checked = Boolean(currentProfile.has_mic);
-  document.getElementById("edit-is-public").checked = currentProfile.is_public !== false;
+  $("edit-display-name").value = currentProfile.display_name || currentUser?.username || "";
+  $("edit-bio").value = currentProfile.bio || "";
+  $("edit-region").value = currentProfile.region || "";
+  $("edit-play-time").value = currentProfile.play_time || "";
+  $("edit-has-mic").checked = Boolean(currentProfile.has_mic);
+  $("edit-is-public").checked = Boolean(currentProfile.is_public);
   selectedAvatarFile = null;
   profileEls.avatarFile.value = "";
-  const avatar = currentProfile.avatar_url || currentProfile.avatar || currentProfile.user?.avatar_url || "";
-  renderAvatarPreview(avatar, displayName);
+  renderAvatarPreview(currentProfile.avatar || "", currentProfile.display_name || currentUser?.username || "GC");
   setInlineError(profileEls.editError);
   profileEls.editModal.hidden = false;
   document.body.classList.add("modal-open");
@@ -399,52 +386,59 @@ function closeEditModal() {
   profileEls.editModal.hidden = true;
   document.body.classList.remove("modal-open");
   selectedAvatarFile = null;
+  profileEls.avatarFile.value = "";
   if (previewObjectUrl) {
     URL.revokeObjectURL(previewObjectUrl);
     previewObjectUrl = null;
   }
 }
 
+async function uploadSelectedAvatar() {
+  if (!selectedAvatarFile) return;
+  const formData = new FormData();
+  formData.append("file", selectedAvatarFile);
+  const response = await http.post(PROFILE_API.AVATAR_UPLOAD, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  const result = unwrapData(response.data);
+  if (!result?.avatar) throw new Error("Backend không trả về trường avatar sau khi tải ảnh.");
+  currentProfile = { ...currentProfile, ...result };
+}
+
 async function saveProfile(event) {
   event.preventDefault();
   setInlineError(profileEls.editError);
-  const displayName = document.getElementById("edit-display-name").value.trim();
+  const displayName = $("edit-display-name").value.trim();
   if (!displayName) return setInlineError(profileEls.editError, "Vui lòng nhập tên hiển thị.");
 
   const payload = {
     display_name: displayName,
-    bio: document.getElementById("edit-bio").value.trim(),
-    region: document.getElementById("edit-region").value || null,
-    play_time: document.getElementById("edit-play-time").value.trim() || null,
-    has_mic: document.getElementById("edit-has-mic").checked,
-    is_public: document.getElementById("edit-is-public").checked,
+    bio: $("edit-bio").value.trim() || null,
+    region: $("edit-region").value || null,
+    play_time: $("edit-play-time").value.trim() || null,
+    has_mic: $("edit-has-mic").checked,
+    is_public: $("edit-is-public").checked,
   };
-  const saveButton = document.getElementById("btn-save-profile");
-  saveButton.disabled = true;
-  saveButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
+  const button = $("btn-save-profile");
+  button.disabled = true;
+  button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
 
   try {
-    if (selectedAvatarFile) {
-      const formData = new FormData();
-      formData.append("file", selectedAvatarFile);
-      const uploadResponse = await http.post(PROFILE_API.AVATAR_UPLOAD, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const uploadData = unwrapData(uploadResponse.data);
-      const avatarUrl = uploadData?.avatar_url || uploadData?.avatar || uploadData?.url || uploadData?.path;
-      if (!avatarUrl) throw new Error("API upload không trả về đường dẫn avatar (avatar_url/avatar/url).");
-      payload.avatar = avatarUrl;
-    }
-    const updated = unwrapData(await api.put(PROFILE_API.PROFILE_UPDATE, payload));
-    currentProfile = { ...currentProfile, ...payload, ...(updated?.profile || updated || {}) };
+    const saved = profileCreated
+      ? unwrapData(await api.put(PROFILE_API.PROFILE_UPDATE, payload))
+      : unwrapData(await api.post(PROFILE_API.PROFILE_CREATE, payload));
+    currentProfile = { ...currentProfile, ...saved, ...payload };
+    profileCreated = true;
+    if (selectedAvatarFile) await uploadSelectedAvatar();
     renderProfile(currentProfile);
     closeEditModal();
+    hideProfileAlert();
     showToast("Đã cập nhật hồ sơ cá nhân.", "success");
   } catch (error) {
     setInlineError(profileEls.editError, error.message || "Không thể lưu hồ sơ.");
   } finally {
-    saveButton.disabled = false;
-    saveButton.innerHTML = `<i class="fa-solid fa-check"></i> Lưu thay đổi`;
+    button.disabled = false;
+    button.innerHTML = `<i class="fa-solid fa-check"></i> Lưu thay đổi`;
   }
 }
 
@@ -472,7 +466,7 @@ function handleAvatarFile(file) {
 function clearAvatarSelection() {
   selectedAvatarFile = null;
   profileEls.avatarFile.value = "";
-  renderAvatarPreview(currentProfile?.avatar_url || currentProfile?.avatar || "", currentProfile?.display_name || "GC");
+  renderAvatarPreview(currentProfile?.avatar || "", currentProfile?.display_name || currentUser?.username || "GC");
   setInlineError(profileEls.editError);
 }
 
@@ -488,6 +482,7 @@ function toggleAddGame(force) {
 async function addGame(event) {
   event.preventDefault();
   setInlineError(profileEls.addGameError);
+  if (!profileCreated) return setInlineError(profileEls.addGameError, "Hãy tạo hồ sơ trước khi thêm game.");
   if (!catalogReady) return setInlineError(profileEls.addGameError, "Danh mục game chưa tải xong.");
   if (myGames.length >= 5) return setInlineError(profileEls.addGameError, "Bạn chỉ có thể thêm tối đa 5 game yêu thích.");
 
@@ -501,17 +496,17 @@ async function addGame(event) {
   if (roleId && !findRole(game, roleId)) return setInlineError(profileEls.addGameError, "Vai trò không thuộc game đã chọn.");
 
   const payload = {
-    game_id: Number(gameId),
-    rank_id: rankId ? Number(rankId) : null,
+    game_id: Number(gameId), rank_id: rankId ? Number(rankId) : null,
     role_id: roleId ? Number(roleId) : null,
-    in_game_id: document.getElementById("new-in-game-id").value.trim() || null,
+    in_game_id: $("new-in-game-id").value.trim() || null,
   };
-  const button = document.getElementById("btn-save-new-game");
+  const button = $("btn-save-new-game");
   button.disabled = true;
-  button.textContent = "Đang lưu...";
+  button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
   try {
     await api.post(PROFILE_API.CREATE_USER_GAME, payload);
-    await loadMyGames();
+    myGames = unwrapData(await api.get(PROFILE_API.MY_GAMES)) || [];
+    renderGames();
     profileEls.addGameForm.reset();
     updateNewGameOptions();
     toggleAddGame(false);
@@ -520,7 +515,7 @@ async function addGame(event) {
     setInlineError(profileEls.addGameError, error.message || "Không thể thêm game.");
   } finally {
     button.disabled = false;
-    button.textContent = "Lưu game";
+    button.innerHTML = "Lưu game";
   }
 }
 
@@ -540,16 +535,16 @@ async function handleGameListAction(event) {
     return;
   }
   if (action === "delete-game") {
-    if (!window.confirm("Bạn có chắc muốn xoá game này khỏi hồ sơ?")) return;
+    if (!window.confirm("Bạn có chắc muốn xóa game này khỏi hồ sơ?")) return;
     button.disabled = true;
     try {
       await api.delete(PROFILE_API.USER_GAME_DETAIL(id));
       myGames = myGames.filter((item) => String(item.id) !== String(id));
       renderGames();
-      showToast("Đã xoá game khỏi hồ sơ.", "success");
+      showToast("Đã xóa game khỏi hồ sơ.", "success");
     } catch (error) {
       button.disabled = false;
-      showToast(`Không thể xoá game: ${error.message}`, "error");
+      showToast(`Không thể xóa game: ${error.message}`, "error");
     }
     return;
   }
@@ -566,7 +561,8 @@ async function handleGameListAction(event) {
         role_id: roleId ? Number(roleId) : null,
         in_game_id: row.in_game_id || null,
       });
-      await loadMyGames();
+      myGames = unwrapData(await api.get(PROFILE_API.MY_GAMES)) || [];
+      renderGames();
       showToast("Đã cập nhật rank và vai trò.", "success");
     } catch (error) {
       button.disabled = false;
@@ -577,55 +573,62 @@ async function handleGameListAction(event) {
 
 function bindEvents() {
   profileEls.editBtn.addEventListener("click", openEditModal);
-  document.getElementById("btn-close-edit").addEventListener("click", closeEditModal);
-  document.getElementById("btn-cancel-edit").addEventListener("click", closeEditModal);
-  document.querySelectorAll("[data-close-edit]").forEach((el) => el.addEventListener("click", closeEditModal));
+  $("btn-close-edit").addEventListener("click", closeEditModal);
+  $("btn-cancel-edit").addEventListener("click", closeEditModal);
+  document.querySelectorAll("[data-close-edit]").forEach((node) => node.addEventListener("click", closeEditModal));
   profileEls.editForm.addEventListener("submit", saveProfile);
   profileEls.avatarFile.addEventListener("change", (event) => handleAvatarFile(event.target.files?.[0]));
-  document.getElementById("btn-remove-avatar-preview").addEventListener("click", clearAvatarSelection);
-
-  document.getElementById("btn-add-game-toggle").addEventListener("click", () => toggleAddGame());
-  document.getElementById("btn-cancel-add-game").addEventListener("click", () => toggleAddGame(false));
+  $("btn-remove-avatar-preview").addEventListener("click", clearAvatarSelection);
+  $("btn-add-game-toggle").addEventListener("click", () => toggleAddGame());
+  $("btn-cancel-add-game").addEventListener("click", () => toggleAddGame(false));
   profileEls.newGame.addEventListener("change", updateNewGameOptions);
   profileEls.addGameForm.addEventListener("submit", addGame);
   profileEls.gamesList.addEventListener("click", handleGameListAction);
-
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !profileEls.editModal.hidden) closeEditModal();
   });
 }
 
 async function initProfilePage() {
-  if (!localStorage.getItem("access_token")) {
-    const next = encodeURIComponent("profile.html" + window.location.search);
+  const requestedUsername = new URLSearchParams(window.location.search).get("username");
+  const hasToken = Boolean(localStorage.getItem("access_token"));
+  if (!hasToken && !requestedUsername) {
+    const next = encodeURIComponent("profile.html");
     window.location.href = `login.html?next=${next}`;
     return;
   }
-  bindEvents();
 
+  bindEvents();
   try {
-    const results = await Promise.allSettled([loadProfile(), loadCatalog()]);
-    const profileResult = results[0];
-    const catalogResult = results[1];
+    if (hasToken) {
+      try { await loadCurrentUser(); }
+      catch (error) {
+        if (!requestedUsername) throw error;
+        currentUser = null;
+      }
+    }
+
+    const jobs = await Promise.allSettled([loadProfile(), loadCatalog()]);
+    const profileResult = jobs[0];
     if (profileResult.status === "rejected") {
-      showProfileAlert(`Không tải được hồ sơ: ${profileResult.reason?.message || "Lỗi không xác định"}. Kiểm tra endpoint PROFILE_ME/PROFILE_BY_USERNAME trong js/pages/profile.js.`, "error");
-      profileEls.gamesList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><strong>Không thể tải dữ liệu hồ sơ</strong><span>Hãy kiểm tra backend đã chạy và API hồ sơ đã được khai báo.</span></div>`;
-      profileEls.teamsList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-info"></i><strong>Chưa thể tải đội</strong><span>Thông tin đội sẽ xuất hiện khi API hồ sơ hoạt động.</span></div>`;
+      const error = profileResult.reason;
+      showProfileAlert(error.message || "Không tải được hồ sơ.", "error");
+      profileEls.gamesList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><strong>Không thể tải hồ sơ</strong><span>Hồ sơ có thể chưa công khai hoặc tài khoản chưa có dữ liệu.</span></div>`;
+      profileEls.teamsList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-info"></i><strong>Chưa có thông tin đội</strong></div>`;
       return;
     }
-    if (catalogResult.status === "rejected") {
-      showProfileAlert(`Không tải được danh mục game: ${catalogResult.reason?.message || "Lỗi không xác định"}.`, "error");
+
+    if (jobs[1].status === "rejected") showProfileAlert(`Không tải được danh mục game: ${jobs[1].reason?.message || "Lỗi không xác định"}.`, "error");
+    const secondary = await Promise.allSettled([loadMyGames(), loadMyTeams()]);
+    if (secondary[0].status === "rejected") {
+      profileEls.gamesList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-gamepad"></i><strong>Chưa tải được game yêu thích</strong><span>${escapeHtml(secondary[0].reason?.message || "Kiểm tra API /api/user-games/me.")}</span></div>`;
     }
-    const jobs = await Promise.allSettled([loadMyGames(), loadMyTeams()]);
-    if (jobs[0].status === "rejected") {
-      profileEls.gamesList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-gamepad"></i><strong>Chưa tải được game yêu thích</strong><span>${escapeHtml(jobs[0].reason?.message || "Kiểm tra API /user-games/me.")}</span></div>`;
-    }
-    if (jobs[1].status === "rejected") {
-      profileEls.teamsList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-people-group"></i><strong>Chưa tải được đội tham gia</strong><span>${escapeHtml(jobs[1].reason?.message || "Kiểm tra API /teams/me.")}</span></div>`;
+    if (secondary[1].status === "rejected") {
+      profileEls.teamsList.innerHTML = `<div class="empty-state"><i class="fa-solid fa-people-group"></i><strong>Chưa tải được đội hiện tại</strong><span>${escapeHtml(secondary[1].reason?.message || "Kiểm tra API /teams/me.")}</span></div>`;
     }
   } catch (error) {
     showProfileAlert(error.message || "Có lỗi khi khởi tạo trang hồ sơ.", "error");
   }
 }
 
-initProfilePage();
+document.addEventListener("DOMContentLoaded", initProfilePage);

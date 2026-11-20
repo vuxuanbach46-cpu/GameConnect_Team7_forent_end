@@ -9,7 +9,7 @@
 const MENU = [
   { href: "index.html", label: "Trang chủ" },
   { href: "pages/community.html", label: "Cộng đồng" },
-  { href: "pages/friends.html", label: "Bạn bè (UI/UX)" },
+  { href: "pages/friends.html", label: "Bạn bè" },
   { href: "pages/profile.html", label: "Hồ sơ" },
   { href: "pages/items.html", label: "Items (CRUD mẫu)" },
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
