@@ -1,0 +1,1116 @@
+/* ==========================================================
+   GameConnect — Trang Tìm đội nhanh (Quick Team Finder)
+   - Kế thừa 100% biến màu, nút bấm, dropdown, toast từ friends.css
+   - Minimalist & Clean: viền mảnh 1px, màu phẳng, không đổ bóng đậm, không gradient
+   ========================================================== */
+
+/* ---------- Thanh trên cùng: nhãn hàng chờ ---------- */
+.qm-queue-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--fc-orange);
+  text-transform: uppercase;
+}
+
+.qm-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fc-orange);
+  flex-shrink: 0;
+}
+
+.qm-queue-label.is-searching .qm-live-dot {
+  animation: qmPulse 1s ease-in-out infinite;
+}
+
+@keyframes qmPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* Các nút icon bên phải dạng thẻ <a> / có huy hiệu số */
+.fc-right-icon-btn {
+  position: relative;
+  text-decoration: none;
+}
+
+.qm-right-party-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--fc-orange);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Danh sách bạn bè online ở thanh phải */
+.qm-right-online {
+  border-top: 1px solid var(--fc-border);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.qm-right-friend {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.qm-right-friend img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--fc-border-strong);
+  background: var(--fc-bg-surface);
+  transition: border-color 0.15s ease;
+}
+
+.qm-right-friend:hover img {
+  border-color: var(--fc-orange);
+}
+
+.qm-right-friend .qm-pres {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--fc-bg-sidebar);
+  background: var(--fc-online);
+}
+
+.qm-right-friend .qm-pres.is-room {
+  background: var(--fc-ingame);
+}
+
+/* ---------- BANNER 3 KHỐI ---------- */
+.qm-banner {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border);
+  border-radius: 10px;
+}
+
+.qm-banner-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.15fr 1.3fr;
+  gap: 16px;
+}
+
+.qm-card {
+  min-width: 0;
+  padding: 20px 22px 22px;
+  border: 1px solid var(--fc-border);
+  border-radius: 10px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.qm-card-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  color: var(--fc-text-muted);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--fc-border);
+}
+
+.qm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.qm-field[hidden] {
+  display: none;
+}
+
+.qm-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fc-text-secondary);
+}
+
+.qm-field-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.qm-dd-full {
+  width: 100%;
+}
+
+.qm-dd-full .fc-dropdown-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.qm-dd-full .fc-dropdown-menu {
+  width: 100%;
+  min-width: 0;
+}
+
+.qm-dd-full .fc-dropdown-menu.qm-rank-menu {
+  min-width: 250px;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong) transparent;
+}
+
+.qm-dd-full .fc-dropdown-menu.qm-menu-right {
+  left: auto;
+  right: 0;
+}
+
+.qm-dd-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.qm-dd-rank-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.qm-dd-rank-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----- Hồ sơ rank hiện tại ----- */
+.qm-me-rank {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.qm-me-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.qm-me-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.qm-me-premier {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+}
+
+.qm-me-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.qm-me-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fc-text);
+}
+
+.qm-me-points {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fc-text-secondary);
+}
+
+.qm-me-region {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fc-cyan);
+}
+
+.qm-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qm-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fc-bg-surface);
+  border: 1px solid var(--fc-border);
+  overflow: hidden;
+}
+
+.qm-progress-fill {
+  height: 100%;
+  background: var(--fc-orange);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.qm-progress-text {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fc-text-muted);
+}
+
+.qm-progress-text strong {
+  color: var(--fc-text);
+  font-weight: 700;
+}
+
+/* ----- Nút chọn dạng Pill (segmented) ----- */
+.qm-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.qm-seg-btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.qm-seg-btn:hover {
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.qm-seg-btn.active {
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+  background: rgba(232, 80, 2, 0.08);
+}
+
+.qm-seg-btn[data-queue="unrated"].active,
+.qm-seg-btn[data-vibe="chill"].active {
+  color: var(--fc-cyan);
+  border-color: var(--fc-cyan);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.qm-seg-sm .qm-seg-btn {
+  padding: 8px 14px;
+}
+
+/* ----- Nút bật/tắt (Mic) ----- */
+.qm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.qm-toggle:hover {
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.qm-toggle-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--fc-border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.qm-toggle[aria-pressed="true"] {
+  color: var(--fc-text);
+  border-color: var(--fc-orange);
+}
+
+.qm-toggle[aria-pressed="true"] .qm-toggle-box {
+  background: var(--fc-orange);
+  border-color: var(--fc-orange);
+}
+
+.qm-toggle[aria-pressed="true"] .qm-toggle-box::after {
+  content: "✓";
+}
+
+/* ----- Khoảng rank & vị trí ----- */
+.qm-rank-range {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 12px;
+}
+
+.qm-range-arrow {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  color: var(--fc-text-muted);
+  font-size: 14px;
+}
+
+.qm-role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.qm-role-chip {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  border: 1px solid var(--fc-border);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.qm-role-chip:hover {
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.qm-role-chip.active {
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+  background: rgba(232, 80, 2, 0.08);
+  font-weight: 600;
+}
+
+/* ---------- NÚT CHUYỂN CHẾ ĐỘ XEM ---------- */
+.qm-view-switch {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.qm-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-card);
+  color: var(--fc-text-secondary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.qm-view-btn:hover {
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.qm-view-btn.active {
+  background: var(--fc-orange);
+  border-color: var(--fc-orange);
+  color: #ffffff;
+}
+
+.qm-view-sub {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  opacity: 0.7;
+}
+
+.qm-view-btn.active .fc-tab-count {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+}
+
+.qm-view[hidden] {
+  display: none;
+}
+
+/* ---------- SẢNH 5 Ô ---------- */
+.qm-lobby-head {
+  max-width: 1180px;
+  margin: 0 auto 18px;
+  padding: 0 2px 12px;
+  border-bottom: 1px solid var(--fc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.qm-lobby-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--fc-text-muted);
+  text-transform: uppercase;
+}
+
+.qm-lobby-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qm-lobby-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fc-text);
+}
+
+.qm-leave-btn[hidden] {
+  display: none;
+}
+
+.qm-leave-btn {
+  padding: 6px 14px;
+}
+
+.qm-slots {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  padding-bottom: 24px;
+}
+
+.qm-slot {
+  position: relative;
+  min-height: 360px;
+  padding: 26px 16px 22px;
+  border: 1px solid var(--fc-border);
+  border-radius: 12px;
+  background: var(--fc-bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.qm-slot:hover {
+  border-color: var(--fc-border-strong);
+}
+
+.qm-slot.is-leader {
+  background: var(--fc-bg-card-hover);
+  border-color: var(--fc-border-strong);
+  padding-top: 40px;
+}
+
+.qm-crown {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--fc-ingame);
+  display: flex;
+}
+
+.qm-slot-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--fc-border-strong);
+  background: var(--fc-bg-surface);
+}
+
+.qm-slot.is-leader .qm-slot-avatar {
+  width: 96px;
+  height: 96px;
+  border-color: var(--fc-ingame);
+}
+
+.qm-slot-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fc-text);
+}
+
+.qm-slot-name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qm-flag {
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: -1px;
+}
+
+.qm-seg-btn .qm-flag {
+  margin-right: 4px;
+}
+
+.qm-range-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.qm-slot-rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 62px;
+  justify-content: center;
+}
+
+.qm-slot-rank img.qm-slot-rank-icon {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.qm-slot-rank-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fc-text-secondary);
+}
+
+.qm-slot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.qm-slot-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--fc-border);
+  background: transparent;
+  color: var(--fc-text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.qm-slot-remove:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--fc-danger);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* Ô trống */
+.qm-slot.is-empty {
+  border-style: dashed;
+  border-color: var(--fc-border-strong);
+  background: transparent;
+}
+
+.qm-slot-add {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid var(--fc-border-strong);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.qm-slot-add:hover {
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+  background: rgba(232, 80, 2, 0.08);
+}
+
+.qm-slot-empty-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fc-text-muted);
+}
+
+.qm-slot-need {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fc-orange);
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--fc-orange);
+  background: rgba(232, 80, 2, 0.08);
+}
+
+/* Ô đang chờ bạn bè phản hồi lời mời */
+.qm-slot.is-pending {
+  border-style: dashed;
+  border-color: var(--fc-ingame);
+}
+
+.qm-slot-pending-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fc-ingame);
+}
+
+.qm-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--fc-border-strong);
+  border-top-color: var(--fc-orange);
+  animation: qmSpin 0.8s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.qm-slot.is-pending .qm-spinner {
+  width: 28px;
+  height: 28px;
+  border-width: 3px;
+  border-top-color: var(--fc-ingame);
+}
+
+@keyframes qmSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Menu bật ra khi bấm dấu + */
+.qm-slot-menu {
+  position: absolute;
+  top: 10px;
+  left: 8px;
+  right: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 10px;
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border-strong);
+  border-radius: 10px;
+  z-index: 60;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fcDropdownFade 0.14s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong) transparent;
+}
+
+.qm-menu-friends {
+  max-height: 138px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong) transparent;
+}
+
+/* Thông báo nổi lên cao hơn thanh Match Bar để không che nút */
+.fc-toast-container {
+  bottom: 96px;
+}
+
+.qm-slot-menu-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--fc-text-muted);
+  text-transform: uppercase;
+  padding: 2px 4px;
+}
+
+.qm-slot-menu-divider {
+  height: 1px;
+  background: var(--fc-border);
+}
+
+.qm-menu-friend {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.qm-menu-friend:hover {
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border);
+}
+
+.qm-menu-friend img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--fc-border-strong);
+  flex-shrink: 0;
+}
+
+.qm-menu-friend .qm-menu-friend-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qm-menu-friend .qm-menu-friend-state {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fc-online);
+}
+
+.qm-menu-friend .qm-menu-friend-state.is-room {
+  color: var(--fc-ingame);
+}
+
+.qm-menu-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 2px 2px;
+}
+
+.qm-menu-close {
+  align-self: flex-end;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+/* ---------- THANH MATCH BAR DƯỚI CÙNG ---------- */
+.qm-matchbar {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) auto minmax(0, 0.6fr);
+  align-items: center;
+  gap: 20px;
+  padding: 14px 36px;
+  background: var(--fc-bg-sidebar);
+  border-top: 1px solid var(--fc-border);
+}
+
+.qm-matchbar-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.qm-matchbar-summary .qm-sum-game {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-right: 4px;
+}
+
+.qm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.qm-chip img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.qm-chip.is-accent {
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+  background: rgba(232, 80, 2, 0.08);
+}
+
+.qm-sum-arrow {
+  color: var(--fc-text-muted);
+  font-size: 12px;
+}
+
+.qm-matchbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.qm-matchbar-actions [hidden] {
+  display: none !important;
+}
+
+.qm-find-btn {
+  padding: 14px 32px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.qm-find-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#btn-post-room {
+  padding: 13px 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#btn-post-room.is-posted {
+  color: var(--fc-orange);
+  border-color: var(--fc-orange);
+}
+
+.qm-matchbar-status {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.qm-search-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fc-text-secondary);
+}
+
+.qm-search-status[hidden] {
+  display: none;
+}
+
+.qm-search-status strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--fc-orange);
+  font-variant-numeric: tabular-nums;
+  min-width: 52px;
+}
+
+/* ---------- DANH SÁCH PHÒNG ---------- */
+.qm-room-row .fc-player-subhead {
+  gap: 8px;
+}
+
+.qm-room-slots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.qm-slot-dots {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.qm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--fc-border-strong);
+  background: transparent;
+}
+
+.qm-dot.is-filled {
+  background: var(--fc-orange);
+  border-color: var(--fc-orange);
+}
+
+.qm-room-slots-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fc-text);
+}
+
+.qm-room-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.qm-room-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qm-range-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 70px;
+}
+
+.qm-range-badge img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.qm-range-badge span {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--fc-text-secondary);
+  text-align: center;
+}
+
+.qm-range-sep {
+  color: var(--fc-text-muted);
+  font-size: 13px;
+}
+
+.qm-room-row.is-mine {
+  border-color: var(--fc-orange);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1280px) {
+  .qm-banner-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .qm-banner-grid .qm-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .qm-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .qm-matchbar {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .qm-matchbar-status {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 820px) {
+  .qm-banner-grid {
+    grid-template-columns: 1fr;
+  }
+  .qm-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .qm-rank-range {
+    grid-template-columns: 1fr;
+  }
+  .qm-range-arrow {
+    display: none;
+  }
+  .qm-matchbar-actions {
+    flex-wrap: wrap;
+  }
+}
