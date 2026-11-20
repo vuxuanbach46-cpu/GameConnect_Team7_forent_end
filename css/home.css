@@ -12,6 +12,17 @@
     --accent-orange-hover: #ea580c;
     --text-primary: #f4f4f6;
     --text-secondary: #8e92a4;
+
+    /* Đồng bộ token màu thanh bar bên trái với friends.css */
+    --fc-bg-sidebar: #11131a;
+    --fc-bg-sidebar-hover: #141720;
+    --fc-bg-surface: #161922;
+    --fc-border: #232734;
+    --fc-border-strong: #31374a;
+    --fc-orange: #e85002;
+    --fc-text: #f1f5f9;
+    --fc-text-secondary: #94a3b8;
+    --fc-text-muted: #64748b;
 }
 
 * {
@@ -32,39 +43,210 @@ body {
 ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #3d4152; }
 
-/* Sidebar Navigation */
-.sidebar-item {
+/* ================================================================= */
+/* THANH BAR BÊN TRÁI (Đồng bộ hoàn toàn với friends.css)            */
+/* ================================================================= */
+.fc-left-bar {
+    width: 68px;
+    flex-shrink: 0;
+    background: var(--fc-bg-sidebar);
+    border-right: 1px solid var(--fc-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 18px 12px;
+    z-index: 50;
+    user-select: none;
+    overflow: hidden;
+    transition: width 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
+                background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.fc-left-bar:hover {
+    width: 244px;
+    background: var(--fc-bg-sidebar-hover);
+    border-right-color: var(--fc-border-strong);
+}
+
+.fc-bar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.fc-brand-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 9px 14px;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    gap: 14px;
+    padding: 2px 2px 6px;
+    text-decoration: none;
+    color: var(--fc-text);
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.fc-brand-logo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border-strong);
+    color: var(--fc-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.fc-brand-link:hover .fc-brand-logo {
+    border-color: var(--fc-text-secondary);
+}
+
+.fc-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.fc-left-bar:hover .fc-brand-text {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.fc-brand-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+    color: var(--fc-text);
+}
+
+.fc-brand-sub {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 1px;
+    color: var(--fc-text-muted);
+}
+
+.fc-nav-item {
     position: relative;
+    width: 100%;
+    height: 42px;
+    padding: 0 2px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fc-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    font: inherit;
+    text-align: left;
+    transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
 }
 
-.sidebar-item:hover {
-    background-color: rgba(255, 255, 255, 0.04);
-    color: var(--text-primary);
+.fc-nav-icon {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
 }
 
-.sidebar-item.active {
-    background-color: rgba(249, 115, 22, 0.12);
-    color: #ffffff;
+.fc-nav-label {
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.sidebar-item.active::before {
-    content: '';
+.fc-left-bar:hover .fc-nav-label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.fc-nav-item:hover {
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border);
+    color: var(--fc-text);
+}
+
+.fc-nav-item.active {
+    color: var(--fc-text);
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border-strong);
+}
+
+.fc-nav-item.active .fc-nav-label {
+    font-weight: 600;
+}
+
+.fc-nav-item.active .fc-nav-icon {
+    color: var(--fc-text);
+}
+
+.fc-nav-item.active::before {
+    content: "";
     position: absolute;
-    left: 0;
-    top: 20%;
-    height: 60%;
+    left: -12px;
     width: 3px;
-    background-color: var(--accent-orange);
-    border-radius: 0 4px 4px 0;
+    height: 20px;
+    background: var(--fc-orange);
+    border-radius: 0 2px 2px 0;
+}
+
+.fc-game-pill {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border-strong);
+    color: var(--fc-text-secondary);
+    font-weight: 700;
+    font-size: 10.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc-nav-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--fc-border);
+    margin: 8px 0;
+}
+
+.fc-nav-badge {
+    position: absolute;
+    top: 3px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--fc-orange);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 3 Thẻ chế độ chơi trung tâm (Ghép trận, Giải đấu,...) */
