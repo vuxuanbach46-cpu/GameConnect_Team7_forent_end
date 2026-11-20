@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm đồng đội | GameConnect - Gaming Hub</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/index.css">
+  <style>
+    /* Custom style bổ sung cho trang tìm đồng đội */
+    .btn-orange {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: white;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+    }
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-orange:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .post-card {
+      background-color: #181920;
+      border: 1px solid #242631;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .post-card:hover {
+      border-color: rgba(249, 115, 22, 0.6);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 20px -4px rgba(249, 115, 22, 0.15);
+    }
+    .badge-open {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .badge-closed {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .badge-full {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #13141a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #f97316; }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden select-none bg-[#0f1015] text-[#f4f4f6]">
+
+  <!-- ================================================================= -->
+  <!-- 1. SIDEBAR TRÁI (Chuẩn cấu trúc gaming hub index.html) -->
+  <!-- ================================================================= -->
+  <aside class="w-60 bg-[#13141a] border-r border-[#242631] flex flex-col justify-between flex-shrink-0 hidden lg:flex">
+    <div>
+      <!-- Logo Brand -->
+      <a href="../index.html" class="h-16 px-5 flex items-center gap-3 border-b border-[#242631]/60 hover:opacity-90 transition">
+        <div class="w-8 h-8 rounded-lg bg-orange-500/15 border border-orange-500/40 flex items-center justify-center text-orange-500">
+          <i class="fa-solid fa-gamepad"></i>
+        </div>
+        <div>
+          <div class="font-bold text-sm text-white leading-tight">GameConnect</div>
+          <div class="text-[10px] font-semibold tracking-widest text-zinc-500 uppercase">GAMING HUB</div>
+        </div>
+      </a>
+
+      <!-- Menu chính -->
+      <div class="p-3 space-y-1">
+        <a href="../index.html" class="sidebar-item">
+          <i class="fa-solid fa-house w-4 text-center"></i>
+          <span>Khám phá Hub</span>
+        </a>
+        <a href="team-posts.html" class="sidebar-item active">
+          <i class="fa-solid fa-play w-4 text-center text-orange-500"></i>
+          <span class="text-white font-semibold">Tìm đồng đội</span>
+        </a>
+        <a href="community.html" class="sidebar-item">
+          <i class="fa-solid fa-bolt w-4 text-center"></i>
+          <span>Bảng tin</span>
+        </a>
+        <a href="friends.html" class="sidebar-item justify-between">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-user-group w-4 text-center"></i>
+            <span>Bạn bè & Kết nối</span>
+          </div>
+          <span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-500/20 text-orange-400">20</span>
+        </a>
+
+        <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-600">Thao tác nhanh</div>
+
+        <button id="btn-sidebar-create" class="sidebar-item w-full text-left">
+          <i class="fa-solid fa-circle-plus w-4 text-center text-orange-400"></i>
+          <span>Tạo bài tìm đội</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Sidebar -->
+    <div class="p-3 border-t border-[#242631]">
+      <a href="../index.html" class="sidebar-item text-xs text-zinc-400 hover:text-white">
+        <i class="fa-solid fa-arrow-left w-4 text-center"></i>
+        <span>Về trang chủ</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ================================================================= -->
+  <!-- 2. KHUNG CHÍNH (TOPBAR + NỘI DUNG CUỘN) -->
+  <!-- ================================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 bg-[#0f1015]">
+
+    <!-- TOPBAR -->
+    <header class="h-14 bg-[#13141a] border-b border-[#242631] px-6 flex items-center justify-between flex-shrink-0">
+      <!-- Tabs điều hướng phong cách friends/index -->
+      <div class="flex items-center gap-6 overflow-x-auto">
+        <a href="../index.html" class="top-tab">
+          <span>SẢNH CHÍNH</span>
+        </a>
+        <a href="team-posts.html" class="top-tab active">
+          <span class="text-orange-400 font-bold">TÌM ĐỒNG ĐỘI</span>
+          <span class="px-2 py-0.5 text-[10px] rounded-full bg-orange-500/20 text-orange-400 font-bold" id="badge-total-count">...</span>
+        </a>
+        <a href="community.html" class="top-tab">
+          <span>BẢNG TIN</span>
+        </a>
+        <a href="friends.html" class="top-tab hidden sm:inline-flex">
+          <span>BẠN BÈ & KẾT NỐI</span>
+        </a>
+      </div>
+
+      <!-- Action: Nút Đăng bài + Auth Actions -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <button id="btn-open-create" class="btn-orange px-4 py-1.5 text-xs rounded-lg flex items-center gap-2">
+          <i class="fa-solid fa-plus"></i>
+          <span>Đăng bài tìm đội</span>
+        </button>
+
+        <div id="auth-actions" class="flex items-center gap-2">
+          <a href="login.html" class="px-3.5 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-[#1e2029] border border-[#2e313e] rounded-lg transition">
+            Đăng nhập
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- NỘI DUNG CUỘN CHÍNH -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+
+      <!-- HERO BANNER TÌM ĐỘI -->
+      <section class="relative rounded-2xl overflow-hidden border border-[#2a2d3d] bg-gradient-to-r from-[#171821] via-[#1d161d] to-[#251510] p-6 sm:p-7">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold mb-2">
+              <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+              <span>SẢNH GHÉP ĐỘI TOÀN QUỐC</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              Tìm Đồng Đội Leo Rank & Squad Chiến Game
+            </h1>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
+              Lọc theo game, bậc rank và vai trò sở trường để ghép team ưng ý nhất. Không lo troll game, toxic!
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="btn-quick-create" class="btn-orange px-5 py-2.5 text-sm rounded-xl flex items-center gap-2.5 whitespace-nowrap">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Đăng bài tuyển ngay</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- BỘ LỌC THÔNG MINH (GAMER FILTER BAR) -->
+      <!-- ================================================================= -->
+      <section class="bg-[#13141a] border border-[#242631] rounded-xl p-4 shadow-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+
+          <!-- 1. Tìm kiếm từ khoá -->
+          <div class="lg:col-span-3">
+            <label class="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <i class="fa-solid fa-magnifying-glass text-orange-500 mr-1"></i> Từ khoá bài đăng
+            </label>
+            <div class="relative">
+              <input id="filter-q" type="search" placeholder="VD: leo Plat, cần Mid, mic on..."
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg px-3 py-2 text-xs placeholder-zinc-500 outline-none transition">
+            </div>
+          </div>
+
+          <!-- 2. Chọn Game (load API) -->
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <i class="fa-solid fa-gamepad text-orange-500 mr-1"></i> Tựa Game
+            </label>
+            <select id="filter-game"
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg px-3 py-2 text-xs outline-none cursor-pointer transition">
+              <option value="">-- Tất cả game --</option>
+            </select>
+          </div>
+
+          <!-- 3. Rank (Dropdown động theo game) -->
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <i class="fa-solid fa-trophy text-orange-500 mr-1"></i> Bậc Rank
+            </label>
+            <select id="filter-rank" disabled
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg px-3 py-2 text-xs outline-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition">
+              <option value="">-- Tất cả rank --</option>
+            </select>
+          </div>
+
+          <!-- 4. Vai trò (Dropdown động theo game) -->
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <i class="fa-solid fa-crosshairs text-orange-500 mr-1"></i> Vai trò cần tuyển
+            </label>
+            <select id="filter-role" disabled
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg px-3 py-2 text-xs outline-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition">
+              <option value="">-- Tất cả vai trò --</option>
+            </select>
+          </div>
+
+          <!-- 5. Khu vực / Server -->
+          <div class="lg:col-span-1">
+            <label class="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <i class="fa-solid fa-globe text-orange-500 mr-1"></i> Server
+            </label>
+            <select id="filter-region"
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg px-2 py-2 text-xs outline-none cursor-pointer transition">
+              <option value="">Tất cả</option>
+              <option value="VN">VN</option>
+              <option value="SEA">SEA</option>
+              <option value="NA">NA</option>
+              <option value="EU">EU</option>
+            </select>
+          </div>
+
+          <!-- 6. Nút Lọc & Reset -->
+          <div class="lg:col-span-2 flex items-center gap-2">
+            <button id="btn-filter"
+              class="flex-1 btn-orange py-2 text-xs rounded-lg font-semibold flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-filter"></i>
+              <span>Lọc</span>
+            </button>
+            <button id="btn-reset-filter"
+              class="px-3 py-2 bg-[#1e2029] hover:bg-[#252834] text-zinc-400 hover:text-white border border-[#2e313e] rounded-lg text-xs transition"
+              title="Xoá tất cả bộ lọc">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- DANH SÁCH BÀI ĐĂNG (CARD GRID) -->
+      <!-- ================================================================= -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-white tracking-wide">Danh sách bài đăng</h2>
+            <span id="total-count-text" class="text-xs text-zinc-400"></span>
+          </div>
+          <div class="text-xs text-zinc-500 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Tự động cập nhật</span>
+          </div>
+        </div>
+
+        <!-- Post Grid Container -->
+        <div id="post-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Skeleton Loading -->
+          <div class="post-card rounded-xl p-5 animate-pulse h-48 bg-[#181920]"></div>
+          <div class="post-card rounded-xl p-5 animate-pulse h-48 bg-[#181920]"></div>
+          <div class="post-card rounded-xl p-5 animate-pulse h-48 bg-[#181920]"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="flex justify-center items-center gap-2 mt-8"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL TẠO / SỬA BÀI ĐĂNG (GAMER MODAL POPUP) -->
+  <!-- ================================================================= -->
+  <div id="modal-overlay" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all" hidden>
+    <div class="bg-[#13141a] border border-[#2e313e] rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-[#242631] flex items-center justify-between bg-[#171821]">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <div>
+            <h3 id="modal-title" class="font-bold text-base text-white">Đăng bài tìm đồng đội</h3>
+            <p class="text-[11px] text-zinc-400">Tuyển thành viên cho squad, ranked hoặc flex</p>
+          </div>
+        </div>
+        <button id="btn-close-modal" class="w-8 h-8 rounded-lg bg-[#20222d] text-zinc-400 hover:text-white flex items-center justify-center hover:bg-[#2b2e3e] transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar text-xs">
+        <form id="post-form" novalidate class="space-y-4">
+
+          <!-- 1. Chọn Game (Bắt buộc) -->
+          <div>
+            <label class="block font-semibold text-zinc-300 mb-1">
+              Game <span class="text-orange-500">*</span>
+            </label>
+            <select id="f-game" name="game_id" required
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none cursor-pointer transition">
+              <option value="">-- Chọn game để nạp rank & vai trò --</option>
+            </select>
+          </div>
+
+          <!-- 2. Tiêu đề bài đăng -->
+          <div>
+            <label class="block font-semibold text-zinc-300 mb-1">
+              Tiêu đề bài đăng <span class="text-orange-500">*</span>
+            </label>
+            <input id="f-title" name="title" type="text" maxlength="150" required
+              placeholder="VD: [LOL-VN] Tìm Jungle + Support leo Plat mic on..."
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none transition placeholder-zinc-500">
+          </div>
+
+          <!-- 3. Khoảng Rank yêu cầu (Min -> Max) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-300 mb-1">Rank tối thiểu</label>
+              <select id="f-min-rank" name="min_rank_id" disabled
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none cursor-pointer disabled:opacity-40 transition">
+                <option value="">-- Không yêu cầu --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-300 mb-1">Rank tối đa</label>
+              <select id="f-max-rank" name="max_rank_id" disabled
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none cursor-pointer disabled:opacity-40 transition">
+                <option value="">-- Không giới hạn --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 4. Vai trò cần tuyển (Checkboxes động theo game) -->
+          <div>
+            <label class="block font-semibold text-zinc-300 mb-1.5">
+              Vai trò cần tuyển (Roles)
+            </label>
+            <div id="f-roles-wrap" class="flex flex-wrap gap-2 p-3 bg-[#181920] border border-[#2a2d3d] rounded-lg min-h-[46px] items-center">
+              <span class="text-zinc-500 italic text-[11px]">Vui lòng chọn game ở trên để hiển thị danh sách vai trò</span>
+            </div>
+          </div>
+
+          <!-- 5. Số người cần tuyển & Giờ chơi -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-300 mb-1">
+                Số người cần tuyển <span class="text-orange-500">*</span>
+              </label>
+              <input id="f-needed" name="needed_players" type="number" min="1" max="50" value="1" required
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none transition">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-300 mb-1">Khung giờ chơi</label>
+              <input id="f-playtime" name="play_time" type="text" placeholder="VD: 20:00 - 23:00" maxlength="100"
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none transition placeholder-zinc-500">
+            </div>
+          </div>
+
+          <!-- 6. Khu vực & Hạn hiển thị -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-zinc-300 mb-1">Khu vực / Máy chủ</label>
+              <select id="f-region" name="region"
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none cursor-pointer transition">
+                <option value="">-- Không chọn --</option>
+                <option value="VN">VN (Việt Nam)</option>
+                <option value="SEA">SEA (Đông Nam Á)</option>
+                <option value="NA">NA (Bắc Mỹ)</option>
+                <option value="EU">EU (Châu Âu)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-300 mb-1">Hạn hiển thị (tối đa 7 ngày)</label>
+              <input id="f-expires" name="expires_at" type="datetime-local"
+                class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2 outline-none transition text-[11px]">
+            </div>
+          </div>
+
+          <!-- 7. Mô tả bài đăng -->
+          <div>
+            <label class="block font-semibold text-zinc-300 mb-1">Mô tả chi tiết</label>
+            <textarea id="f-desc" name="description" rows="3"
+              placeholder="Yêu cầu voice Discord, thái độ nghiêm túc, không toxic..."
+              class="w-full bg-[#181920] border border-[#2a2d3d] focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white rounded-lg p-2.5 outline-none transition placeholder-zinc-500"></textarea>
+          </div>
+
+          <!-- Error Alert -->
+          <div id="form-error" class="p-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs hidden flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="form-error-text"></span>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="pt-3 border-t border-[#242631] flex justify-end gap-3">
+            <button type="button" id="btn-cancel-form"
+              class="px-4 py-2 bg-[#1e2029] hover:bg-[#282a36] text-zinc-300 rounded-lg text-xs font-semibold transition">
+              Huỷ
+            </button>
+            <button type="submit" id="btn-submit-post"
+              class="btn-orange px-5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span id="submit-btn-text">Đăng bài ngay</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed right-5 bottom-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/pages/team-posts.js"></script>
+  <script src="../js/index.js"></script>
+</body>
+</html>

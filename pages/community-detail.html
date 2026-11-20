@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết bài viết | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/community.css">
+</head>
+<body class="community-page community-detail-page fc-dark-body" data-root="../">
+  <div class="community-detail-shell">
+    <header class="community-detail-header">
+      <a href="community.html" class="community-detail-back" aria-label="Quay lại cộng đồng">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>Quay lại cộng đồng</span>
+      </a>
+      <span class="community-detail-brand">GAMECONNECT</span>
+    </header>
+    <main class="community-detail-main">
+      <section id="detail-post" aria-live="polite"></section>
+      <section id="comments" class="comment-panel" aria-labelledby="comment-heading">
+        <div class="comment-heading">
+          <h2 id="comment-heading">Bình luận</h2>
+          <span id="comment-count">0</span>
+        </div>
+        <form id="comment-form" class="comment-form">
+          <div class="avatar avatar-self" aria-hidden="true">M</div>
+          <div class="comment-form-body">
+            <p id="replying-to" class="replying-to" hidden></p>
+            <textarea id="comment-content" rows="2" maxlength="500" placeholder="Viết bình luận hoặc chia sẻ suy nghĩ của bạn..."></textarea>
+            <div class="comment-form-actions">
+              <button type="button" id="cancel-reply" class="comment-secondary" hidden>Huỷ trả lời</button>
+              <button type="submit" id="comment-submit" class="publish-button">Đăng bình luận</button>
+            </div>
+          </div>
+        </form>
+        <div id="comment-list" class="comment-list"></div>
+        <div id="comment-empty" class="comment-empty" hidden>Chưa có bình luận nào. Hãy là người đầu tiên.</div>
+      </section>
+    </main>
+  </div>
+  <div id="fc-toast-container" class="fc-toast-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/pages/community-detail.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bạn bè & Kết nối | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/notifications.css">
+</head>
+<body class="fc-dark-body" data-root="../">
+  <header id="app-header"></header>
+
+  <div class="fc-app-shell">
+    <!-- ==================== THANH BAR BÊN TRÁI (HOVER MỞ RỘNG + HIỆN ICON & TÊN WEB) ==================== -->
+    <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
+      <div class="fc-bar-group">
+        <!-- Logo mới (Gamepad/Hexagon khác hẳn FACEIT) + Tên trang web -->
+        <a href="home.html" class="fc-brand-link" title="GameConnect - Sảnh chính">
+          <div class="fc-brand-logo">
+            <!-- Icon tay cầm gaming hiện đại -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <line x1="15" y1="13" x2="15.01" y2="13"></line>
+              <line x1="18" y1="11" x2="18.01" y2="11"></line>
+              <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+            </svg>
+          </div>
+          <div class="fc-brand-text">
+            <span class="fc-brand-title">GameConnect</span>
+            <span class="fc-brand-sub">GAMING HUB</span>
+          </div>
+        </a>
+
+        <div class="fc-nav-divider"></div>
+
+        <!-- Tìm kiếm nhanh -->
+        <button class="fc-nav-item" id="btn-focus-search" title="Tìm kiếm người chơi">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm kiếm</span>
+        </button>
+
+        <!-- Kênh Game -->
+        <button class="fc-nav-item" id="btn-cycle-game" title="Chuyển nhanh bộ lọc Game">
+          <span class="fc-nav-icon">
+            <span class="fc-game-pill">GC</span>
+          </span>
+          <span class="fc-nav-label">Kênh Esport</span>
+        </button>
+
+        <div class="fc-nav-divider"></div>
+
+        <!-- Tìm đội nhanh -->
+        <a href="../index.html" class="fc-nav-item" title="Tìm đội nhanh">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm đội nhanh</span>
+        </a>
+
+        <!-- Bảng xếp hạng -->
+        <button class="fc-nav-item" title="Bảng xếp hạng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10M12 20V4M6 20v-6"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bảng xếp hạng</span>
+        </button>
+
+        <!-- Thống kê -->
+        <button class="fc-nav-item" title="Thống kê cá nhân">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Thống kê</span>
+        </a>
+
+        <!-- Bảng tin (Feed) -->
+        <button class="fc-nav-item" title="Bảng tin cộng đồng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bảng tin</span>
+        </button>
+
+        <!-- NÚT BẠN BÈ TRÊN THANH BAR (Ô MÀU XANH NƯỚC BIỂN Ở HÌNH 1) -->
+        <a href="friends.html" class="fc-nav-item active" title="Bạn bè & Kết nối">
+          <span class="fc-nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span class="fc-nav-badge" id="sidebar-req-badge">4</span>
+          </span>
+          <span class="fc-nav-label">Bạn bè & Kết nối</span>
+        </a>
+
+        <!-- Tạo phòng / Tổ đội -->
+        <button class="fc-nav-item" title="Tạo phòng / Tìm đồng đội">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tạo phòng đội</span>
+        </button>
+
+        <!-- Tìm phòng -->
+        <button class="fc-nav-item" title="Tìm phòng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm phòng</span>
+        </button>
+      </div>
+
+      <div class="fc-bar-group">
+        <!-- Cửa hàng -->
+        <a href="items.html" class="fc-nav-item" title="Cửa hàng / Items">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Cửa hàng vật phẩm</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ==================== KHU VỰC CHÍNH Ở GIỮA (RỘNG SÁT 2 VẠCH XANH) ==================== -->
+    <main class="fc-main-area">
+      <!-- Thanh 4 Tab trên cùng khôi phục như ban đầu -->
+      <header class="fc-top-tabbar">
+        <a href="../index.html" class="fc-tab-back-home">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Trang chủ</span>
+        </a>
+
+        <nav class="fc-tabs-nav" role="tablist" aria-label="Quản lý bạn bè">
+          <!-- Ô MÀU ĐỎ: BẠN BÈ -->
+          <button class="fc-tab-btn active" role="tab" data-tab="friends" aria-selected="true">
+            <span>BẠN BÈ</span>
+            <span class="fc-tab-count" id="count-friends">0</span>
+          </button>
+
+          <!-- Ô MÀU TÍM: LỜI MỜI ĐẾN -->
+          <button class="fc-tab-btn" role="tab" data-tab="received" aria-selected="false">
+            <span>LỜI MỜI ĐẾN</span>
+            <span class="fc-tab-count" id="count-received">0</span>
+          </button>
+
+          <!-- Ô MÀU HỒNG: ĐÃ GỬI -->
+          <button class="fc-tab-btn" role="tab" data-tab="sent" aria-selected="false">
+            <span>ĐÃ GỬI</span>
+            <span class="fc-tab-count" id="count-sent">0</span>
+          </button>
+
+          <!-- Ô MÀU XANH: GỢI Ý KẾT BẠN -->
+          <button class="fc-tab-btn" role="tab" data-tab="suggestions" aria-selected="false">
+            <span>GỢI Ý KẾT BẠN</span>
+            <span class="fc-tab-count" id="count-suggestions">0</span>
+          </button>
+        </nav>
+      </header>
+
+      <!-- Danh sách người chơi mở rộng sát 2 vạch xanh -->
+      <div class="fc-content-scroll">
+        <div class="fc-content-container">
+          <!-- Thanh công cụ tìm kiếm & lọc -->
+          <div class="fc-toolbar">
+            <div class="fc-toolbar-left">
+              <div class="fc-search-box">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input
+                  type="text"
+                  id="search-player-input"
+                  class="fc-search-input"
+                  placeholder="Tìm theo tên, tag, vị trí hoặc game đang chơi..."
+                >
+              </div>
+
+              <!-- Custom Dropdown: Lọc theo Game -->
+              <div class="fc-dropdown" id="dropdown-game">
+                <button type="button" class="fc-dropdown-trigger" id="btn-dropdown-game" aria-expanded="false">
+                  <span class="fc-dropdown-trigger-left" id="label-dropdown-game">
+                    <svg class="fc-dd-all-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                      <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                      <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                      <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                    <span>Tất cả game</span>
+                  </span>
+                  <svg class="fc-dropdown-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                <div class="fc-dropdown-menu" id="menu-dropdown-game" hidden>
+                  <!-- Render tự động kèm logo & số đếm bằng JS -->
+                </div>
+              </div>
+
+              <!-- Custom Dropdown: Lọc theo Trạng thái -->
+              <div class="fc-dropdown" id="dropdown-status">
+                <button type="button" class="fc-dropdown-trigger" id="btn-dropdown-status" aria-expanded="false">
+                  <span class="fc-dropdown-trigger-left" id="label-dropdown-status">
+                    <span class="fc-dd-dot is-all"></span>
+                    <span>Mọi trạng thái</span>
+                  </span>
+                  <svg class="fc-dropdown-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                <div class="fc-dropdown-menu" id="menu-dropdown-status" hidden>
+                  <!-- Render tự động kèm số đếm bằng JS -->
+                </div>
+              </div>
+            </div>
+
+            <div class="fc-toolbar-right" id="tab-summary-text">
+              <!-- Tự động cập nhật bằng JS -->
+            </div>
+          </div>
+
+          <!-- Tiêu đề nhóm -->
+          <div class="fc-section-label">
+            <span id="section-heading">DANH SÁCH BẠN BÈ</span>
+            <span class="fc-section-cols-hint">NGƯỜI CHƠI · GAME & VỊ TRÍ CHÍNH · MỨC RANK / ELO · THAO TÁC</span>
+          </div>
+
+          <!-- Danh sách các hàng hiển thị người chơi -->
+          <div id="players-list-container" class="fc-player-list"></div>
+
+          <!-- Thanh phân trang (Pagination) -->
+          <div id="pagination-container" class="fc-pagination"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== THANH BAR BÊN PHẢI (SOCIAL SIDEBAR) ==================== -->
+    <aside class="fc-right-bar" aria-label="Thanh trạng thái bạn bè nhanh">
+      <div class="fc-avatar-menu-wrapper">
+        <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Nhấn để mở tuỳ chọn giao diện Sáng / Tối">
+          <img
+            src="https://api.dicebear.com/9.x/adventurer/svg?seed=CaptianVN&backgroundColor=b6e3f4"
+            alt="Avatar của bạn"
+            class="fc-self-avatar"
+          >
+          <span class="fc-status-dot"></span>
+        </button>
+
+        <!-- Menu bật ra khi nhấn vào Avatar -->
+        <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
+          <div class="fc-avatar-dropdown-header">
+            <strong>CaptainVN</strong>
+            <span>● Đang trực tuyến</span>
+          </div>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <div class="fc-avatar-dropdown-label">Giao diện hiển thị</div>
+          <button type="button" class="fc-theme-option" data-set-theme="dark">
+            <span>🌙 Chế độ Tối (Dark)</span>
+            <span class="fc-theme-check" id="check-theme-dark">✓</span>
+          </button>
+          <button type="button" class="fc-theme-option" data-set-theme="light">
+            <span>☀️ Chế độ Sáng (Light)</span>
+            <span class="fc-theme-check" id="check-theme-light"></span>
+          </button>
+        </div>
+      </div>
+
+      <button class="fc-right-icon-btn" title="Đấu nhanh VS" style="font-weight: 800; font-size: 12px;">VS</button>
+
+      <!-- CHUÔNG THÔNG BÁO (Tài nguyên chung) -->
+      <div id="gc-notif-bell"></div>
+
+      <button class="fc-right-icon-btn" data-quick-tab="received" title="Lời mời kết bạn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+      </button>
+
+      <div class="fc-party-box">
+        <button class="fc-right-icon-btn active" data-quick-tab="friends" title="Danh sách bạn bè">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </button>
+
+        <button class="fc-right-icon-btn" data-quick-tab="suggestions" title="Gợi ý kết bạn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Khung hiển thị thông báo góc dưới -->
+  <div id="fc-toast-container" class="fc-toast-container"></div>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // Khởi tạo chuông thông báo dùng chung
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
+  <script src="../js/pages/friends.js"></script>
+</body>
+</html>

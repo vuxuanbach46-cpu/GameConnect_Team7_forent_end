@@ -1,0 +1,97 @@
+/* ================================================================= */
+/* GAMECONNECT - FACEIT STYLE INDEX CSS */
+/* ================================================================= */
+
+:root {
+    --bg-main: #0f1015;
+    --bg-surface: #15161d;
+    --bg-card: #181920;
+    --bg-card-hover: #1e2029;
+    --border-color: #242631;
+    --accent-orange: #f97316;
+    --accent-orange-hover: #ea580c;
+    --text-main: #f4f4f6;
+    --text-muted: #8e92a4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+    background: #2a2d3a;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #3d4152;
+}
+
+/* Nút cam phong cách FACEIT */
+.btn-faceit {
+    background-color: var(--accent-orange);
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+}
+
+.btn-faceit:hover {
+    background-color: var(--accent-orange-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45);
+}
+
+/* Thẻ card game/tính năng */
+.faceit-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.25s ease;
+}
+
+.faceit-card:hover {
+    border-color: #383b4d;
+    background-color: var(--bg-card-hover);
+    transform: translateY(-2px);
+}
+
+/* Thẻ profile game thủ trang trí ở Hero section */
+.profile-card-mock {
+    background: linear-gradient(135deg, #181920 0%, #121318 100%);
+    border: 1px solid #2e3142;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Header Nav link */
+.faceit-nav-link {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+}
+
+.faceit-nav-link:hover,
+.faceit-nav-link.active {
+    color: #ffffff;
+}
