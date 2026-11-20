@@ -136,8 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const baseUrl = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
         ? CONFIG.API_BASE_URL
         : "http://127.0.0.1:8000";
-      const homeUrl = new URL("home.html", window.location.href).href;
-      window.location.href = `${baseUrl}/auth/google/login?redirect_to=${encodeURIComponent(homeUrl)}`;
+      const loginUrl = new URL("/auth/google/login", baseUrl);
+      loginUrl.searchParams.set("redirect_to", new URL("home.html", window.location.href).href);
+      window.location.href = loginUrl.href;
     });
   }
 });
