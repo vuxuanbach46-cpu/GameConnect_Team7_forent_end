@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng | GameConnect</title>
+
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/team-shared.css">
+</head>
+
+<body class="admin-page gc-team-page" data-root="../">
+    <div class="admin-shell">
+
+        <!-- Sidebar dùng chung cho Admin -->
+        <aside id="admin-sidebar"></aside>
+
+        <div class="admin-workspace">
+
+            <header class="admin-topbar">
+                <h1>Quản lý người dùng</h1>
+                <span class="muted">GameConnect / Admin</span>
+            </header>
+
+            <main class="admin-main">
+                <section class="card">
+
+                    <div class="admin-toolbar">
+                        <h2>Danh sách người dùng</h2>
+
+                        <input id="user-search" type="search" placeholder="Tìm theo tên hoặc email..."
+                            aria-label="Tìm người dùng">
+                    </div>
+
+                    <p class="muted" id="demo-notice">
+                        Dữ liệu minh họa - chưa kết nối API quản trị.
+                    </p>
+
+                    <!-- Bảng người dùng -->
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Họ và tên</th>
+                                    <th>Email</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="users-table-body"></tbody>
+                        </table>
+                    </div>
+
+                    <p id="users-message" role="status"></p>
+
+                    <!-- Phân trang -->
+                    <div class="admin-pagination">
+                        <button type="button" class="btn" id="prev-page">
+                            Trang trước
+                        </button>
+
+                        <span id="page-info"></span>
+
+                        <button type="button" class="btn" id="next-page">
+                            Trang sau
+                        </button>
+                    </div>
+
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Hộp thoại khóa tài khoản -->
+    <dialog id="lock-dialog" class="admin-dialog">
+        <form id="lock-form">
+
+            <h2>Khóa tài khoản</h2>
+            <p id="lock-user-label"></p>
+
+            <label for="lock-duration">
+                Chọn thời hạn khóa
+            </label>
+
+            <select id="lock-duration" required>
+                <option value="1">1 ngày</option>
+                <option value="7">7 ngày</option>
+                <option value="30">30 ngày</option>
+                <option value="permanent">Vĩnh viễn</option>
+            </select>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">
+                    Xác nhận khóa
+                </button>
+
+                <button type="button" class="btn" id="cancel-lock">
+                    Hủy
+                </button>
+            </div>
+
+        </form>
+    </dialog>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/admin_layout.js"></script>
+    <script src="../js/pages/admin_users.js"></script>
+    <script src="../js/pages/team-shell.js"></script>
+</body>
+
+</html>

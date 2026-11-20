@@ -1,0 +1,186 @@
+.teams-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.teams-heading h1 {
+    margin-bottom: 4px;
+}
+
+.teams-heading p {
+    margin: 0;
+}
+
+.teams-filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    align-items: end;
+    gap: 16px;
+}
+
+.teams-filters label {
+    margin-top: 0;
+}
+
+.teams-filters select,
+#create-team-form select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-card);
+    color: var(--color-text);
+    font: inherit;
+}
+
+.teams-filters select:focus,
+#create-team-form select:focus {
+    outline: 2px solid var(--color-primary);
+    border-color: transparent;
+}
+
+.teams-results {
+    margin-top: 24px;
+}
+
+.teams-results .list-header {
+    margin-bottom: 16px;
+}
+
+.teams-results h2 {
+    margin-bottom: 0;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.team-card {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.team-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.team-card-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg);
+    flex-shrink: 0;
+}
+
+.team-card h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    overflow-wrap: anywhere;
+}
+
+.team-card-game {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+.team-card-description {
+    margin: 0 0 16px;
+    color: var(--color-muted);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+    flex: 1;
+}
+
+.team-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+    font-size: 13px;
+}
+
+.team-join-mode {
+    padding: 4px 8px;
+    background: var(--color-bg);
+    border-radius: var(--radius);
+    color: var(--color-muted);
+}
+
+.teams-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.create-team-section {
+    max-width: 700px;
+    margin: 24px auto;
+}
+
+.create-team-section[hidden],
+.logo-preview[hidden] {
+    display: none;
+}
+
+.create-team-section .list-header h2 {
+    margin-bottom: 0;
+}
+
+.logo-preview {
+    margin-top: 12px;
+}
+
+.logo-preview img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+}
+
+#create-team-message {
+    margin-top: 12px;
+}
+
+#teams-message:empty,
+#create-team-message:empty {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .teams-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .teams-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .teams-filters,
+    .teams-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .teams-pagination {
+        gap: 8px;
+    }
+}

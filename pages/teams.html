@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách đội | GameConnect</title>
+    <link rel="icon" href="../assets/images/logo.svg">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/teams.css">
+    <link rel="stylesheet" href="../css/team-shared.css">
+</head>
+
+<body class="gc-team-page" data-root="../">
+    <header id="app-header"></header>
+
+    <main class="container teams-page">
+        <section class="teams-heading">
+            <div>
+                <h1>Danh sách đội chơi</h1>
+                <p class="muted">
+                    Tìm kiếm đội chơi phù hợp hoặc tạo đội của riêng bạn.
+                </p>
+            </div>
+
+            <button class="btn btn-primary" type="button" id="open-create-form">
+                + Tạo đội mới
+            </button>
+        </section>
+
+        <section class="card">
+            <h2>Tìm kiếm đội</h2>
+
+            <div class="teams-filters">
+                <div>
+                    <label for="team-search">Tên đội</label>
+                    <input type="search" id="team-search" placeholder="Nhập tên đội...">
+                </div>
+
+                <div>
+                    <label for="game-filter">Trò chơi</label>
+                    <select id="game-filter">
+                        <option value="">Tất cả trò chơi</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn" id="reset-filter">
+                    Xóa bộ lọc
+                </button>
+            </div>
+        </section>
+
+        <section class="teams-results">
+            <div class="list-header">
+                <h2>Đội chơi</h2>
+                <span class="muted" id="teams-count"></span>
+            </div>
+
+            <div id="teams-message" role="status"></div>
+
+            <div class="teams-grid" id="teams-list"></div>
+
+            <div class="teams-pagination">
+                <button type="button" class="btn" id="previous-page">
+                    Trang trước
+                </button>
+
+                <span id="page-info">Trang 1</span>
+
+                <button type="button" class="btn" id="next-page">
+                    Trang sau
+                </button>
+            </div>
+        </section>
+
+        <section class="card create-team-section" id="create-team-section" hidden>
+            <div class="list-header">
+                <h2>Tạo đội mới</h2>
+                <button type="button" class="btn" id="close-create-form">
+                    Đóng
+                </button>
+            </div>
+
+            <form id="create-team-form">
+                <label for="team-name">Tên đội *</label>
+                <input type="text" id="team-name" name="name" maxlength="100" placeholder="Nhập tên đội" required>
+
+                <label for="team-game">Trò chơi *</label>
+                <select id="team-game" name="main_game_id" required>
+                    <option value="">Chọn trò chơi</option>
+                </select>
+
+                <label for="team-description">Mô tả đội</label>
+                <textarea id="team-description" name="description" rows="3"
+                    placeholder="Giới thiệu về đội..."></textarea>
+
+                <label for="team-max-members">Số thành viên tối đa *</label>
+                <input type="number" id="team-max-members" name="max_members" min="2" value="5" required>
+
+                <label for="team-join-mode">Hình thức tham gia</label>
+                <select id="team-join-mode" name="join_mode">
+                    <option value="PUBLIC">Công khai</option>
+                    <option value="APPROVAL_REQUIRED">Cần phê duyệt</option>
+                </select>
+
+                <label for="team-logo">Logo đội</label>
+                <input type="file" id="team-logo" name="logo" accept="image/png,image/jpeg,image/webp">
+
+                <p class="muted">
+                    Chấp nhận JPG, PNG, WEBP. Dung lượng tối đa 2MB.
+                </p>
+
+                <div id="logo-preview-container" class="logo-preview" hidden>
+                    <img id="logo-preview" alt="Logo đội xem trước">
+                </div>
+
+                <p class="muted">
+                    Logo hiện chỉ được xem trước. Cần API upload ảnh để lưu lên server.
+                </p>
+
+                <p id="create-team-message" role="status"></p>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submit-team">
+                        Tạo đội
+                    </button>
+
+                    <button type="reset" class="btn">
+                        Nhập lại
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer id="app-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/teams.js"></script>
+    <script src="../js/pages/team-shell.js"></script>
+</body>
+
+</html>
