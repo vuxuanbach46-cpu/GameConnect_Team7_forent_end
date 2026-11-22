@@ -418,13 +418,18 @@ function renderPagination(totalItems, totalPages, startIdx, endIdx) {
   `;
 }
 
-// Trạng thái hiển thị ở tab Bạn bè: chỉ "Đang trong phòng" hoặc "Đang trực tuyến"
+// Trạng thái hiển thị ở tab Bạn bè: "Đang trong phòng", "Đang trực tuyến (· Hoạt động gần đây)", hoặc "Hoạt động X phút/giờ trước" khi offline có last_seen
 function getFriendStatusLine(player) {
-  if (player.presence !== "online" && player.presence !== "ingame") return null;
-  if (player.inRoom) {
-    return { key: "inroom", text: "ĐANG TRONG PHÒNG" };
+  if (player.inRoom || player.presence === "ingame") {
+    return { key: "inroom", text: player.statusText || "ĐANG TRONG PHÒNG" };
   }
-  return { key: "online", text: "ĐANG TRỰC TUYẾN" };
+  if (player.presence === "online") {
+    return { key: "online", text: player.statusText || "ĐANG TRỰC TUYẾN" };
+  }
+  if (player.lastSeen) {
+    return { key: "offline", text: player.statusText || formatRelativeTime(player.lastSeen, "HOẠT ĐỘNG") };
+  }
+  return null;
 }
 
 function getMutualCount(player) {
@@ -475,7 +480,9 @@ function renderSinglePlayerRow(player, tabForRow) {
       ? friendStatus
         ? friendStatus.key === "inroom"
           ? "fc-presence-ingame"
-          : "fc-presence-online"
+          : friendStatus.key === "online"
+          ? "fc-presence-online"
+          : "fc-presence-offline"
         : "fc-presence-offline"
       : player.presence === "ingame"
       ? "fc-presence-ingame"
@@ -490,7 +497,9 @@ function renderSinglePlayerRow(player, tabForRow) {
       ? friendStatus
         ? friendStatus.key === "inroom"
           ? "is-inroom"
-          : "is-online"
+          : friendStatus.key === "online"
+          ? "is-online"
+          : ""
         : ""
       : player.presence === "ingame"
       ? "is-ingame"
@@ -569,7 +578,16 @@ function renderPlayerList() {
   const rawList = MOCK_DATA[currentTab] || [];
   const filtered = rawList.filter(matchesPlayerFilter);
 
-  if (currentTab === "suggestions") {
+  if (currentTab === "friends") {
+    const presencePriority = (p) => (p.inRoom || p.presence === "ingame" ? 2 : p.presence === "online" ? 1 : 0);
+    filtered.sort((a, b) => {
+      const pDiff = presencePriority(b) - presencePriority(a);
+      if (pDiff !== 0) return pDiff;
+      const seenDiff = (b.lastSeenTs || 0) - (a.lastSeenTs || 0);
+      if (seenDiff !== 0) return seenDiff;
+      return (b.mutualFriends || 0) - (a.mutualFriends || 0);
+    });
+  } else if (currentTab === "suggestions") {
     filtered.sort((a, b) => (b.mutualFriends || 0) - (a.mutualFriends || 0));
   }
 
@@ -922,13 +940,31 @@ function mapBackendPlayerToCard(raw, tabType) {
     ? `${roomInfo.room_name || "Phòng chờ"} (${roomInfo.current_players || 1}/${roomInfo.max_players || 5})`
     : "";
 
-  const presence = tabType === "blocked"
+  const lastSeen = userObj.last_seen || raw.last_seen || null;
+  const lastSeenDate = lastSeen ? new Date(lastSeen) : null;
+  const lastSeenTs = lastSeenDate && !Number.isNaN(lastSeenDate.getTime()) ? lastSeenDate.getTime() : 0;
+
+  let presence = tabType === "blocked"
     ? "offline"
     : (inRoom ? "ingame" : (userObj.presence || raw.presence || "online"));
 
   let statusText = "ĐANG TRỰC TUYẾN";
   if (tabType === "friends") {
-    statusText = inRoom ? "ĐANG TRONG PHÒNG" : "ĐANG TRỰC TUYẾN";
+    if (inRoom) {
+      presence = "ingame";
+      statusText = "ĐANG TRONG PHÒNG";
+    } else if (lastSeen && lastSeenTs > 0) {
+      const diffMinutes = (Date.now() - lastSeenTs) / 60000;
+      if (diffMinutes <= 10) {
+        presence = "online";
+        statusText = "ĐANG TRỰC TUYẾN · HOẠT ĐỘNG GẦN ĐÂY";
+      } else {
+        presence = "offline";
+        statusText = formatRelativeTime(lastSeen, "HOẠT ĐỘNG");
+      }
+    } else {
+      statusText = presence === "offline" ? "NGOẠI TUYẾN" : "ĐANG TRỰC TUYẾN";
+    }
   } else if (tabType === "received") {
     statusText = formatRelativeTime(raw.created_at, "GỬI LỜI MỜI");
   } else if (tabType === "sent") {
@@ -951,6 +987,8 @@ function mapBackendPlayerToCard(raw, tabType) {
     avatar: resolveAvatarUrl(userObj.avatar ?? raw.avatar, username),
     presence,
     statusText,
+    lastSeen,
+    lastSeenTs,
     subInfo: mutualCount > 0 ? `${mutualCount} bạn chung` : (raw.reason || ""),
     inRoom,
     roomId,

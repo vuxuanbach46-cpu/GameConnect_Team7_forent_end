@@ -13,15 +13,44 @@
     --text-primary: #f4f4f6;
     --text-secondary: #8e92a4;
 
-    /* Đồng bộ token màu thanh bar bên trái với friends.css */
+    /* Đồng bộ token màu thanh bar trái/phải & notification với friends.css */
+    --fc-bg-main: #0c0d12;
     --fc-bg-sidebar: #11131a;
     --fc-bg-sidebar-hover: #141720;
     --fc-bg-surface: #161922;
+    --fc-bg-card: #13161f;
+    --fc-bg-card-hover: #181c27;
     --fc-border: #232734;
     --fc-border-strong: #31374a;
     --fc-orange: #e85002;
+    --fc-orange-hover: #d14700;
     --fc-text: #f1f5f9;
     --fc-text-secondary: #94a3b8;
+    --fc-text-muted: #64748b;
+    --fc-online: #22c55e;
+    --fc-danger: #ef4444;
+}
+
+/* ==================== CHẾ ĐỘ SÁNG (LIGHT MODE - ĐỒNG BỘ FRIENDS) ==================== */
+body.fc-light-mode {
+    --bg-app: #f8fafc;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --border-subtle: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+
+    --fc-bg-main: #f8fafc;
+    --fc-bg-sidebar: #ffffff;
+    --fc-bg-sidebar-hover: #ffffff;
+    --fc-bg-surface: #f1f5f9;
+    --fc-bg-card: #ffffff;
+    --fc-bg-card-hover: #f8fafc;
+    --fc-border: #e2e8f0;
+    --fc-border-strong: #cbd5e1;
+    --fc-text: #0f172a;
+    --fc-text-secondary: #475569;
     --fc-text-muted: #64748b;
 }
 
@@ -35,6 +64,7 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Custom Scrollbar */
@@ -249,32 +279,1134 @@ body {
     justify-content: center;
 }
 
-/* 3 Thẻ chế độ chơi trung tâm (Ghép trận, Giải đấu,...) */
-.mode-card {
-    background: linear-gradient(180deg, #1b1d26 0%, #14151c 100%);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
+/* ================================================================= */
+/* TOP TAB BAR (SẢNH CHÍNH HUB + 5 TAB BẠN BÈ CÓ SỐ ĐẾM THẬT)        */
+/* ================================================================= */
+.home-topbar {
+    height: 56px;
+    background: var(--fc-bg-sidebar);
+    border-bottom: 1px solid var(--fc-border);
+    padding: 0 24px;
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    overflow-x: auto;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-top-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    height: 100%;
+    white-space: nowrap;
+}
+
+.home-top-tab {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    padding: 0 14px;
+    text-decoration: none;
+    color: var(--fc-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.45px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 0.16s ease;
+}
+
+.home-top-tab:hover {
+    color: var(--fc-text);
+}
+
+.home-top-tab.active {
+    color: var(--fc-text);
+}
+
+.home-top-tab.active::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 0;
+    height: 2px;
+    background: var(--fc-orange);
+    border-radius: 2px 2px 0 0;
+}
+
+.home-top-tab.has-highlight {
+    color: #f97316;
+}
+
+body.fc-light-mode .home-top-tab.has-highlight {
+    color: #c2410c;
+}
+
+.home-top-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border);
+    color: var(--fc-text-secondary);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.home-top-tab.has-highlight .home-top-tab-count {
+    background: rgba(232, 80, 2, 0.14);
+    border-color: rgba(232, 80, 2, 0.35);
+    color: #f97316;
+}
+
+body.fc-light-mode .home-top-tab.has-highlight .home-top-tab-count {
+    color: #c2410c;
+    background: rgba(234, 88, 12, 0.1);
+    border-color: rgba(234, 88, 12, 0.3);
+}
+
+/* ================================================================= */
+/* THANH TÌM KIẾM & BỘ LỌC NHANH (Dưới Banner)                       */
+/* ================================================================= */
+.home-toolbar-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 520px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.home-search-box {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1 1 280px;
+    max-width: 440px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border);
+    color: var(--fc-text-muted);
+    transition: border-color 0.16s ease;
+}
+
+.home-search-box:focus-within {
+    border-color: var(--fc-border-strong);
+    color: var(--fc-text-secondary);
+}
+
+.home-search-box input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fc-text);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.home-search-box input::placeholder {
+    color: var(--fc-text-muted);
+}
+
+.home-dd-wrap {
+    position: relative;
+}
+
+.home-dd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border);
+    color: var(--fc-text);
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.home-dd-btn:hover,
+.home-dd-wrap.is-open .home-dd-btn {
+    border-color: var(--fc-border-strong);
+    background: var(--fc-bg-card-hover);
+}
+
+.home-dd-btn-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.home-dd-logo {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.home-dd-chevron {
+    color: var(--fc-text-muted);
+    transition: transform 0.16s ease;
+    flex-shrink: 0;
+}
+
+.home-dd-wrap.is-open .home-dd-chevron {
+    transform: rotate(180deg);
+}
+
+.home-dd-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 224px;
+    padding: 6px;
+    border-radius: 10px;
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border-strong);
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.home-dd-menu[hidden] {
+    display: none !important;
+}
+
+.home-dd-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fc-text);
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+
+.home-dd-item:hover {
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border);
+}
+
+.home-dd-item.active {
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border-strong);
+    font-weight: 600;
+}
+
+.home-dd-item-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.home-dd-item-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--fc-text-muted);
+}
+
+.home-dd-check {
+    color: var(--fc-orange);
+    font-weight: 700;
+    min-width: 12px;
+    text-align: right;
+}
+
+.home-dd-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.home-dd-dot.is-all { background: #38bdf8; }
+.home-dd-dot.is-online { background: var(--fc-online); }
+.home-dd-dot.is-offline { background: #64748b; }
+
+.home-toolbar-summary {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fc-text-secondary);
+    white-space: nowrap;
+}
+
+/* ================================================================= */
+/* 3 THẺ CHỨC NĂNG CHÍNH (Tối giản, phẳng, viền mảnh 1px)            */
+/* ================================================================= */
+.home-feature-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 214px;
+    padding: 20px;
+    border-radius: 12px;
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border);
+    text-decoration: none;
+    color: var(--fc-text);
+    transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.home-feature-card:hover {
+    background: var(--fc-bg-card-hover);
+    border-color: var(--fc-border-strong);
+    transform: translateY(-2px);
+}
+
+.home-feature-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.home-feature-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--fc-border-strong);
+    background: var(--fc-bg-surface);
+    color: var(--fc-text);
+    flex-shrink: 0;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.home-feature-card.is-orange .home-feature-icon-box {
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.1);
+    border-color: rgba(249, 115, 22, 0.32);
+}
+
+.home-feature-card.is-emerald .home-feature-icon-box {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.32);
+}
+
+.home-feature-card.is-sky .home-feature-icon-box {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.32);
+}
+
+body.fc-light-mode .home-feature-card.is-orange .home-feature-icon-box {
+    color: #c2410c;
+    background: rgba(234, 88, 12, 0.08);
+    border-color: rgba(234, 88, 12, 0.25);
+}
+
+body.fc-light-mode .home-feature-card.is-emerald .home-feature-icon-box {
+    color: #047857;
+    background: rgba(5, 150, 105, 0.08);
+    border-color: rgba(5, 150, 105, 0.25);
+}
+
+body.fc-light-mode .home-feature-card.is-sky .home-feature-icon-box {
+    color: #0369a1;
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.25);
+}
+
+.home-feature-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border);
+    color: var(--fc-text-secondary);
+}
+
+.home-feature-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.home-feature-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--fc-text);
+}
+
+.home-feature-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--fc-text-secondary);
+}
+
+.home-feature-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--fc-border);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fc-text-secondary);
+    transition: color 0.18s ease;
+}
+
+.home-feature-card:hover .home-feature-footer {
+    color: var(--fc-text);
+}
+
+.home-feature-card.is-orange:hover .home-feature-footer {
+    color: #f97316;
+}
+
+.home-feature-card.is-emerald:hover .home-feature-footer {
+    color: #10b981;
+}
+
+.home-feature-card.is-sky:hover .home-feature-footer {
+    color: #38bdf8;
+}
+
+body.fc-light-mode .home-feature-card.is-orange:hover .home-feature-footer {
+    color: #c2410c;
+}
+
+body.fc-light-mode .home-feature-card.is-emerald:hover .home-feature-footer {
+    color: #047857;
+}
+
+body.fc-light-mode .home-feature-card.is-sky:hover .home-feature-footer {
+    color: #0369a1;
+}
+
+.home-feature-arrow {
+    display: inline-block;
+    transition: transform 0.18s ease;
+}
+
+.home-feature-card:hover .home-feature-arrow {
+    transform: translateX(4px);
+}
+
+/* ================================================================= */
+/* KHỐI TỔ ĐỘI ĐANG TÌM NGƯỜI (Dữ liệu thật -> Link Tìm phòng)       */
+/* ================================================================= */
+.home-rooms-card {
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.home-rooms-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.home-rooms-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.home-rooms-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fc-online);
+    flex-shrink: 0;
+}
+
+.home-rooms-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fc-text);
+}
+
+.home-rooms-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border);
+    color: var(--fc-text-secondary);
+}
+
+.home-room-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.home-room-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--fc-bg-surface);
+    border: 1px solid var(--fc-border);
+    text-decoration: none;
+    transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.home-room-item:hover {
+    background: var(--fc-bg-card-hover);
+    border-color: var(--fc-border-strong);
+}
+
+.home-room-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.home-room-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fc-text);
+    white-space: nowrap;
     overflow: hidden;
-    transition: all 0.25s ease;
+    text-overflow: ellipsis;
 }
 
-.mode-card:hover {
-    transform: translateY(-4px);
-    border-color: #3f4356;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+.home-room-meta {
+    font-size: 11px;
+    color: var(--fc-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.mode-glow-orange {
-    background: radial-gradient(circle at 50% 35%, rgba(249, 115, 22, 0.45) 0%, rgba(249, 115, 22, 0.05) 65%, transparent 100%);
+.home-room-slot {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: rgba(232, 80, 2, 0.12);
+    border: 1px solid rgba(232, 80, 2, 0.3);
+    color: #f97316;
+    white-space: nowrap;
 }
 
-.mode-glow-emerald {
-    background: radial-gradient(circle at 50% 35%, rgba(16, 185, 129, 0.35) 0%, rgba(16, 185, 129, 0.05) 65%, transparent 100%);
+body.fc-light-mode .home-room-slot {
+    color: #c2410c;
+    background: rgba(234, 88, 12, 0.08);
+    border-color: rgba(234, 88, 12, 0.25);
 }
 
-.mode-glow-amber {
-    background: radial-gradient(circle at 50% 35%, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0.05) 65%, transparent 100%);
+.home-room-empty {
+    padding: 14px 12px;
+    border-radius: 8px;
+    border: 1px dashed var(--fc-border-strong);
+    background: var(--fc-bg-surface);
+    font-size: 12px;
+    color: var(--fc-text-muted);
+    text-align: center;
+}
+
+.home-card-cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--fc-orange);
+    border: 1px solid var(--fc-orange);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.home-card-cta-btn:hover {
+    background: var(--fc-orange-hover);
+    border-color: var(--fc-orange-hover);
+}
+
+/* ================================================================= */
+/* BẢNG NGƯỜI CHƠI / LỜI MỜI TRỰC TIẾP (Dưới 3 thẻ chính)            */
+/* ================================================================= */
+.home-players-card {
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-players-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--fc-border);
+    background: var(--fc-bg-surface);
+}
+
+.home-players-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.home-players-heading {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--fc-text);
+    white-space: nowrap;
+}
+
+.home-mini-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.home-mini-tab {
+    padding: 4px 9px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fc-text-secondary);
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.home-mini-tab:hover {
+    color: var(--fc-text);
+    background: var(--fc-bg-card);
+    border-color: var(--fc-border);
+}
+
+.home-mini-tab.active {
+    color: #f97316;
+    background: rgba(232, 80, 2, 0.12);
+    border-color: rgba(232, 80, 2, 0.35);
+}
+
+body.fc-light-mode .home-mini-tab.active {
+    color: #c2410c;
+    background: rgba(234, 88, 12, 0.08);
+    border-color: rgba(234, 88, 12, 0.28);
+}
+
+.home-players-cols-hint {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--fc-text-muted);
+    white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+    .home-players-cols-hint {
+        display: none;
+    }
+}
+
+.home-players-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.home-player-row {
+    display: grid;
+    grid-template-columns: minmax(210px, 1.8fr) minmax(135px, 1.1fr) minmax(120px, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--fc-border);
+    transition: background-color 0.15s ease;
+}
+
+.home-player-row:last-child {
+    border-bottom: none;
+}
+
+.home-player-row:hover {
+    background: var(--fc-bg-card-hover);
+}
+
+@media (max-width: 900px) {
+    .home-player-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+.home-player-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.home-player-avatar-wrap {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+}
+
+.home-player-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--fc-border-strong);
+    background: var(--fc-bg-surface);
+}
+
+.home-player-presence-dot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--fc-bg-card);
+    background: #64748b;
+}
+
+.home-player-presence-dot.is-online { background: var(--fc-online); }
+.home-player-presence-dot.is-ingame { background: #eab308; }
+
+.home-player-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.home-player-status-line {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--fc-online);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.home-player-status-line.is-sent {
+    color: #38bdf8;
+}
+
+.home-player-status-line.is-muted {
+    color: var(--fc-text-muted);
+}
+
+body.fc-light-mode .home-player-status-line.is-sent {
+    color: #0284c7;
+}
+
+.home-player-name-line {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+}
+
+.home-player-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--fc-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.home-player-handle {
+    font-size: 11.5px;
+    color: var(--fc-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.home-player-game-col {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--fc-text-secondary);
+}
+
+.home-player-game-logo {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.home-player-game-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #38bdf8;
+    flex-shrink: 0;
+}
+
+.home-player-game-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.home-player-rank-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.home-player-rank-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.home-player-rank-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.home-player-rank-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fc-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.home-player-rank-sub {
+    font-size: 11px;
+    color: var(--fc-text-muted);
+    white-space: nowrap;
+}
+
+.home-player-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.home-action-btn {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 7px;
+    border: 1px solid var(--fc-border-strong);
+    background: var(--fc-bg-surface);
+    color: var(--fc-text);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.home-action-btn:hover {
+    background: var(--fc-bg-card-hover);
+    border-color: var(--fc-text-muted);
+}
+
+.home-action-btn.is-primary {
+    background: var(--fc-orange);
+    border-color: var(--fc-orange);
+    color: #ffffff;
+}
+
+.home-action-btn.is-primary:hover {
+    background: var(--fc-orange-hover);
+    border-color: var(--fc-orange-hover);
+}
+
+.home-action-btn.is-danger-ghost {
+    color: var(--fc-text-secondary);
+}
+
+.home-action-btn.is-danger-ghost:hover {
+    color: var(--fc-danger);
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.home-action-more {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--fc-text-muted);
+}
+
+.home-players-empty {
+    padding: 26px 18px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--fc-text-muted);
+}
+
+.home-players-fallback-banner {
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #f97316;
+    background: rgba(232, 80, 2, 0.08);
+    border-bottom: 1px solid var(--fc-border);
+}
+
+.home-players-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 11px 16px;
+    border-top: 1px solid var(--fc-border);
+    background: var(--fc-bg-surface);
+}
+
+.home-page-info {
+    font-size: 12px;
+    color: var(--fc-text-secondary);
+    white-space: nowrap;
+}
+
+.home-page-info strong {
+    color: var(--fc-text);
+}
+
+.home-page-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.home-page-btn {
+    min-width: 32px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--fc-border);
+    background: var(--fc-bg-card);
+    color: var(--fc-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.home-page-btn:hover:not(:disabled) {
+    color: var(--fc-text);
+    border-color: var(--fc-border-strong);
+    background: var(--fc-bg-card-hover);
+}
+
+.home-page-btn.active {
+    background: var(--fc-orange);
+    border-color: var(--fc-orange);
+    color: #ffffff;
+}
+
+.home-page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.home-page-size-select {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--fc-border);
+    background: var(--fc-bg-card);
+    color: var(--fc-text);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* ================================================================= */
+/* BÀI ĐĂNG MỚI NHẤT (Hàng dưới cùng)                                */
+/* ================================================================= */
+.home-post-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-post-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(232, 80, 2, 0.14);
+    border: 1px solid rgba(232, 80, 2, 0.35);
+    color: #f97316;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.home-post-content {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.home-post-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.home-post-author {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fc-text);
+}
+
+.home-post-time {
+    font-size: 11.5px;
+    color: var(--fc-text-muted);
+}
+
+.home-post-text {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--fc-text-secondary);
+}
+
+.home-post-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-top: 4px;
+}
+
+.home-post-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fc-text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.home-post-action-link:hover {
+    color: var(--fc-text);
+}
+
+/* Nút + ở đáy thanh bar bên phải */
+.fc-right-bottom-btn {
+    margin-top: auto;
+    border-radius: 50%;
+    border-color: var(--fc-border);
+    background: var(--fc-bg-surface);
 }
 
 /* Nút cam đặc trưng */
@@ -288,4 +1420,336 @@ body {
 .btn-orange:hover {
     background-color: var(--accent-orange-hover);
     box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+}
+
+/* ================================================================= */
+/* THANH BAR BÊN PHẢI & AVATAR DROPDOWN (Đồng bộ friends.css)        */
+/* ================================================================= */
+.fc-right-bar {
+    width: 64px;
+    flex-shrink: 0;
+    background: var(--fc-bg-sidebar);
+    border-left: 1px solid var(--fc-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 0;
+    gap: 12px;
+    z-index: 40;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.fc-right-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fc-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.fc-right-icon-btn:hover {
+    background: var(--fc-bg-surface);
+    color: var(--fc-text);
+    border-color: var(--fc-border);
+}
+
+.fc-right-icon-btn.active {
+    color: var(--fc-text);
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border-strong);
+}
+
+.fc-avatar-menu-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.fc-self-avatar-wrap {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.fc-self-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--fc-border-strong);
+    background: var(--fc-bg-surface);
+}
+
+.fc-status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--fc-online);
+    border: 2px solid var(--fc-bg-sidebar);
+}
+
+/* Menu bật ra khi nhấn vào Avatar */
+.fc-avatar-dropdown {
+    position: absolute;
+    top: 4px;
+    right: 52px;
+    width: 228px;
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border-strong);
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 200;
+}
+
+.fc-avatar-dropdown[hidden] {
+    display: none !important;
+}
+
+.fc-avatar-dropdown-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 8px;
+}
+
+.fc-avatar-dropdown-header strong {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--fc-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fc-avatar-dropdown-header span {
+    font-size: 11.5px;
+    color: var(--fc-online);
+    font-weight: 500;
+}
+
+.fc-avatar-dropdown-divider {
+    height: 1px;
+    background: var(--fc-border);
+    margin: 8px 0;
+}
+
+.fc-avatar-dropdown-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--fc-text-muted);
+    padding: 2px 8px 6px;
+}
+
+.fc-theme-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fc-text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-theme-option:hover {
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border);
+}
+
+.fc-theme-option.active {
+    background: var(--fc-bg-surface);
+    border-color: var(--fc-border-strong);
+    color: var(--fc-text);
+}
+
+.fc-theme-check {
+    font-weight: 700;
+    color: var(--fc-orange);
+}
+
+.fc-avatar-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fc-danger);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-avatar-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.28);
+}
+
+.fc-party-box {
+    background: transparent;
+    border-top: 1px solid var(--fc-border);
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Toast thông báo nhanh góc dưới */
+.fc-toast-container {
+    position: fixed;
+    right: 84px;
+    bottom: 24px;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.fc-toast {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--fc-bg-card);
+    border: 1px solid var(--fc-border-strong);
+    color: var(--fc-text);
+    font-size: 13px;
+    font-weight: 500;
+    pointer-events: auto;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+/* ================================================================= */
+/* LIGHT MODE OVERRIDES CHO KHU VỰC DASHBOARD HOME                   */
+/* ================================================================= */
+body.fc-light-mode ::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+body.fc-light-mode ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+body.fc-light-mode ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+body.fc-light-mode .home-main-shell {
+    background-color: #f8fafc !important;
+}
+
+body.fc-light-mode .home-topbar {
+    background-color: #ffffff !important;
+    border-bottom-color: #e2e8f0 !important;
+}
+
+body.fc-light-mode .home-topbar-title {
+    color: #0f172a !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#15161d\] {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#181920\] {
+    background-color: #ffffff !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#1b1d26\] {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#1b1d26\]:hover {
+    background-color: #f1f5f9 !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#1e2029\],
+body.fc-light-mode .home-main-shell .bg-\[\#22242e\] {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#1e2029\]:hover,
+body.fc-light-mode .home-main-shell .bg-\[\#22242e\]:hover {
+    background-color: #e2e8f0 !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-\[\#242631\] {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+body.fc-light-mode .home-main-shell .border-\[\#242631\] {
+    border-color: #e2e8f0 !important;
+}
+
+body.fc-light-mode .home-main-shell .border-\[\#15161d\] {
+    border-color: #ffffff !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-zinc-800 {
+    background-color: #e2e8f0 !important;
+}
+
+/* Đổi chữ sang tông tối rõ nét trên nền sáng, giữ nguyên chữ trắng trong Banner & badge màu */
+body.fc-light-mode .home-main-shell main > :not(.home-banner) .text-white:not(.bg-red-500):not(.bg-red-600):not(.bg-orange-500):not(.bg-purple-600) {
+    color: #0f172a !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-red-500,
+body.fc-light-mode .home-main-shell .bg-red-600,
+body.fc-light-mode .home-main-shell .bg-orange-500,
+body.fc-light-mode .home-main-shell .bg-purple-600 {
+    color: #ffffff !important;
+}
+
+body.fc-light-mode .home-main-shell main > :not(.home-banner) .text-zinc-200,
+body.fc-light-mode .home-main-shell main > :not(.home-banner) .text-zinc-300 {
+    color: #334155 !important;
+}
+
+body.fc-light-mode .home-main-shell main > :not(.home-banner) .text-zinc-400 {
+    color: #475569 !important;
+}
+
+body.fc-light-mode .home-main-shell main > :not(.home-banner) .text-zinc-500 {
+    color: #64748b !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-orange-500\/20.text-orange-400 {
+    color: #c2410c !important;
+}
+
+body.fc-light-mode .home-main-shell .bg-sky-500\/20.text-sky-400 {
+    color: #0369a1 !important;
 }
