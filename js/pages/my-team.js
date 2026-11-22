@@ -1,50 +1,4 @@
-const STORAGE_KEY = "gameconnect_my_teams";
-
-const demoTeams = [
-    {
-        id: 1,
-        name: "GameConnect Warriors",
-        game: "Liên Minh Huyền Thoại",
-        description: "Cùng nhau leo rank, giao lưu và tìm đồng đội mỗi tối.",
-        role: "captain",
-        members: 3,
-        maxMembers: 5
-    },
-    {
-        id: 2,
-        name: "Valorant Legends",
-        game: "Valorant",
-        description: "Đội chơi Valorant vui vẻ, ưu tiên teamwork và giao tiếp.",
-        role: "member",
-        members: 4,
-        maxMembers: 5
-    },
-    {
-        id: 3,
-        name: "PUBG Squad",
-        game: "PUBG",
-        description: "Tập hợp những người yêu thích PUBG và chơi cùng cuối tuần.",
-        role: "member",
-        members: 4,
-        maxMembers: 4
-    }
-];
-
-function loadMyTeams() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved !== null) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) return parsed;
-        }
-    } catch (error) {
-        console.error("Không thể đọc danh sách đội:", error);
-    }
-
-    return demoTeams;
-}
-
-let myTeams = loadMyTeams();
+let myTeams = [];
 
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -91,17 +45,17 @@ function renderMyTeams() {
 
       <div class="my-teams-info">
         <span>🎯 ${escapeHTML(team.game)}</span>
-        <span>👥 ${team.members}/${team.maxMembers}</span>
+        <span>👥 ${escapeHTML(team.members)}/${escapeHTML(team.maxMembers)}</span>
       </div>
 
       <div class="my-teams-card-actions">
         <a class="my-teams-action"
            href="team-feed.html?id=${encodeURIComponent(team.id)}">
-          Xem bảng tin
+          Bảng tin (bản mẫu)
         </a>
         <a class="my-teams-secondary"
            href="team-detail.html?id=${encodeURIComponent(team.id)}">
-          Chi tiết đội
+          Chi tiết đội (bản mẫu)
         </a>
       </div>
     </article>
@@ -114,7 +68,24 @@ function renderMyTeams() {
 document.getElementById("team-role-filter")
     .addEventListener("change", renderMyTeams);
 
-renderMyTeams();
+async function loadMyTeams() {
+    const status = document.getElementById("my-teams-status");
+    if (!localStorage.getItem("access_token")) {
+        status.textContent = "Vui lòng đăng nhập để xem các đội của bạn.";
+        return;
+    }
+    status.textContent = "Đang tải danh sách đội...";
+    try {
+        const response = await api.get("/api/teams/mine");
+        myTeams = response.data;
+        status.textContent = "";
+        renderMyTeams();
+    } catch (error) {
+        status.textContent = error.message || "Không thể tải danh sách đội.";
+    }
+}
+
+loadMyTeams();
 
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {

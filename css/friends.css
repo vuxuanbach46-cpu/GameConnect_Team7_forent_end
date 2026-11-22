@@ -1638,3 +1638,6 @@ body.fc-dark-body #app-footer {
 .fc-player-subhead.is-blocked {
   color: var(--fc-danger);
 }
+
+.fc-team-invitations-link { display: inline-block; margin: 12px 24px 0; color: #ff9b62; font-weight: 600; }
+#team-invite-controls select { background: var(--fc-bg-surface); color: var(--fc-text); border: 1px solid var(--fc-border-strong); border-radius: 6px; padding: 8px; margin-right: 8px; max-width: 100%; }

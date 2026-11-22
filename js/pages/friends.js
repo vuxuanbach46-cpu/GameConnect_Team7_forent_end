@@ -1111,11 +1111,17 @@ async function openProfile(player) {
       </div>
     </div>
 
+    <div class="fc-profile-block" id="team-invite-controls">
+      <span class="fc-profile-label">Mời vào đội</span>
+      <p id="team-invite-message" role="status">Đang tải đội của bạn...</p>
+    </div>
     <div class="fc-modal-actions">
       <button type="button" class="fc-btn fc-btn-secondary" data-modal-close>Đóng</button>
       <button type="button" class="fc-btn fc-btn-danger-ghost" data-modal-block-profile>Chặn</button>
     </div>
   `);
+
+  loadCaptainTeamsForInvitation(targetUserId);
 
   try {
     const res = await api.get(`/friend-requests/mutual-friends/${targetUserId}`);
@@ -1134,6 +1140,41 @@ async function openProfile(player) {
       }
     }
   } catch (_) {}
+}
+
+// Mời game thủ từ hồ sơ; đội và quyền được kiểm tra bởi máy chủ.
+async function loadCaptainTeamsForInvitation(targetUserId) {
+  const container = document.getElementById("team-invite-controls");
+  try {
+    const response = await api.get("/api/team-invitations/captain-teams");
+    if (!container || !container.isConnected) return;
+    const teams = response.data || [];
+    const message = container.querySelector("#team-invite-message");
+    if (!teams.length) {
+      message.textContent = "Bạn chưa là đội trưởng của đội nào.";
+      return;
+    }
+    message.textContent = "Chọn đội để gửi lời mời.";
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", "Chọn đội để mời");
+    teams.forEach((team) => select.add(new Option(team.name, team.id)));
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "fc-btn fc-btn-secondary";
+    button.textContent = "Gửi lời mời";
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        await api.post("/api/team-invitations", { team_id: Number(select.value), user_id: Number(targetUserId) });
+        message.textContent = "Đã gửi lời mời vào đội.";
+      } catch (error) {
+        message.textContent = error.message || "Không thể gửi lời mời.";
+      } finally { button.disabled = false; }
+    });
+    container.append(select, button);
+  } catch (error) {
+    if (container && container.isConnected) container.querySelector("#team-invite-message").textContent = error.message || "Không thể tải danh sách đội.";
+  }
 }
 
 // Chặn người dùng thật: POST /friend-requests/blocks/{targetUserId}
