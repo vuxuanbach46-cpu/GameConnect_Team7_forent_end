@@ -105,6 +105,7 @@ function renderStatusBadge(status) {
 }
 
 function renderDetail(post) {
+  const isOwner = currentUserId && (post.user_id === currentUserId);
   const game = getGameById(post.game_id);
   const meta = GAME_META[post.game_id] || { icon: "fa-gamepad", color: "from-zinc-700/30 to-zinc-900/10", border: "border-zinc-700/30", text: "text-zinc-400", name: game?.name || `Game #${post.game_id}` };
   const gameName = game ? escapeHtml(game.name) : meta.name;
@@ -125,6 +126,10 @@ function renderDetail(post) {
 
   // Applications Table (nếu có quyền xem)
   const apps = post.applications || [];
+  const acceptedApps = apps.filter((a) => a.status === "ACCEPTED");
+  const isFull = post.status === "FULL" || (acceptedApps.length >= post.needed_players);
+  const canCreateTeam = isOwner && isFull;
+
   const appsSection = apps.length > 0 ? `
     <div class="bg-[#181920] border border-[#242631] rounded-2xl p-6 mt-6 shadow-xl">
       <div class="flex items-center justify-between mb-4">
@@ -440,6 +445,7 @@ function showGamerToast(message, type = "success") {
 // 8. Khởi tạo
 (async function init() {
   if (!postId) return;
+  await loadCurrentUser();
   await loadGamesCatalog();
   await loadDetail();
 })();
