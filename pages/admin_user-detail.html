@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết người dùng | GameConnect</title>
+
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+
+<body class="admin-page gc-team-page" data-root="../">
+    <div class="admin-shell">
+
+        <!-- Sidebar Admin dùng chung -->
+        <aside id="admin-sidebar"></aside>
+
+        <div class="admin-workspace">
+            <header class="admin-topbar">
+                <div>
+                    <h1>Chi tiết người dùng</h1>
+                    <p class="muted">Thông tin tài khoản GameConnect</p>
+                </div>
+            </header>
+
+            <main class="admin-main">
+                <a href="admin_users.html" class="admin-back-link">
+                    ← Quay lại danh sách
+                </a>
+
+                <section class="card">
+                    <h2>Thông tin tài khoản</h2>
+
+                    <p id="user-detail-message" role="status"></p>
+
+                    <div class="admin-user-profile">
+                        <div class="admin-avatar" id="user-avatar">U</div>
+
+                        <div>
+                            <h2 id="detail-name">Đang tải...</h2>
+                            <p class="muted" id="detail-email"></p>
+                            <span id="detail-status"></span>
+                        </div>
+                    </div>
+
+                    <div class="admin-detail-grid">
+                        <div class="admin-detail-item">
+                            <span class="muted">Mã người dùng</span>
+                            <strong id="detail-id">--</strong>
+                        </div>
+
+                        <div class="admin-detail-item">
+                            <span class="muted">Họ và tên</span>
+                            <strong id="detail-full-name">--</strong>
+                        </div>
+
+                        <div class="admin-detail-item">
+                            <span class="muted">Email</span>
+                            <strong id="detail-email-info">--</strong>
+                        </div>
+
+                        <div class="admin-detail-item">
+                            <span class="muted">Vai trò</span>
+                            <strong id="detail-role">--</strong>
+                        </div>
+
+                        <div class="admin-detail-item">
+                            <span class="muted">Ngày tạo tài khoản</span>
+                            <strong id="detail-created-at">--</strong>
+                        </div>
+
+                        <div class="admin-detail-item">
+                            <span class="muted">Trạng thái tài khoản</span>
+                            <strong id="detail-account-status">--</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Quản lý tài khoản</h2>
+                    <p class="muted">
+                        Quản trị viên có thể xem trạng thái và quản lý tài khoản người dùng.
+                    </p>
+
+                    <button type="button" class="btn btn-danger" id="detail-lock-btn">
+                        Khóa tài khoản
+                    </button>
+
+                    <button type="button" class="btn btn-primary" id="detail-unlock-btn" hidden>
+                        Mở khóa tài khoản
+                    </button>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Hộp thoại chọn thời hạn khóa -->
+    <dialog id="detail-lock-dialog" class="admin-dialog">
+        <form id="detail-lock-form">
+            <h2>Khóa tài khoản</h2>
+
+            <label for="detail-lock-duration">Thời hạn khóa</label>
+            <select id="detail-lock-duration" required>
+                <option value="1">1 ngày</option>
+                <option value="7">7 ngày</option>
+                <option value="30">30 ngày</option>
+                <option value="permanent">Vĩnh viễn</option>
+            </select>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">
+                    Xác nhận
+                </button>
+
+                <button type="button" class="btn" id="detail-cancel-lock">
+                    Hủy
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/admin_layout.js"></script>
+    <script src="../js/pages/admin_user_detail.js"></script>
+</body>
+
+</html>

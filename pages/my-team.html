@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đội của tôi | GameConnect</title>
+    <link rel="icon" href="../assets/images/logo.svg">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/my-team.css">
+</head>
+
+<body class="gc-team-page" data-root="../">
+    <header id="app-header"></header>
+
+    <main class="container my-teams-page">
+        <div class="my-teams-heading">
+            <div>
+                <h1>🎮 Đội của tôi</h1>
+                <p>Quản lý các đội bạn đang tham gia và theo dõi hoạt động của đội.</p>
+            </div>
+            <div><a href="team-invitations.html" class="my-teams-secondary">Lời mời vào đội</a> <a href="teams.html" class="my-teams-explore">Khám phá đội</a></div>
+        </div>
+
+        <div class="my-teams-summary">
+            <div class="my-teams-stat">
+                <span>Tổng số đội</span>
+                <strong id="total-teams">0</strong>
+            </div>
+            <div class="my-teams-stat">
+                <span>Đội đang làm đội trưởng</span>
+                <strong id="captain-teams">0</strong>
+            </div>
+            <div class="my-teams-stat">
+                <span>Đội đang tham gia</span>
+                <strong id="member-teams">0</strong>
+            </div>
+        </div>
+
+        <div class="my-teams-toolbar">
+            <h2>Danh sách đội</h2>
+            <select id="team-role-filter" aria-label="Lọc theo vai trò">
+                <option value="all">Tất cả đội</option>
+                <option value="captain">Đội trưởng</option>
+                <option value="member">Thành viên</option>
+            </select>
+        </div>
+
+        <p id="my-teams-status" role="status"></p>
+        <p class="muted">Trang chi tiết và bảng tin hiện là bản mẫu, chưa đồng bộ dữ liệu đội.</p>
+        <div id="my-teams-list" class="my-teams-grid"></div>
+
+        <div id="my-teams-empty" class="my-teams-empty" hidden>
+            <h3>Chưa có đội nào</h3>
+            <p>Bạn chưa tham gia đội nào hoặc không có đội phù hợp với bộ lọc.</p>
+        </div>
+    </main>
+
+    <footer id="app-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/my-team.js"></script>
+</body>
+
+</html>

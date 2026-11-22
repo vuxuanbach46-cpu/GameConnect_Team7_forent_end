@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng tin nội bộ | GameConnect</title>
+    <link rel="icon" href="../assets/images/logo.svg">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/team-feed.css">
+</head>
+
+<body class="gc-team-page" data-root="../">
+    <header id="app-header"></header>
+
+    <main class="container team-feed-page">
+
+        <a href="my-team.html" class="feed-back">← Quay lại Đội của tôi</a>
+
+        <section class="feed-heading">
+            <div>
+                <span class="feed-label">🎮 KHÔNG GIAN ĐỘI</span>
+                <h1 id="feed-team-name">Bảng tin nội bộ</h1>
+                <p>Theo dõi thông báo và lịch chơi mới nhất của đội.</p>
+            </div>
+            <span class="feed-private">🔒 Chỉ dành cho thành viên</span>
+        </section>
+
+        <section class="feed-summary">
+            <div class="feed-stat">
+                <span>Thông báo</span>
+                <strong id="announcement-count">0</strong>
+            </div>
+            <div class="feed-stat">
+                <span>Lịch chơi</span>
+                <strong id="schedule-count">0</strong>
+            </div>
+            <div class="feed-stat">
+                <span>Vai trò của bạn</span>
+                <strong id="feed-user-role">Thành viên</strong>
+            </div>
+        </section>
+
+        <section id="feed-captain-tools" class="feed-captain-tools" hidden>
+            <div>
+                <h2>👑 Quản lý bảng tin</h2>
+                <p>Đăng thông báo hoặc lên lịch chơi cho các thành viên.</p>
+            </div>
+            <button id="btn-create-post" type="button" class="feed-primary">
+                + Đăng bài mới
+            </button>
+        </section>
+
+        <section class="feed-content">
+            <div class="feed-toolbar">
+                <h2>Hoạt động của đội</h2>
+                <select id="feed-filter" aria-label="Lọc bài viết">
+                    <option value="all">Tất cả bài viết</option>
+                    <option value="announcement">Thông báo</option>
+                    <option value="schedule">Lịch chơi</option>
+                </select>
+            </div>
+
+            <div id="feed-post-list" class="feed-post-list"></div>
+
+            <div id="feed-empty" class="feed-empty" hidden>
+                <h3>Chưa có bài viết nào</h3>
+                <p>Các thông báo và lịch chơi mới sẽ xuất hiện tại đây.</p>
+            </div>
+
+            <div id="feed-access-denied" class="feed-empty" hidden>
+                <h3>🔒 Không có quyền truy cập</h3>
+                <p>Chỉ thành viên của đội mới được xem bảng tin này.</p>
+                <a href="my-team.html" class="feed-primary">Về Đội của tôi</a>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="feed-modal" class="feed-modal-overlay" hidden>
+        <div class="feed-modal">
+            <div class="feed-modal-header">
+                <h2>Đăng bài lên bảng tin</h2>
+                <button id="btn-close-feed-modal" type="button" class="feed-close" aria-label="Đóng">✕</button>
+            </div>
+
+            <form id="feed-post-form">
+                <label for="feed-post-type">Loại bài viết</label>
+                <select id="feed-post-type" required>
+                    <option value="announcement">📢 Thông báo</option>
+                    <option value="schedule">📅 Lịch chơi</option>
+                </select>
+
+                <label for="feed-post-title">Tiêu đề</label>
+                <input id="feed-post-title" type="text" maxlength="120" required placeholder="Nhập tiêu đề bài viết">
+
+                <label for="feed-post-content">Nội dung</label>
+                <textarea id="feed-post-content" rows="5" required
+                    placeholder="Nhập nội dung muốn chia sẻ với đội"></textarea>
+
+                <div id="feed-schedule-fields" hidden>
+                    <label for="feed-play-date">Ngày chơi</label>
+                    <input id="feed-play-date" type="date">
+
+                    <label for="feed-play-time">Giờ bắt đầu</label>
+                    <input id="feed-play-time" type="time">
+                </div>
+
+                <p id="feed-form-error" class="feed-form-error" hidden></p>
+
+                <div class="feed-form-actions">
+                    <button id="btn-cancel-feed" type="button" class="feed-secondary">Hủy</button>
+                    <button type="submit" class="feed-primary">Đăng bài</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer id="app-footer"></footer>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/team-feed.js"></script>
+</body>
+
+</html>
