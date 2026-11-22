@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginLink = inPagesDir ? "login.html" : "pages/login.html";
     const registerLink = inPagesDir ? "register.html" : "pages/register.html";
     const homeLink = inPagesDir ? "home.html" : "pages/home.html";
+    const adminDashboardLink = inPagesDir ? "admin-dashboard.html" : "pages/admin-dashboard.html";
+    const adminReportsLink = inPagesDir ? "admin-reports.html" : "pages/admin-reports.html";
     const indexLink = inPagesDir ? "../index.html" : "index.html";
 
     if (!token) {
@@ -22,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (userRole === "ADMIN") {
             // --- 2. NHÓM ADMIN ---
             authNav.innerHTML = `
-                <a href="${homeLink}" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs font-bold uppercase">Admin Panel</a>
+                <a href="${adminDashboardLink}" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs font-bold uppercase">Admin Panel</a>
                 <span class="text-gray-300 text-sm">Chào, Admin</span>
                 <button id="logout-btn" class="text-sm text-red-400 hover:underline">Đăng xuất</button>
             `;

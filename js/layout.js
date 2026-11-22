@@ -11,6 +11,8 @@ const MENU = [
   { href: "pages/community.html", label: "Bảng tin Cộng đồng" },
   { href: "pages/friends.html", label: "Bạn bè & Kết nối" },
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
+  { href: "pages/admin-dashboard.html", label: "📊 Dashboard Thống kê" },
+  { href: "pages/admin-reports.html", label: "🛡️ Quản lý Báo cáo" },
   { href: "pages/my-team.html", label: "🎮 Đội của tôi" },
 ];
 
