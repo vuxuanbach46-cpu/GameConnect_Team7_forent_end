@@ -1,9 +1,9 @@
 // ============================================================
-// js/pages/team-post-detail.js  –  Trang chi tiết bài đăng tìm đội
-// T3CCE3F
+// js/pages/team-post-detail.js  –  Chi tiết bài đăng tìm đội (Gaming Hub UI)
+// Task: T3CCE3F
 // ============================================================
 
-const detailWrap = document.getElementById("detail-wrap");
+const detailWrap   = document.getElementById("detail-wrap");
 const modalOverlay = document.getElementById("modal-overlay");
 const modalTitle   = document.getElementById("modal-title");
 const postForm     = document.getElementById("post-form");
@@ -14,111 +14,229 @@ const fMinRank     = document.getElementById("f-min-rank");
 const fMaxRank     = document.getElementById("f-max-rank");
 const fRolesWrap   = document.getElementById("f-roles-wrap");
 
-let gamesCatalog = [];
-let currentPost  = null;
+// Apply modal
+const applyModal   = document.getElementById("apply-modal");
+const applyMsg     = document.getElementById("apply-message");
 
-// ============================================================
-// 1. Lấy post_id từ URL
-// ============================================================
-const params = new URLSearchParams(window.location.search);
-const postId = Number(params.get("id"));
+// Create team modal (Task T3CD622)
+const createTeamModal    = document.getElementById("create-team-modal");
+const createTeamForm     = document.getElementById("create-team-form");
+const ctName             = document.getElementById("ct-name");
+const ctJoinMode         = document.getElementById("ct-join-mode");
+const ctDesc             = document.getElementById("ct-desc");
+const ctMembersList      = document.getElementById("ct-members-list");
+const ctMemberCountBadge = document.getElementById("ct-member-count-badge");
+const ctFormError        = document.getElementById("ct-form-error");
+const btnSubmitCreateTeam= document.getElementById("btn-submit-create-team");
+const btnCloseCreateTeam = document.getElementById("btn-close-create-team-modal");
+const btnCancelCreateTeam= document.getElementById("btn-cancel-create-team");
 
-if (!postId) {
-  detailWrap.innerHTML = `<div class="card empty-state"><p class="text-error">Không tìm thấy bài đăng.</p></div>`;
-}
+let gamesCatalog   = [];
+let currentPost    = null;
+let currentUserId  = null;
+let currentUserObj = null;
 
-// ============================================================
-// 2. Load danh mục game
-// ============================================================
-async function loadGamesCatalog() {
+async function loadCurrentUser() {
+  const token = localStorage.getItem("access_token") || localStorage.getItem("token");
+  if (!token) return;
   try {
-    gamesCatalog = await api.get("/games");
-    populateGameDropdown(fGame);
-  } catch (e) {
-    console.warn("Không tải được game catalog:", e.message);
+    let res;
+    try {
+      res = await api.get("/user/me");
+    } catch {
+      res = await api.get("/api/users/me");
+    }
+    if (res && res.data) {
+      currentUserId = res.data.id;
+      currentUserObj = res.data;
+    } else if (res && res.id) {
+      currentUserId = res.id;
+      currentUserObj = res;
+    }
+  } catch (err) {
+    console.warn("Chưa đăng nhập hoặc không lấy được thông tin user:", err.message);
   }
 }
 
-function populateGameDropdown(selectEl) {
+const GAME_META = {
+  1: { icon: "fa-gamepad", color: "from-blue-600/30 to-blue-900/10", border: "border-blue-500/30", text: "text-blue-400", name: "Liên Minh Huyền Thoại" },
+  2: { icon: "fa-crosshairs", color: "from-red-600/30 to-red-900/10", border: "border-red-500/30", text: "text-red-400", name: "Valorant" },
+  3: { icon: "fa-person-rifle", color: "from-amber-600/30 to-amber-900/10", border: "border-amber-500/30", text: "text-amber-400", name: "PUBG Mobile" },
+  4: { icon: "fa-fire", color: "from-orange-600/30 to-orange-900/10", border: "border-orange-500/30", text: "text-orange-400", name: "Free Fire" },
+  5: { icon: "fa-shield-halved", color: "from-purple-600/30 to-purple-900/10", border: "border-purple-500/30", text: "text-purple-400", name: "Liên Quân Mobile" },
+};
+
+// 1. Lấy post_id từ URL
+const urlParams = new URLSearchParams(window.location.search);
+const postId = Number(urlParams.get("id"));
+
+if (!postId) {
+  detailWrap.innerHTML = `
+    <div class="bg-[#181920] border border-[#242631] rounded-2xl p-10 text-center">
+      <i class="fa-solid fa-triangle-exclamation text-3xl text-red-400 mb-2"></i>
+      <h3 class="text-white font-bold text-base">Không tìm thấy bài đăng</h3>
+      <p class="text-zinc-400 text-xs mt-1">Đường dẫn không hợp lệ hoặc bài đăng đã bị gỡ.</p>
+      <a href="team-posts.html" class="btn-orange px-4 py-2 text-xs rounded-xl inline-flex items-center gap-2 mt-4">
+        ← Quay lại Sảnh Tìm Đồng Đội
+      </a>
+    </div>`;
+}
+
+// 2. Load danh mục game
+async function loadGamesCatalog() {
+  try {
+    try {
+      gamesCatalog = await api.get("/api/games");
+    } catch {
+      gamesCatalog = await api.get("/games");
+    }
+    populateGameSelect(fGame);
+  } catch (e) {
+    console.warn("Không tải được catalog:", e.message);
+  }
+}
+
+function populateGameSelect(selectEl) {
   selectEl.innerHTML = '<option value="">-- Chọn game --</option>' +
-    gamesCatalog.map((g) => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join("");
+    gamesCatalog.map((g) => `<option value="${g.id}">🎮 ${escapeHtml(g.name)}</option>`).join("");
 }
 
 function getGameById(id) {
   return gamesCatalog.find((g) => g.id === Number(id));
 }
 
-// ============================================================
-// 3. Load & Render chi tiết
-// ============================================================
+// 3. Load chi tiết bài đăng
 async function loadDetail() {
   try {
-    const post = await api.get(`/team-posts/${postId}`);
+    let post;
+    try {
+      post = await api.get(`/api/team-posts/${postId}`);
+    } catch {
+      post = await api.get(`/team-posts/${postId}`);
+    }
     currentPost = post;
     document.title = `${post.title} | GameConnect`;
     renderDetail(post);
   } catch (err) {
-    detailWrap.innerHTML = `<div class="card empty-state">
-      <p class="text-error">${escapeHtml(err.message)}</p>
-      <a href="team-posts.html" class="btn" style="margin-top:12px;">← Quay lại danh sách</a>
-    </div>`;
+    detailWrap.innerHTML = `
+      <div class="bg-[#181920] border border-[#242631] rounded-2xl p-10 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-3xl text-red-400 mb-2"></i>
+        <p class="text-red-400 text-sm mt-2">${escapeHtml(err.message)}</p>
+        <a href="team-posts.html" class="btn-orange px-4 py-2 text-xs rounded-xl inline-flex items-center gap-2 mt-4">
+          ← Quay lại Sảnh Tìm Đồng Đội
+        </a>
+      </div>`;
   }
 }
 
-function statusBadge(status) {
-  const map = {
-    OPEN:    ["badge-open", "Đang mở"],
-    CLOSED:  ["badge-closed", "Đã đóng"],
-    EXPIRED: ["badge-expired", "Hết hạn"],
-  };
-  const [cls, label] = map[status] || ["badge-expired", status];
-  return `<span class="badge ${cls}">${label}</span>`;
+function renderStatusBadge(status) {
+  if (status === "OPEN") {
+    return `<span class="badge-open px-3 py-1 rounded-full text-xs font-bold tracking-wider inline-flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ĐANG MỞ TUYỂN
+    </span>`;
+  } else if (status === "FULL") {
+    return `<span class="badge-full px-3 py-1 rounded-full text-xs font-bold tracking-wider">ĐÃ ĐỦ THÀNH VIÊN</span>`;
+  } else {
+    return `<span class="badge-closed px-3 py-1 rounded-full text-xs font-bold tracking-wider">ĐÃ ĐÓNG BÀI</span>`;
+  }
 }
 
 function renderDetail(post) {
+  const isOwner = currentUserId && (post.user_id === currentUserId);
   const game = getGameById(post.game_id);
-  const gameName = game ? escapeHtml(game.name) : `Game #${post.game_id}`;
+  const meta = GAME_META[post.game_id] || { icon: "fa-gamepad", color: "from-zinc-700/30 to-zinc-900/10", border: "border-zinc-700/30", text: "text-zinc-400", name: game?.name || `Game #${post.game_id}` };
+  const gameName = game ? escapeHtml(game.name) : meta.name;
 
-  // Rank
-  let rankText = "Không yêu cầu";
+  let rankText = "Không yêu cầu bậc Rank";
   if (post.min_rank_id || post.max_rank_id) {
-    const minR = game?.ranks.find((r) => r.id === post.min_rank_id);
-    const maxR = game?.ranks.find((r) => r.id === post.max_rank_id);
+    const minR = game?.ranks?.find((r) => r.id === post.min_rank_id);
+    const maxR = game?.ranks?.find((r) => r.id === post.max_rank_id);
     if (minR && maxR) rankText = `${minR.rank_name} → ${maxR.rank_name}`;
     else if (minR) rankText = `Từ ${minR.rank_name}`;
     else if (maxR) rankText = `Đến ${maxR.rank_name}`;
   }
 
-  // Vai trò
   const roleTags = (post.role_ids || []).map((rid) => {
-    const role = game?.roles.find((r) => r.id === rid);
-    return role ? `<span class="role-tag">${escapeHtml(role.role_name)}</span>` : "";
-  }).join("") || '<span class="muted" style="font-size:13px;">Không yêu cầu</span>';
+    const role = game?.roles?.find((r) => r.id === rid);
+    return role ? `<span class="px-3 py-1 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-bold">${escapeHtml(role.role_name)}</span>` : "";
+  }).join("") || '<span class="text-zinc-500 italic text-xs">Tuyển tự do mọi vị trí</span>';
 
-  // Đơn ứng tuyển (chỉ hiện nếu có)
+  // Applications Table (chủ bài hoặc admin thấy)
   const apps = post.applications || [];
+  const acceptedApps = apps.filter((a) => a.status === "ACCEPTED");
+  const isFull = post.status === "FULL" || (acceptedApps.length >= post.needed_players);
+  const canCreateTeam = isOwner && isFull;
+
   const appsSection = apps.length > 0 ? `
-    <div class="card">
-      <h3 style="margin:0 0 16px;">Đơn ứng tuyển (${apps.length})</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
+    <div class="bg-[#181920] border border-[#242631] rounded-2xl p-6 mt-6 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-users-viewfinder text-orange-400"></i>
+            <span>Danh sách đơn ứng tuyển (${apps.length})</span>
+          </h3>
+          <p class="text-[11px] text-zinc-500 mt-0.5">
+            Đã chấp nhận: <span class="text-emerald-400 font-bold">${acceptedApps.length}/${post.needed_players}</span> thành viên
+          </p>
+        </div>
+        ${canCreateTeam ? `
+          <button id="btn-section-create-team" class="btn-orange px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-orange-500/20">
+            <i class="fa-solid fa-shield-halved"></i> Tạo đội ngay
+          </button>
+        ` : ''}
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-zinc-300">
+          <thead class="text-zinc-500 uppercase border-b border-[#242631] text-[10px]">
             <tr>
-              <th>#</th>
-              <th>Người ứng tuyển</th>
-              <th>Lời nhắn</th>
-              <th>Trạng thái</th>
-              <th>Ngày nộp</th>
+              <th class="py-2.5 px-3">#</th>
+              <th class="py-2.5 px-3">Người chơi</th>
+              <th class="py-2.5 px-3">Lời nhắn</th>
+              <th class="py-2.5 px-3">Trạng thái</th>
+              <th class="py-2.5 px-3">Ngày nộp</th>
+              ${isOwner ? '<th class="py-2.5 px-3 text-right">Thao tác</th>' : ''}
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-[#242631]">
             ${apps.map((a) => `
-              <tr>
-                <td>${a.id}</td>
-                <td>User #${a.user_id}</td>
-                <td>${escapeHtml(a.message || "—")}</td>
-                <td><span class="application-status-${a.status.toLowerCase()}">${a.status}</span></td>
-                <td>${formatDateTime(a.created_at)}</td>
+              <tr class="hover:bg-[#1f212b]/60 transition">
+                <td class="py-3 px-3 font-mono text-zinc-500">#${a.id}</td>
+                <td class="py-3 px-3 font-semibold text-white">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">
+                      ${a.user_id}
+                    </div>
+                    <span>Gamer #${a.user_id}</span>
+                  </div>
+                </td>
+                <td class="py-3 px-3 text-zinc-300">${escapeHtml(a.message || "Không có lời nhắn")}</td>
+                <td class="py-3 px-3">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                    a.status === 'ACCEPTED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                    a.status === 'REJECTED' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                    a.status === 'CANCELLED' ? 'bg-zinc-700/30 text-zinc-400 border border-zinc-700/30' :
+                    'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  }">${a.status === 'ACCEPTED' ? 'ĐÃ DUYỆT' : a.status === 'REJECTED' ? 'TỪ CHỐI' : a.status === 'CANCELLED' ? 'ĐÃ RÚT' : 'CHỜ DUYỆT'}</span>
+                </td>
+                <td class="py-3 px-3 text-zinc-500 text-[11px]">${formatDateTime(a.created_at)}</td>
+                ${isOwner ? `
+                  <td class="py-3 px-3 text-right">
+                    ${a.status === 'PENDING' ? `
+                      <div class="inline-flex items-center gap-1.5">
+                        <button onclick="handleApplicationDecision(${a.id}, 'ACCEPTED')" class="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition">
+                          <i class="fa-solid fa-check"></i> Duyệt
+                        </button>
+                        <button onclick="handleApplicationDecision(${a.id}, 'REJECTED')" class="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition">
+                          <i class="fa-solid fa-xmark"></i> Từ chối
+                        </button>
+                      </div>
+                    ` : a.status === 'ACCEPTED' ? `
+                      <span class="text-[11px] text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>Thành viên đội</span>
+                    ` : `
+                      <span class="text-[11px] text-zinc-500">-</span>
+                    `}
+                  </td>
+                ` : ''}
               </tr>`).join("")}
           </tbody>
         </table>
@@ -126,92 +244,196 @@ function renderDetail(post) {
     </div>` : "";
 
   detailWrap.innerHTML = `
-    <div class="detail-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
-        <h1 class="detail-title">${escapeHtml(post.title)}</h1>
-        ${statusBadge(post.status)}
+    <!-- Main Card -->
+    <div class="bg-[#181920] border border-[#242631] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+
+      <!-- Header: Game tag & Status -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-gradient-to-r ${meta.color} border ${meta.border} text-xs font-bold ${meta.text}">
+          <i class="fa-solid ${meta.icon}"></i>
+          <span>${gameName}</span>
+        </div>
+        <div>${renderStatusBadge(post.status)}</div>
       </div>
 
-      <div class="detail-meta">
-        <span>🎮 <strong>${gameName}</strong></span>
-        <span>🏆 Rank: <strong>${escapeHtml(rankText)}</strong></span>
-        <span>👥 Cần tuyển: <strong>${post.needed_players} người</strong></span>
-        ${post.region ? `<span>🌏 Khu vực: <strong>${escapeHtml(post.region)}</strong></span>` : ""}
-        ${post.play_time ? `<span>⏰ Giờ chơi: <strong>${escapeHtml(post.play_time)}</strong></span>` : ""}
-        ${post.expires_at ? `<span>📅 Hạn đến: <strong>${formatDateTime(post.expires_at)}</strong></span>` : ""}
-        <span style="color:var(--color-muted);font-size:12px;">Đăng lúc ${formatDateTime(post.created_at)}</span>
+      <!-- Banner thông báo khi đã đủ người FULL (Bonus T3CD622) -->
+      ${isFull && isOwner ? `
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-[#16231d] to-orange-500/15 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-emerald-500/5">
+          <div class="flex items-start sm:items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl flex-shrink-0">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>Bài đăng đã đủ thành viên (${acceptedApps.length}/${post.needed_players})</span>
+                <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">SẴN SÀNG TẠO ĐỘI</span>
+              </h4>
+              <p class="text-xs text-zinc-400 mt-0.5">
+                Các vị trí đã được tuyển đủ người. Bấm nút <strong>"Tạo đội"</strong> để khởi tạo clan chính thức và cùng nhau leo rank!
+              </p>
+            </div>
+          </div>
+          <button id="btn-banner-create-team" class="btn-orange px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap self-start sm:self-auto shadow-md shadow-orange-500/25 hover:scale-105 transition-transform">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Tạo đội ngay</span>
+          </button>
+        </div>
+      ` : ''}
+
+      <!-- Title -->
+      <h1 class="text-xl sm:text-2xl font-extrabold text-white leading-tight">
+        ${escapeHtml(post.title)}
+      </h1>
+
+      <!-- Specs Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#13141a] p-4 rounded-xl border border-[#242631]">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-zinc-500 block mb-0.5">Số lượng tuyển</span>
+          <span class="text-sm font-bold text-orange-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-users"></i> ${post.needed_players} người
+          </span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase font-bold text-zinc-500 block mb-0.5">Yêu cầu Rank</span>
+          <span class="text-sm font-bold text-amber-400 flex items-center gap-1.5 truncate">
+            <i class="fa-solid fa-trophy"></i> ${escapeHtml(rankText)}
+          </span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase font-bold text-zinc-500 block mb-0.5">Khung giờ</span>
+          <span class="text-sm font-bold text-blue-400 flex items-center gap-1.5 truncate">
+            <i class="fa-solid fa-clock"></i> ${escapeHtml(post.play_time || "Linh hoạt")}
+          </span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase font-bold text-zinc-500 block mb-0.5">Khu vực / Server</span>
+          <span class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-globe"></i> ${escapeHtml(post.region || "Toàn quốc")}
+          </span>
+        </div>
       </div>
 
-      <div class="detail-section-title">Vai trò cần tuyển</div>
-      <div class="role-tags">${roleTags}</div>
+      <!-- Roles Required -->
+      <div>
+        <h4 class="text-xs uppercase font-bold text-zinc-400 tracking-wider mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-crosshairs text-orange-400"></i> Vai trò cần tuyển
+        </h4>
+        <div class="flex flex-wrap gap-2">${roleTags}</div>
+      </div>
 
+      <!-- Description -->
       ${post.description ? `
-        <div class="detail-section-title">Mô tả</div>
-        <p class="detail-desc">${escapeHtml(post.description)}</p>` : ""}
+        <div>
+          <h4 class="text-xs uppercase font-bold text-zinc-400 tracking-wider mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-align-left text-orange-400"></i> Lời nhắn từ chủ bài đăng
+          </h4>
+          <div class="p-4 bg-[#13141a] rounded-xl border border-[#242631] text-xs text-zinc-300 leading-relaxed whitespace-pre-line">
+            ${escapeHtml(post.description)}
+          </div>
+        </div>` : ""}
 
-      <div class="detail-actions" id="post-actions">
-        ${post.status === "OPEN" ? `
-          <button class="btn btn-primary" id="btn-apply">Ứng tuyển ngay</button>` : ""}
-        <button class="btn" id="btn-edit-post">✏️ Chỉnh sửa</button>
-        <button class="btn btn-danger" id="btn-close-post">Đóng bài đăng</button>
-        <button class="btn" onclick="history.back()">← Quay lại</button>
+      <!-- Meta Info -->
+      <div class="text-[11px] text-zinc-500 flex flex-wrap gap-4 pt-2 border-t border-[#242631]">
+        <span><i class="fa-regular fa-clock mr-1"></i>Đăng lúc: ${formatDateTime(post.created_at)}</span>
+        ${post.expires_at ? `<span><i class="fa-regular fa-calendar-xmark mr-1"></i>Hạn bài: ${formatDateTime(post.expires_at)}</span>` : ""}
+        <span><i class="fa-regular fa-user mr-1"></i>Chủ bài: Gamer #${post.user_id}</span>
       </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-4 border-t border-[#242631] flex flex-wrap items-center gap-3">
+        ${canCreateTeam ? `
+          <button id="btn-open-create-team" class="btn-orange px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-orange-500/25 animate-pulse hover:animate-none transition">
+            <i class="fa-solid fa-shield-halved text-sm"></i>
+            <span>Tạo đội (${1 + acceptedApps.length} thành viên)</span>
+          </button>
+        ` : ''}
+
+        ${(!isOwner && post.status === 'OPEN') ? `
+          <button id="btn-open-apply" class="btn-orange px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2">
+            <i class="fa-solid fa-handshake"></i>
+            <span>Ứng tuyển ngay</span>
+          </button>` : ""}
+
+        ${isOwner ? `
+          <button id="btn-edit-post" class="px-4 py-2.5 bg-[#1e2029] hover:bg-[#282a36] text-zinc-300 hover:text-white rounded-xl text-xs font-semibold border border-[#2e313e] flex items-center gap-2 transition">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Chỉnh sửa bài</span>
+          </button>
+          ${post.status !== 'CLOSED' ? `
+            <button id="btn-close-post" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+              <i class="fa-solid fa-lock"></i>
+              <span>Đóng bài đăng</span>
+            </button>
+          ` : ''}
+        ` : ''}
+
+        <a href="team-posts.html" class="px-4 py-2.5 bg-[#181920] hover:bg-[#222430] text-zinc-400 hover:text-white rounded-xl text-xs font-semibold border border-[#242631] transition">
+          ← Quay lại danh sách
+        </a>
+      </div>
+
     </div>
 
     ${appsSection}
   `;
 
-  // Gắn sự kiện cho các nút action
+  // Gắn sự kiện
+  document.getElementById("btn-open-apply")?.addEventListener("click", () => {
+    applyMsg.value = "";
+    applyModal.hidden = false;
+    applyMsg.focus();
+  });
   document.getElementById("btn-edit-post")?.addEventListener("click", () => openEditModal(post));
   document.getElementById("btn-close-post")?.addEventListener("click", () => closePost(post.id));
-  document.getElementById("btn-apply")?.addEventListener("click", applyToPost);
+
+  // Gắn sự kiện tạo đội
+  const handleOpenCreateTeam = () => openCreateTeamModal(post);
+  document.getElementById("btn-open-create-team")?.addEventListener("click", handleOpenCreateTeam);
+  document.getElementById("btn-banner-create-team")?.addEventListener("click", handleOpenCreateTeam);
+  document.getElementById("btn-section-create-team")?.addEventListener("click", handleOpenCreateTeam);
 }
 
-// ============================================================
-// 4. Ứng tuyển
-// ============================================================
-async function applyToPost() {
-  const message = prompt("Lời nhắn gửi chủ bài đăng (không bắt buộc):");
-  if (message === null) return; // User cancel
+// 4. Nộp đơn ứng tuyển
+document.getElementById("btn-close-apply")?.addEventListener("click", () => applyModal.hidden = true);
+document.getElementById("btn-cancel-apply")?.addEventListener("click", () => applyModal.hidden = true);
+document.getElementById("btn-confirm-apply")?.addEventListener("click", async () => {
+  const message = applyMsg.value.trim() || null;
+  const btn = document.getElementById("btn-confirm-apply");
+  btn.disabled = true;
   try {
-    await api.post(`/team-posts/${postId}/applications`, { message: message.trim() || null });
-    showToast("Đã nộp đơn ứng tuyển! 🎉");
-    loadDetail();
-  } catch (err) {
-    showToast(err.message, "error");
-  }
-}
-
-// ============================================================
-// 5. Đóng bài đăng
-// ============================================================
-async function closePost(id) {
-  if (!confirm("Đóng bài đăng này sớm?")) return;
-  try {
-    await api.patch ? api.patch(`/team-posts/${id}/close`) : api.put(`/team-posts/${id}/close`);
-    showToast("Đã đóng bài đăng");
-    loadDetail();
-  } catch (err) {
-    // fallback POST nếu patch chưa có
     try {
-      await api.post(`/team-posts/${id}/close`);
-      showToast("Đã đóng bài đăng");
-      loadDetail();
-    } catch (err2) {
-      showToast(err2.message, "error");
+      await api.post(`/api/team-posts/${postId}/applications`, { message });
+    } catch {
+      await api.post(`/team-posts/${postId}/applications`, { message });
     }
+    showGamerToast("Đã gửi đơn ứng tuyển vào đội! 🎉", "success");
+    applyModal.hidden = true;
+    loadDetail();
+  } catch (err) {
+    showGamerToast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// 5. Đóng bài đăng
+async function closePost(id) {
+  if (!confirm("Bạn có chắc chắn muốn đóng bài đăng này sớm?")) return;
+  try {
+    try {
+      await (api.patch ? api.patch(`/api/team-posts/${id}/close`) : api.post(`/api/team-posts/${id}/close`));
+    } catch {
+      await api.post(`/team-posts/${id}/close`);
+    }
+    showGamerToast("Đã đóng bài đăng thành công!", "success");
+    loadDetail();
+  } catch (err) {
+    showGamerToast(err.message, "error");
   }
 }
 
-// ============================================================
 // 6. Modal sửa bài
-// ============================================================
 function openEditModal(post) {
-  modalTitle.textContent = "Chỉnh sửa bài đăng";
-  submitBtn.textContent = "Lưu thay đổi";
-  hideFormError();
-
-  // Chọn game
   fGame.value = post.game_id;
   const game = getGameById(post.game_id);
   populateFormRanks(game, post.min_rank_id, post.max_rank_id);
@@ -219,7 +441,6 @@ function openEditModal(post) {
   fMinRank.disabled = !game;
   fMaxRank.disabled = !game;
 
-  // Điền các field
   postForm.title.value = post.title;
   postForm.needed_players.value = post.needed_players;
   postForm.play_time.value = post.play_time || "";
@@ -233,14 +454,12 @@ function openEditModal(post) {
   }
 
   modalOverlay.hidden = false;
-  document.body.style.overflow = "hidden";
 }
 
-// Rank & Role form helpers (tái dùng từ team-posts.js)
 function populateFormRanks(game, selectedMin, selectedMax) {
   const baseMin = '<option value="">-- Không yêu cầu --</option>';
   const baseMax = '<option value="">-- Không giới hạn --</option>';
-  if (!game) {
+  if (!game || !game.ranks) {
     fMinRank.innerHTML = baseMin;
     fMaxRank.innerHTML = baseMax;
     return;
@@ -254,19 +473,18 @@ function populateFormRanks(game, selectedMin, selectedMax) {
 }
 
 function populateFormRoles(game, selectedIds = []) {
-  if (!game || !game.roles.length) {
-    fRolesWrap.innerHTML = '<span class="muted" style="font-size:13px;">Game này không có vai trò</span>';
+  if (!game || !game.roles || !game.roles.length) {
+    fRolesWrap.innerHTML = '<span class="text-zinc-500 italic text-[11px]">Không có vai trò</span>';
     return;
   }
   fRolesWrap.innerHTML = game.roles.map((r) => `
-    <label class="role-checkbox-item">
-      <input type="checkbox" name="role_ids" value="${r.id}"
+    <label class="cursor-pointer px-2.5 py-1 rounded bg-[#20222d] border border-[#2e313e] hover:border-orange-500/50 text-zinc-300 font-medium text-xs flex items-center gap-1.5 transition has-[:checked]:bg-orange-500/20 has-[:checked]:border-orange-500 has-[:checked]:text-orange-400 select-none">
+      <input type="checkbox" name="role_ids" value="${r.id}" class="accent-orange-500"
         ${selectedIds.includes(r.id) ? "checked" : ""}>
-      ${escapeHtml(r.role_name)}
+      <span>${escapeHtml(r.role_name)}</span>
     </label>`).join("");
 }
 
-// Thay đổi game → reload rank/role trong form
 fGame.addEventListener("change", () => {
   const game = getGameById(fGame.value);
   populateFormRanks(game);
@@ -275,31 +493,18 @@ fGame.addEventListener("change", () => {
   fMaxRank.disabled = !game;
 });
 
-// Đóng modal
-document.getElementById("btn-close-modal").addEventListener("click", closeModal);
-document.getElementById("btn-cancel-form").addEventListener("click", closeModal);
-modalOverlay.addEventListener("click", (e) => { if (e.target === modalOverlay) closeModal(); });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
-function closeModal() {
-  modalOverlay.hidden = true;
-  document.body.style.overflow = "";
-}
+document.getElementById("btn-close-modal")?.addEventListener("click", () => modalOverlay.hidden = true);
+document.getElementById("btn-cancel-form")?.addEventListener("click", () => modalOverlay.hidden = true);
 
-// ============================================================
-// 7. Submit sửa bài
-// ============================================================
+// 7. Submit cập nhật
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  hideFormError();
-
   const game_id = Number(fGame.value);
-  if (!game_id) return showFormError("Vui lòng chọn game.");
-
+  if (!game_id) return alert("Vui lòng chọn game.");
   const title = postForm.title.value.trim();
-  if (!title) return showFormError("Vui lòng nhập tiêu đề.");
+  if (!title) return alert("Vui lòng nhập tiêu đề.");
 
-  const checkedRoles = [...fRolesWrap.querySelectorAll('input[type="checkbox"]:checked')]
-    .map((el) => Number(el.value));
+  const checkedRoles = [...fRolesWrap.querySelectorAll('input[type="checkbox"]:checked')].map((el) => Number(el.value));
 
   const payload = {
     game_id,
@@ -310,39 +515,160 @@ postForm.addEventListener("submit", async (e) => {
     play_time: postForm.play_time.value.trim() || null,
     region: postForm.region.value || null,
     description: postForm.description.value.trim() || null,
-    expires_at: postForm.expires_at.value
-      ? new Date(postForm.expires_at.value).toISOString()
-      : null,
+    expires_at: postForm.expires_at.value ? new Date(postForm.expires_at.value).toISOString() : null,
     role_ids: checkedRoles,
   };
 
   submitBtn.disabled = true;
   try {
-    await api.put(`/team-posts/${postId}`, payload);
-    showToast("Đã cập nhật bài đăng!");
-    closeModal();
+    try {
+      await api.put(`/api/team-posts/${postId}`, payload);
+    } catch {
+      await api.put(`/team-posts/${postId}`, payload);
+    }
+    showGamerToast("Đã cập nhật bài đăng thành công!", "success");
+    modalOverlay.hidden = true;
     loadDetail();
   } catch (err) {
-    showFormError(err.message);
+    alert(err.message);
   } finally {
     submitBtn.disabled = false;
   }
 });
 
-function showFormError(msg) {
-  formError.textContent = msg;
-  formError.hidden = false;
-}
-function hideFormError() {
-  formError.hidden = true;
-  formError.textContent = "";
+// Quyết định duyệt / từ chối đơn ứng tuyển (Task T3CD622 & T3CCE75)
+window.handleApplicationDecision = async function (appId, decision) {
+  try {
+    try {
+      await api.put(`/api/team-posts/${postId}/applications/${appId}`, { status: decision });
+    } catch {
+      await api.put(`/team-posts/${postId}/applications/${appId}`, { status: decision });
+    }
+    showGamerToast(
+      decision === "ACCEPTED" ? "Đã chấp nhận đơn ứng tuyển! 🎉" : "Đã từ chối đơn ứng tuyển.",
+      decision === "ACCEPTED" ? "success" : "info"
+    );
+    await loadDetail();
+  } catch (err) {
+    showGamerToast(err.message, "error");
+  }
+};
+
+// Modal tạo đội từ bài đăng đủ người (Task T3CD622)
+function openCreateTeamModal(post) {
+  const apps = post.applications || [];
+  const acceptedApps = apps.filter((a) => a.status === "ACCEPTED");
+
+  ctName.value = `Team ${post.title}`.trim().slice(0, 80);
+  ctDesc.value = `Đội tuyển được thành lập từ bài đăng tìm đồng đội: ${post.title}`;
+  ctJoinMode.value = "APPROVAL_REQUIRED";
+  ctFormError.classList.add("hidden");
+  ctFormError.textContent = "";
+
+  const totalMembers = 1 + acceptedApps.length;
+  ctMemberCountBadge.textContent = `${totalMembers} người`;
+
+  ctMembersList.innerHTML = `
+    <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#13141a] border border-orange-500/30">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold">
+          <i class="fa-solid fa-crown text-[11px]"></i>
+        </div>
+        <div>
+          <span class="text-white font-bold text-xs">${escapeHtml(currentUserObj?.username || `Gamer #${post.user_id}`)} (Bạn)</span>
+          <span class="text-[10px] text-zinc-400 block">Đội trưởng / Chủ bài đăng</span>
+        </div>
+      </div>
+      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+        CAPTAIN
+      </span>
+    </div>
+    ${acceptedApps.map((a, idx) => `
+      <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#13141a] border border-[#242631]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
+            ${idx + 1}
+          </div>
+          <div>
+            <span class="text-white font-semibold text-xs">Gamer #${a.user_id}</span>
+            <span class="text-[10px] text-zinc-400 block truncate max-w-[200px]">${escapeHtml(a.message || "Ứng viên đã được duyệt")}</span>
+          </div>
+        </div>
+        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          MEMBER
+        </span>
+      </div>
+    `).join("")}
+  `;
+
+  createTeamModal.hidden = false;
+  ctName.focus();
 }
 
-// ============================================================
-// 8. Khởi động
-// ============================================================
+btnCloseCreateTeam?.addEventListener("click", () => createTeamModal.hidden = true);
+btnCancelCreateTeam?.addEventListener("click", () => createTeamModal.hidden = true);
+
+createTeamForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = ctName.value.trim();
+  if (!name || name.length < 2) {
+    ctFormError.textContent = "Tên đội phải có từ 2 ký tự trở lên.";
+    ctFormError.classList.remove("hidden");
+    return;
+  }
+
+  btnSubmitCreateTeam.disabled = true;
+  ctFormError.classList.add("hidden");
+
+  try {
+    const payload = {
+      name,
+      join_mode: ctJoinMode.value,
+      description: ctDesc.value.trim() || null,
+    };
+
+    let res;
+    try {
+      res = await api.post(`/api/team-posts/${postId}/create-team`, payload);
+    } catch {
+      res = await api.post(`/team-posts/${postId}/create-team`, payload);
+    }
+
+    const teamData = res?.data || res;
+    showGamerToast(`Tạo đội "${teamData.team_name || name}" thành công! Đang chuyển hướng... 🎉`, "success");
+    createTeamModal.hidden = true;
+
+    const teamId = teamData.team_id || teamData.id;
+    setTimeout(() => {
+      window.location.href = `team-detail.html?id=${teamId}`;
+    }, 1200);
+  } catch (err) {
+    ctFormError.textContent = err.message || "Không thể tạo đội. Vui lòng kiểm tra lại.";
+    ctFormError.classList.remove("hidden");
+  } finally {
+    btnSubmitCreateTeam.disabled = false;
+  }
+});
+
+function showGamerToast(message, type = "success") {
+  const container = document.getElementById("toast-container") || document.body;
+  const toast = document.createElement("div");
+  const isOk = type === "success";
+  toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border text-xs font-semibold shadow-2xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-3 ${
+    isOk ? "bg-[#14231b] border-emerald-500/40 text-emerald-400" : "bg-[#281515] border-red-500/40 text-red-400"
+  }`;
+  toast.innerHTML = `<i class="fa-solid ${isOk ? "fa-circle-check" : "fa-triangle-exclamation"} text-sm"></i><span>${escapeHtml(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "translate-y-2");
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// 8. Khởi tạo
 (async function init() {
   if (!postId) return;
+  await loadCurrentUser();
   await loadGamesCatalog();
   await loadDetail();
 })();

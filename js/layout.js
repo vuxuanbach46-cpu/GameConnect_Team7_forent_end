@@ -8,11 +8,10 @@
 // Thêm trang mới vào menu: thêm 1 dòng vào mảng này (đường dẫn tính từ thư mục frontend/)
 const MENU = [
   { href: "index.html", label: "Trang chủ" },
-  { href: "pages/community.html", label: "Cộng đồng" },
-  { href: "pages/friends.html", label: "Bạn bè (UI/UX)" },
-  { href: "pages/items.html", label: "Items (CRUD mẫu)" },
+  { href: "pages/community.html", label: "Bảng tin Cộng đồng" },
+  { href: "pages/friends.html", label: "Bạn bè & Kết nối" },
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
-  { href: "pages/admin-reports.html", label: "🛡️ Quản lý Báo cáo" },
+  { href: "pages/my-team.html", label: "🎮 Đội của tôi" },
 ];
 
 function renderLayout() {

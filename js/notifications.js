@@ -33,11 +33,14 @@ const NotificationBell = (() => {
   // ---- Icon SVG cho từng loại thông báo ----
   const TYPE_ICONS = {
     friend_request: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>',
+    FRIEND_REQUEST: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>',
     friend_accepted: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
+    FRIEND_ACCEPTED: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
     team_invite: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     PARTY_INVITE: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     team_join: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
     match: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    MATCH_FOUND: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
     system: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
   };
 
@@ -90,6 +93,9 @@ const NotificationBell = (() => {
 
   // Lấy CSS class cho icon type
   function _getTypeClass(type) {
+    if (type === "FRIEND_REQUEST") return "type-friend_request";
+    if (type === "FRIEND_ACCEPTED") return "type-friend_accepted";
+    if (type === "MATCH_FOUND") return "type-match";
     const known = ["friend_request", "friend_accepted", "team_invite", "PARTY_INVITE", "team_join", "match", "system"];
     return known.includes(type) ? `type-${type}` : "type-default";
   }
@@ -168,6 +174,8 @@ const NotificationBell = (() => {
     listEl.innerHTML = notifications.map((n) => `
       <div class="gc-notif-item ${n.is_read ? "" : "is-unread"}"
            data-notif-id="${n.id}"
+           data-notif-type="${escapeHtml(n.type || "")}"
+           data-notif-room-id="${n.room_id || ""}"
            data-notif-link="${escapeHtml(n.link || "")}"
            role="button" tabindex="0">
         <div class="gc-notif-icon ${_getTypeClass(n.type)}">
@@ -189,10 +197,12 @@ const NotificationBell = (() => {
 
   // ---- SỰ KIỆN ----
 
-  // Click vào thông báo: đánh dấu đã đọc + navigate
+  // Click vào thông báo: đánh dấu đã đọc + xử lý lời mời đội / kết bạn / điều hướng
   async function _onItemClick(item) {
     const id = item.dataset.notifId;
-    const link = item.dataset.notifLink;
+    const type = item.dataset.notifType || "";
+    const roomId = item.dataset.notifRoomId || "";
+    const link = item.dataset.notifLink || "";
 
     // Đánh dấu đã đọc
     if (item.classList.contains("is-unread")) {
@@ -206,18 +216,69 @@ const NotificationBell = (() => {
       }
     }
 
-    // Điều hướng
+    _closeDropdown();
+
+    // 1. Lời mời vào sảnh đội (PARTY_INVITE hoặc link /api/matchmaking/accept-invite/...)
+    if (type === "PARTY_INVITE" || link.includes("/api/matchmaking/accept-invite/")) {
+      const apiPath = link.includes("/api/matchmaking/accept-invite/")
+        ? link
+        : (roomId ? `/api/matchmaking/accept-invite/${roomId}` : `/api/matchmaking/accept-notification/${id}`);
+      try {
+        await http.post(apiPath, {}, { headers: _authHeaders() });
+      } catch (err) {
+        console.warn("Không thể nhận lời mời sảnh đội:", err);
+      }
+      if (window.location.pathname.endsWith("/quick-match.html") && typeof qmLoadBackendData === "function") {
+        if (typeof qmSwitchView === "function") qmSwitchView("lobby");
+        await qmLoadBackendData();
+      } else {
+        window.location.href = `${_rootPath}pages/quick-match.html?view=lobby`;
+      }
+      return;
+    }
+
+    // 2. Đã tìm thấy trận / đủ người trong phòng (MATCH_FOUND hoặc /rooms/...)
+    if (type === "MATCH_FOUND" || link.startsWith("/rooms/")) {
+      if (window.location.pathname.endsWith("/quick-match.html") && typeof qmLoadBackendData === "function") {
+        if (typeof qmSwitchView === "function") qmSwitchView("lobby");
+        await qmLoadBackendData();
+      } else {
+        window.location.href = `${_rootPath}pages/quick-match.html?view=lobby`;
+      }
+      return;
+    }
+
+    // 3. Lời mời kết bạn đến (FRIEND_REQUEST / friend_request / /friends/requests...)
+    if (type === "FRIEND_REQUEST" || type === "friend_request" || link.startsWith("/friends/requests")) {
+      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
+        switchTab("received");
+        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = `${_rootPath}pages/friends.html?tab=received`;
+      }
+      return;
+    }
+
+    // 4. Lời mời kết bạn được chấp nhận (FRIEND_ACCEPTED / friend_accepted)
+    if (type === "FRIEND_ACCEPTED" || type === "friend_accepted") {
+      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
+        switchTab("friends");
+        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = `${_rootPath}pages/friends.html?tab=friends`;
+      }
+      return;
+    }
+
+    // 5. Các đường dẫn khác
     if (link) {
-      // Nếu link bắt đầu bằng http → mở trực tiếp
-      // Nếu link là đường dẫn tương đối → nối với rootPath
       if (link.startsWith("http")) {
         window.location.href = link;
       } else {
-        window.location.href = _rootPath + link;
+        const cleanLink = link.replace(/^\/+/, "");
+        window.location.href = _rootPath + cleanLink;
       }
     }
-
-    _closeDropdown();
   }
 
   // Toggle dropdown
