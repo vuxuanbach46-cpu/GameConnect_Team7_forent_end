@@ -18,45 +18,8 @@ const fRolesWrap   = document.getElementById("f-roles-wrap");
 const applyModal   = document.getElementById("apply-modal");
 const applyMsg     = document.getElementById("apply-message");
 
-// Create team modal (Task T3CD622)
-const createTeamModal    = document.getElementById("create-team-modal");
-const createTeamForm     = document.getElementById("create-team-form");
-const ctName             = document.getElementById("ct-name");
-const ctJoinMode         = document.getElementById("ct-join-mode");
-const ctDesc             = document.getElementById("ct-desc");
-const ctMembersList      = document.getElementById("ct-members-list");
-const ctMemberCountBadge = document.getElementById("ct-member-count-badge");
-const ctFormError        = document.getElementById("ct-form-error");
-const btnSubmitCreateTeam= document.getElementById("btn-submit-create-team");
-const btnCloseCreateTeam = document.getElementById("btn-close-create-team-modal");
-const btnCancelCreateTeam= document.getElementById("btn-cancel-create-team");
-
-let gamesCatalog   = [];
-let currentPost    = null;
-let currentUserId  = null;
-let currentUserObj = null;
-
-async function loadCurrentUser() {
-  const token = localStorage.getItem("access_token") || localStorage.getItem("token");
-  if (!token) return;
-  try {
-    let res;
-    try {
-      res = await api.get("/user/me");
-    } catch {
-      res = await api.get("/api/users/me");
-    }
-    if (res && res.data) {
-      currentUserId = res.data.id;
-      currentUserObj = res.data;
-    } else if (res && res.id) {
-      currentUserId = res.id;
-      currentUserObj = res;
-    }
-  } catch (err) {
-    console.warn("Chưa đăng nhập hoặc không lấy được thông tin user:", err.message);
-  }
-}
+let gamesCatalog = [];
+let currentPost  = null;
 
 const GAME_META = {
   1: { icon: "fa-gamepad", color: "from-blue-600/30 to-blue-900/10", border: "border-blue-500/30", text: "text-blue-400", name: "Liên Minh Huyền Thoại" },
@@ -161,7 +124,7 @@ function renderDetail(post) {
     return role ? `<span class="px-3 py-1 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-bold">${escapeHtml(role.role_name)}</span>` : "";
   }).join("") || '<span class="text-zinc-500 italic text-xs">Tuyển tự do mọi vị trí</span>';
 
-  // Applications Table (chủ bài hoặc admin thấy)
+  // Applications Table (nếu có quyền xem)
   const apps = post.applications || [];
   const acceptedApps = apps.filter((a) => a.status === "ACCEPTED");
   const isFull = post.status === "FULL" || (acceptedApps.length >= post.needed_players);
@@ -170,20 +133,11 @@ function renderDetail(post) {
   const appsSection = apps.length > 0 ? `
     <div class="bg-[#181920] border border-[#242631] rounded-2xl p-6 mt-6 shadow-xl">
       <div class="flex items-center justify-between mb-4">
-        <div>
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-users-viewfinder text-orange-400"></i>
-            <span>Danh sách đơn ứng tuyển (${apps.length})</span>
-          </h3>
-          <p class="text-[11px] text-zinc-500 mt-0.5">
-            Đã chấp nhận: <span class="text-emerald-400 font-bold">${acceptedApps.length}/${post.needed_players}</span> thành viên
-          </p>
-        </div>
-        ${canCreateTeam ? `
-          <button id="btn-section-create-team" class="btn-orange px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-orange-500/20">
-            <i class="fa-solid fa-shield-halved"></i> Tạo đội ngay
-          </button>
-        ` : ''}
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-users-viewfinder text-orange-400"></i>
+          <span>Danh sách đơn ứng tuyển (${apps.length})</span>
+        </h3>
+        <span class="text-[11px] text-zinc-500">Chỉ chủ bài đăng nhìn thấy danh sách này</span>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-zinc-300">
@@ -193,8 +147,7 @@ function renderDetail(post) {
               <th class="py-2.5 px-3">Người chơi</th>
               <th class="py-2.5 px-3">Lời nhắn</th>
               <th class="py-2.5 px-3">Trạng thái</th>
-              <th class="py-2.5 px-3">Ngày nộp</th>
-              ${isOwner ? '<th class="py-2.5 px-3 text-right">Thao tác</th>' : ''}
+              <th class="py-2.5 px-3 text-right">Ngày nộp</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-[#242631]">
@@ -212,31 +165,12 @@ function renderDetail(post) {
                 <td class="py-3 px-3 text-zinc-300">${escapeHtml(a.message || "Không có lời nhắn")}</td>
                 <td class="py-3 px-3">
                   <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
-                    a.status === 'ACCEPTED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                    a.status === 'REJECTED' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                    a.status === 'CANCELLED' ? 'bg-zinc-700/30 text-zinc-400 border border-zinc-700/30' :
-                    'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  }">${a.status === 'ACCEPTED' ? 'ĐÃ DUYỆT' : a.status === 'REJECTED' ? 'TỪ CHỐI' : a.status === 'CANCELLED' ? 'ĐÃ RÚT' : 'CHỜ DUYỆT'}</span>
+                    a.status === 'ACCEPTED' ? 'bg-emerald-500/20 text-emerald-400' :
+                    a.status === 'REJECTED' ? 'bg-red-500/20 text-red-400' :
+                    'bg-amber-500/20 text-amber-400'
+                  }">${a.status}</span>
                 </td>
-                <td class="py-3 px-3 text-zinc-500 text-[11px]">${formatDateTime(a.created_at)}</td>
-                ${isOwner ? `
-                  <td class="py-3 px-3 text-right">
-                    ${a.status === 'PENDING' ? `
-                      <div class="inline-flex items-center gap-1.5">
-                        <button onclick="handleApplicationDecision(${a.id}, 'ACCEPTED')" class="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition">
-                          <i class="fa-solid fa-check"></i> Duyệt
-                        </button>
-                        <button onclick="handleApplicationDecision(${a.id}, 'REJECTED')" class="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition">
-                          <i class="fa-solid fa-xmark"></i> Từ chối
-                        </button>
-                      </div>
-                    ` : a.status === 'ACCEPTED' ? `
-                      <span class="text-[11px] text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>Thành viên đội</span>
-                    ` : `
-                      <span class="text-[11px] text-zinc-500">-</span>
-                    `}
-                  </td>
-                ` : ''}
+                <td class="py-3 px-3 text-right text-zinc-500 text-[11px]">${formatDateTime(a.created_at)}</td>
               </tr>`).join("")}
           </tbody>
         </table>
@@ -255,30 +189,6 @@ function renderDetail(post) {
         </div>
         <div>${renderStatusBadge(post.status)}</div>
       </div>
-
-      <!-- Banner thông báo khi đã đủ người FULL (Bonus T3CD622) -->
-      ${isFull && isOwner ? `
-        <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-[#16231d] to-orange-500/15 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-emerald-500/5">
-          <div class="flex items-start sm:items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              <i class="fa-solid fa-trophy"></i>
-            </div>
-            <div>
-              <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                <span>Bài đăng đã đủ thành viên (${acceptedApps.length}/${post.needed_players})</span>
-                <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">SẴN SÀNG TẠO ĐỘI</span>
-              </h4>
-              <p class="text-xs text-zinc-400 mt-0.5">
-                Các vị trí đã được tuyển đủ người. Bấm nút <strong>"Tạo đội"</strong> để khởi tạo clan chính thức và cùng nhau leo rank!
-              </p>
-            </div>
-          </div>
-          <button id="btn-banner-create-team" class="btn-orange px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap self-start sm:self-auto shadow-md shadow-orange-500/25 hover:scale-105 transition-transform">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span>Tạo đội ngay</span>
-          </button>
-        </div>
-      ` : ''}
 
       <!-- Title -->
       <h1 class="text-xl sm:text-2xl font-extrabold text-white leading-tight">
@@ -341,32 +251,19 @@ function renderDetail(post) {
 
       <!-- Action Buttons -->
       <div class="pt-4 border-t border-[#242631] flex flex-wrap items-center gap-3">
-        ${canCreateTeam ? `
-          <button id="btn-open-create-team" class="btn-orange px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-orange-500/25 animate-pulse hover:animate-none transition">
-            <i class="fa-solid fa-shield-halved text-sm"></i>
-            <span>Tạo đội (${1 + acceptedApps.length} thành viên)</span>
-          </button>
-        ` : ''}
-
-        ${(!isOwner && post.status === 'OPEN') ? `
+        ${post.status === 'OPEN' ? `
           <button id="btn-open-apply" class="btn-orange px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2">
             <i class="fa-solid fa-handshake"></i>
             <span>Ứng tuyển ngay</span>
           </button>` : ""}
-
-        ${isOwner ? `
-          <button id="btn-edit-post" class="px-4 py-2.5 bg-[#1e2029] hover:bg-[#282a36] text-zinc-300 hover:text-white rounded-xl text-xs font-semibold border border-[#2e313e] flex items-center gap-2 transition">
-            <i class="fa-solid fa-pen-to-square"></i>
-            <span>Chỉnh sửa bài</span>
-          </button>
-          ${post.status !== 'CLOSED' ? `
-            <button id="btn-close-post" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
-              <i class="fa-solid fa-lock"></i>
-              <span>Đóng bài đăng</span>
-            </button>
-          ` : ''}
-        ` : ''}
-
+        <button id="btn-edit-post" class="px-4 py-2.5 bg-[#1e2029] hover:bg-[#282a36] text-zinc-300 hover:text-white rounded-xl text-xs font-semibold border border-[#2e313e] flex items-center gap-2 transition">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Chỉnh sửa bài</span>
+        </button>
+        <button id="btn-close-post" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+          <i class="fa-solid fa-lock"></i>
+          <span>Đóng bài đăng</span>
+        </button>
         <a href="team-posts.html" class="px-4 py-2.5 bg-[#181920] hover:bg-[#222430] text-zinc-400 hover:text-white rounded-xl text-xs font-semibold border border-[#242631] transition">
           ← Quay lại danh sách
         </a>
@@ -385,12 +282,6 @@ function renderDetail(post) {
   });
   document.getElementById("btn-edit-post")?.addEventListener("click", () => openEditModal(post));
   document.getElementById("btn-close-post")?.addEventListener("click", () => closePost(post.id));
-
-  // Gắn sự kiện tạo đội
-  const handleOpenCreateTeam = () => openCreateTeamModal(post);
-  document.getElementById("btn-open-create-team")?.addEventListener("click", handleOpenCreateTeam);
-  document.getElementById("btn-banner-create-team")?.addEventListener("click", handleOpenCreateTeam);
-  document.getElementById("btn-section-create-team")?.addEventListener("click", handleOpenCreateTeam);
 }
 
 // 4. Nộp đơn ứng tuyển
@@ -533,120 +424,6 @@ postForm.addEventListener("submit", async (e) => {
     alert(err.message);
   } finally {
     submitBtn.disabled = false;
-  }
-});
-
-// Quyết định duyệt / từ chối đơn ứng tuyển (Task T3CD622 & T3CCE75)
-window.handleApplicationDecision = async function (appId, decision) {
-  try {
-    try {
-      await api.put(`/api/team-posts/${postId}/applications/${appId}`, { status: decision });
-    } catch {
-      await api.put(`/team-posts/${postId}/applications/${appId}`, { status: decision });
-    }
-    showGamerToast(
-      decision === "ACCEPTED" ? "Đã chấp nhận đơn ứng tuyển! 🎉" : "Đã từ chối đơn ứng tuyển.",
-      decision === "ACCEPTED" ? "success" : "info"
-    );
-    await loadDetail();
-  } catch (err) {
-    showGamerToast(err.message, "error");
-  }
-};
-
-// Modal tạo đội từ bài đăng đủ người (Task T3CD622)
-function openCreateTeamModal(post) {
-  const apps = post.applications || [];
-  const acceptedApps = apps.filter((a) => a.status === "ACCEPTED");
-
-  ctName.value = `Team ${post.title}`.trim().slice(0, 80);
-  ctDesc.value = `Đội tuyển được thành lập từ bài đăng tìm đồng đội: ${post.title}`;
-  ctJoinMode.value = "APPROVAL_REQUIRED";
-  ctFormError.classList.add("hidden");
-  ctFormError.textContent = "";
-
-  const totalMembers = 1 + acceptedApps.length;
-  ctMemberCountBadge.textContent = `${totalMembers} người`;
-
-  ctMembersList.innerHTML = `
-    <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#13141a] border border-orange-500/30">
-      <div class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold">
-          <i class="fa-solid fa-crown text-[11px]"></i>
-        </div>
-        <div>
-          <span class="text-white font-bold text-xs">${escapeHtml(currentUserObj?.username || `Gamer #${post.user_id}`)} (Bạn)</span>
-          <span class="text-[10px] text-zinc-400 block">Đội trưởng / Chủ bài đăng</span>
-        </div>
-      </div>
-      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
-        CAPTAIN
-      </span>
-    </div>
-    ${acceptedApps.map((a, idx) => `
-      <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#13141a] border border-[#242631]">
-        <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
-            ${idx + 1}
-          </div>
-          <div>
-            <span class="text-white font-semibold text-xs">Gamer #${a.user_id}</span>
-            <span class="text-[10px] text-zinc-400 block truncate max-w-[200px]">${escapeHtml(a.message || "Ứng viên đã được duyệt")}</span>
-          </div>
-        </div>
-        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-          MEMBER
-        </span>
-      </div>
-    `).join("")}
-  `;
-
-  createTeamModal.hidden = false;
-  ctName.focus();
-}
-
-btnCloseCreateTeam?.addEventListener("click", () => createTeamModal.hidden = true);
-btnCancelCreateTeam?.addEventListener("click", () => createTeamModal.hidden = true);
-
-createTeamForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = ctName.value.trim();
-  if (!name || name.length < 2) {
-    ctFormError.textContent = "Tên đội phải có từ 2 ký tự trở lên.";
-    ctFormError.classList.remove("hidden");
-    return;
-  }
-
-  btnSubmitCreateTeam.disabled = true;
-  ctFormError.classList.add("hidden");
-
-  try {
-    const payload = {
-      name,
-      join_mode: ctJoinMode.value,
-      description: ctDesc.value.trim() || null,
-    };
-
-    let res;
-    try {
-      res = await api.post(`/api/team-posts/${postId}/create-team`, payload);
-    } catch {
-      res = await api.post(`/team-posts/${postId}/create-team`, payload);
-    }
-
-    const teamData = res?.data || res;
-    showGamerToast(`Tạo đội "${teamData.team_name || name}" thành công! Đang chuyển hướng... 🎉`, "success");
-    createTeamModal.hidden = true;
-
-    const teamId = teamData.team_id || teamData.id;
-    setTimeout(() => {
-      window.location.href = `team-detail.html?id=${teamId}`;
-    }, 1200);
-  } catch (err) {
-    ctFormError.textContent = err.message || "Không thể tạo đội. Vui lòng kiểm tra lại.";
-    ctFormError.classList.remove("hidden");
-  } finally {
-    btnSubmitCreateTeam.disabled = false;
   }
 });
 
