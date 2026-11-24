@@ -913,6 +913,76 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Popup đổi mật khẩu từ menu avatar
+    const passwordModal = document.getElementById("change-password-modal");
+    const passwordForm = document.getElementById("change-password-form");
+    const passwordMessage = document.getElementById("change-password-message");
+    const passwordSubmit = document.getElementById("change-password-submit");
+    const setPasswordModal = (open) => {
+        if (!passwordModal) return;
+        passwordModal.hidden = !open;
+        document.body.classList.toggle("gc-password-modal-open", open);
+        if (open) {
+            if (avatarDropdown) avatarDropdown.hidden = true;
+            window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+        } else {
+            passwordForm?.reset();
+            if (passwordMessage) {
+                passwordMessage.hidden = true;
+                passwordMessage.textContent = "";
+                passwordMessage.classList.remove("error");
+            }
+        }
+    };
+    document.getElementById("open-change-password")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setPasswordModal(true);
+    });
+    ["close-change-password", "cancel-change-password"].forEach((id) => {
+        document.getElementById(id)?.addEventListener("click", () => setPasswordModal(false));
+    });
+    passwordModal?.querySelectorAll("[data-close-password]").forEach((el) => {
+        el.addEventListener("click", () => setPasswordModal(false));
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && passwordModal && !passwordModal.hidden) setPasswordModal(false);
+    });
+    passwordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const oldPassword = document.getElementById("old-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const showPasswordMessage = (text, isError = false) => {
+            passwordMessage.textContent = text;
+            passwordMessage.classList.toggle("error", isError);
+            passwordMessage.hidden = false;
+        };
+        if (newPassword !== confirmPassword) {
+            showPasswordMessage("Mật khẩu xác nhận không khớp.", true);
+            return;
+        }
+        if (oldPassword === newPassword) {
+            showPasswordMessage("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+            return;
+        }
+
+        passwordSubmit.disabled = true;
+        passwordSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...';
+        try {
+            const response = await api.put("/auth/change-password", {
+                old_password: oldPassword,
+                new_password: newPassword,
+            });
+            showPasswordMessage(response?.message || "Đổi mật khẩu thành công.");
+            passwordForm.reset();
+        } catch (error) {
+            showPasswordMessage(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+        } finally {
+            passwordSubmit.disabled = false;
+            passwordSubmit.innerHTML = '<i class="fa-solid fa-key"></i> Cập nhật mật khẩu';
+        }
+    });
+
     // Tải tên & avatar thật vào menu Avatar
     loadHomeUserAvatar(token);
 
