@@ -18,16 +18,41 @@
 
   <main class="profile-page">
     <div class="profile-page-heading">
-      <div>
-        <p class="eyebrow">GAMING IDENTITY</p>
-        <h1>Hồ sơ người chơi</h1>
-        <p class="heading-description">Thông tin cá nhân, tựa game yêu thích và đội bạn đang đồng hành.</p>
-      </div>
-      <div class="heading-actions">
-        <a class="gc-btn gc-btn-quiet" href="friends.html"><i class="fa-solid fa-user-group"></i> Bạn bè</a>
-        <button id="btn-edit-profile" class="gc-btn gc-btn-primary" type="button"><i class="fa-solid fa-pen"></i> Sửa hồ sơ</button>
-      </div>
+
+    <!-- Cụm nút Back và tiêu đề -->
+    <div class="profile-heading-main">
+
+        <button type="button"
+                class="gc-btn-back"
+                onclick="if (history.length > 1) history.back(); else location.href = 'index.html';"
+                aria-label="Quay lại">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="profile-heading-text">
+            <p class="eyebrow">GAMING IDENTITY</p>
+            <h1>Hồ sơ người chơi</h1>
+            <p class="heading-description">
+                Thông tin cá nhân, tựa game yêu thích và đội bạn đang đồng hành.
+            </p>
+        </div>
+
     </div>
+
+    <!-- Các nút chức năng -->
+    <div class="heading-actions">
+        <a class="gc-btn gc-btn-quiet" href="friends.html">
+            <i class="fa-solid fa-user-group"></i> Bạn bè
+        </a>
+
+        <button id="btn-edit-profile"
+                class="gc-btn gc-btn-primary"
+                type="button">
+            <i class="fa-solid fa-pen"></i> Sửa hồ sơ
+        </button>
+    </div>
+
+</div>
 
     <div id="profile-alert" class="profile-alert" role="status" hidden></div>
 

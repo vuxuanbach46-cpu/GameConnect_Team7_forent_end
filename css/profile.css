@@ -176,6 +176,117 @@
   .avatar-preview { width:62px;height:62px;flex-basis:62px; }
   .remove-avatar-btn { margin-left:auto; }
 }
+/* Tổng thể phần tiêu đề */
+.profile-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    margin-bottom: 26px;
+}
+
+/* Nhóm Back và tiêu đề */
+.profile-heading-main {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+/* Phần nội dung tiêu đề */
+.profile-heading-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Nút Back */
+.gc-btn-back {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.035);
+    color: #ffffff;
+
+    font-size: 17px;
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.gc-btn-back:hover {
+    background: rgba(255, 112, 24, 0.15);
+    border-color: #ff7018;
+    color: #ff7018;
+    transform: translateX(-3px);
+}
+
+/* Tiêu đề */
+.profile-heading-text h1 {
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Mô tả */
+.profile-heading-text .heading-description {
+    margin-top: 7px;
+    margin-bottom: 0;
+}
+
+/* Nhóm nút bên phải */
+.heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .profile-heading-main {
+        gap: 13px;
+    }
+
+    .heading-actions {
+        width: 100%;
+        padding-left: 57px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-heading-main {
+        gap: 10px;
+    }
+
+    .gc-btn-back {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+    }
+
+    .profile-heading-text h1 {
+        font-size: 24px;
+    }
+
+    .profile-heading-text .heading-description {
+        font-size: 12px;
+    }
+}
 
 /* Header/footer do layout.js render */
 #app-header { position:sticky;top:0;z-index:50;background:rgba(16,17,22,.94);border-bottom:1px solid #282b36;backdrop-filter:blur(14px); }
