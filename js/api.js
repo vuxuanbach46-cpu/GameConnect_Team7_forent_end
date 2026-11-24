@@ -53,7 +53,17 @@ function redirectToLoginOnExpired() {
   localStorage.removeItem("refresh_token");
   const isLoginPage = window.location.pathname.endsWith("/login.html") || window.location.pathname.endsWith("/register.html");
   if (!isLoginPage) {
-    window.location.href = window.location.pathname.includes("/pages/") ? "login.html" : "pages/login.html";
+    const loginUrl = new URL(
+      window.location.pathname.includes("/pages/") ? "login.html" : "pages/login.html",
+      window.location.href,
+    );
+    if (window.location.pathname.includes("/pages/")) {
+      loginUrl.searchParams.set(
+        "next",
+        `${window.location.pathname.split("/").pop()}${window.location.search}${window.location.hash}`,
+      );
+    }
+    window.location.href = loginUrl.href;
   }
 }
 
@@ -137,6 +147,9 @@ http.interceptors.response.use(
 const api = {
   get: (path, params) => http.get(path, { params }).then((res) => res.data),
   post: (path, body) => http.post(path, body).then((res) => res.data),
+  upload: (path, formData) => http.post(path, formData, {
+    headers: { "Content-Type": undefined },
+  }).then((res) => res.data),
   put: (path, body) => http.put(path, body).then((res) => res.data),
   patch: (path, body) => http.patch(path, body).then((res) => res.data),
   delete: (path) => http.delete(path).then((res) => res.data),
