@@ -41,6 +41,8 @@ const NotificationBell = (() => {
     team_join: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
     match: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
     MATCH_FOUND: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    NEW_MESSAGE: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    new_message: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
     system: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
   };
 
@@ -96,7 +98,8 @@ const NotificationBell = (() => {
     if (type === "FRIEND_REQUEST") return "type-friend_request";
     if (type === "FRIEND_ACCEPTED") return "type-friend_accepted";
     if (type === "MATCH_FOUND") return "type-match";
-    const known = ["friend_request", "friend_accepted", "team_invite", "PARTY_INVITE", "team_join", "match", "system"];
+    if (type === "NEW_MESSAGE" || type === "new_message") return "type-NEW_MESSAGE";
+    const known = ["friend_request", "friend_accepted", "team_invite", "PARTY_INVITE", "team_join", "match", "NEW_MESSAGE", "new_message", "system"];
     return known.includes(type) ? `type-${type}` : "type-default";
   }
 
@@ -114,6 +117,8 @@ const NotificationBell = (() => {
       PARTY_INVITE: "Mời vào đội",
       team_join: "Xin gia nhập đội",
       match: "Trận đấu",
+      NEW_MESSAGE: "Tin nhắn mới",
+      new_message: "Tin nhắn mới",
       system: "Hệ thống",
     };
     return labels[type] || type;
@@ -264,6 +269,24 @@ const NotificationBell = (() => {
       if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
         switchTab("friends");
         if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = `${_rootPath}pages/friends.html?tab=friends`;
+      }
+      return;
+    }
+
+    // 4b. Tin nhắn mới 1-1 (NEW_MESSAGE / new_message / link /chat/{friend_id})
+    if (type === "NEW_MESSAGE" || type === "new_message" || link.startsWith("/chat/")) {
+      const chatMatch = link.match(/\/chat\/(\d+)/);
+      const friendId = chatMatch ? Number(chatMatch[1]) : 0;
+      if (
+        friendId > 0 &&
+        window.location.pathname.endsWith("/friends.html") &&
+        typeof window.openChatByFriendId === "function"
+      ) {
+        await window.openChatByFriendId(friendId);
+      } else if (friendId > 0) {
+        window.location.href = `${_rootPath}pages/friends.html?tab=friends&chat=${friendId}`;
       } else {
         window.location.href = `${_rootPath}pages/friends.html?tab=friends`;
       }

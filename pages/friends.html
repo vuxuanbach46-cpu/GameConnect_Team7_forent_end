@@ -340,6 +340,9 @@
           </svg>
         </button>
       </div>
+
+      <!-- Avatar bạn bè nhắn tin + số tin nhắn chưa đọc -->
+      <div id="fc-right-chat-list" class="fc-right-chat-list" aria-label="Tin nhắn bạn bè" hidden></div>
     </aside>
   </div>
 
@@ -347,6 +350,44 @@
   <div id="fc-modal" class="fc-modal" hidden>
     <div id="fc-modal-card" class="fc-modal-card" role="dialog" aria-modal="true"></div>
   </div>
+
+  <!-- Khung Chat 1-1 Nổi góc dưới bên phải (Floating Chat Box) -->
+  <aside id="fc-chat-widget" class="fc-chat-widget" aria-label="Khung chat 1-1 với bạn bè" hidden>
+    <header class="fc-chat-header" id="fc-chat-header">
+      <div class="fc-chat-user-info">
+        <div class="fc-chat-avatar-wrap">
+          <img
+            id="fc-chat-avatar"
+            src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4"
+            alt="Avatar bạn bè"
+            class="fc-chat-avatar"
+          >
+          <span id="fc-chat-presence" class="fc-presence-badge fc-presence-online"></span>
+        </div>
+        <div class="fc-chat-user-meta">
+          <strong id="fc-chat-name" class="fc-chat-name">Người chơi</strong>
+          <span id="fc-chat-status" class="fc-chat-status">Đang trực tuyến</span>
+        </div>
+      </div>
+      <div class="fc-chat-header-actions">
+        <button type="button" id="fc-chat-minimize-btn" class="fc-chat-icon-btn" title="Thu nhỏ / Mở rộng khung chat" aria-label="Thu nhỏ khung chat">—</button>
+        <button type="button" id="fc-chat-close-btn" class="fc-chat-icon-btn" title="Đóng khung chat" aria-label="Đóng khung chat">✕</button>
+      </div>
+    </header>
+
+    <div id="fc-chat-messages" class="fc-chat-messages" role="log" aria-live="polite"></div>
+
+    <form id="fc-chat-form" class="fc-chat-input-bar" autocomplete="off">
+      <input
+        type="text"
+        id="fc-chat-input"
+        class="fc-chat-input"
+        placeholder="Nhập tin nhắn... (Enter để gửi)"
+        maxlength="2000"
+      >
+      <button type="submit" id="fc-chat-send-btn" class="fc-chat-send-btn">Gửi</button>
+    </form>
+  </aside>
 
   <!-- Khung hiển thị thông báo góc dưới -->
   <div id="fc-toast-container" class="fc-toast-container"></div>
