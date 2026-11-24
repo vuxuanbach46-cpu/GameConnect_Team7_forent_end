@@ -103,3 +103,27 @@ Lưu ý khi tạo trang:
 - Trạng thái: Đã kiểm tra kết nối Frontend -> Backend FastAPI -> MySQL 8.0 thành công.
 - CRUD mẫu trên trang Items (`pages/items.html`) hoạt động chính xác.
 
+
+## 7. Hồ sơ người chơi (GameConnect)
+
+Đã bổ sung trang `pages/profile.html`, style `css/profile.css` và logic `js/pages/profile.js`. Trang dùng HTML/CSS/JavaScript thuần theo cấu trúc có sẵn; danh mục game được tải từ `GET /games` (cùng cấu trúc `ranks`/`roles` mà trang Tìm đồng đội đang dùng). Ảnh game được ưu tiên lấy từ trường `image`/`image_url` của API, nếu không có thì dùng ảnh nội bộ trong `assets/images/games/`.
+
+**Các endpoint frontend đang cấu hình mặc định** (nếu router backend của nhóm đặt tên khác, sửa object `PROFILE_API` ở đầu `js/pages/profile.js`):
+
+| Chức năng | Method + endpoint | Dữ liệu chính |
+|---|---|---|
+| Xem hồ sơ của tôi | `GET /game-profile/me` | `display_name`, `avatar`/`avatar_url`, `bio`, `region`, `play_time`, `has_mic`, `is_public` |
+| Xem hồ sơ công khai | `GET /game-profile/{username}` | Hồ sơ người dùng; có thể kèm `user_games` và `teams` |
+| Cập nhật hồ sơ | `PUT /game-profile/me` | JSON: `display_name`, `bio`, `region`, `play_time`, `has_mic`, `is_public`, `avatar` (nếu upload) |
+| Upload avatar | `POST /game-profile/me/avatar` | `multipart/form-data`, trường file tên `file`; trả về `avatar_url`, `avatar`, `url` hoặc `path` |
+| Danh mục game | `GET /games` | Mảng game có `id`, `name`, `image` (tuỳ chọn), `ranks[]`, `roles[]` |
+| Game của tôi | `GET /user-games/me` | Mảng có `id`, `game_id`, `rank_id`, `role_id`, `in_game_id` |
+| Thêm game | `POST /user-games` | JSON: `game_id`, `rank_id`, `role_id`, `in_game_id` |
+| Sửa game yêu thích | `PUT /user-games/{id}` | JSON: `rank_id`, `role_id`, `in_game_id` |
+| Xoá game yêu thích | `DELETE /user-games/{id}` | — |
+| Đội đang tham gia | `GET /teams/me` | Mảng đội, nên có `id`, `name`, `logo`/`avatar`, `game_name`, `member_role` |
+| Gửi lời mời kết bạn | `POST /friends/requests` | JSON: `receiver_id` |
+
+Trang kiểm tra giới hạn tối đa 5 game và xác thực rank/vai trò theo game ở frontend; backend vẫn cần xác thực lại các quy tắc này để bảo vệ dữ liệu. Module Bạn bè hiện có trong source là UI mock và module Tìm đồng đội hiện là bài đăng tuyển; để nút Kết bạn và danh sách Đội hoạt động xuyên suốt dữ liệu thật, backend cần cung cấp các endpoint tương ứng trong bảng trên (hoặc cập nhật đường dẫn trong `PROFILE_API`).
+
+Cách mở trang: đăng nhập trước, sau đó chọn **Hồ sơ** trên thanh menu hoặc mở `pages/profile.html`. Xem hồ sơ theo username: `pages/profile.html?username=<username>`.
