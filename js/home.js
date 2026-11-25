@@ -42,12 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Hiển thị các mục điều hướng Admin nếu là ADMIN, ẩn nếu là USER thường
+    // Hiển thị các mục điều hướng Admin nếu là ADMIN, ẩn/xóa nếu là USER thường
+    const isAdmin = String(userRole || "").toUpperCase() === "ADMIN";
     const adminNavItems = document.querySelectorAll(".admin-nav-item");
-    if (userRole === "ADMIN") {
+    if (isAdmin) {
         adminNavItems.forEach(el => el.style.display = "");
     } else {
-        adminNavItems.forEach(el => el.style.display = "none");
+        adminNavItems.forEach(el => el.remove());
     }
 
     // --- 2. XỬ LÝ ĐĂNG XUẤT ---

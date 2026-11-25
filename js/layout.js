@@ -11,16 +11,35 @@ const MENU = [
   { href: "pages/community.html", label: "Bảng tin Cộng đồng" },
   { href: "pages/friends.html", label: "Bạn bè & Kết nối" },
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
-  { href: "pages/admin-dashboard.html", label: "📊 Dashboard Thống kê" },
-  { href: "pages/admin-reports.html", label: "🛡️ Quản lý Báo cáo" },
+  { href: "pages/admin-dashboard.html", label: "📊 Dashboard Thống kê", adminOnly: true },
+  { href: "pages/admin-reports.html", label: "🛡️ Quản lý Báo cáo", adminOnly: true },
   { href: "pages/my-team.html", label: "🎮 Đội của tôi" },
 ];
+
+function checkIsAdmin() {
+  const token = localStorage.getItem("access_token");
+  if (!token) return false;
+  try {
+    const base64Url = token.split(".")[1];
+    if (base64Url) {
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(atob(base64));
+      if (payload && payload.role) {
+        return String(payload.role).toUpperCase() === "ADMIN";
+      }
+    }
+  } catch (e) {}
+  return String(localStorage.getItem("user_role") || "").toUpperCase() === "ADMIN";
+}
 
 function renderLayout() {
   const root = document.body.dataset.root || "./";
   const currentPath = window.location.pathname;
+  const isAdmin = checkIsAdmin();
 
-  const links = MENU.map((item) => {
+  const visibleMenu = MENU.filter((item) => !item.adminOnly || isAdmin);
+
+  const links = visibleMenu.map((item) => {
     const isActive = currentPath.endsWith("/" + item.href) ||
       (item.href === "index.html" && currentPath.endsWith("/"));
     return `<a href="${root}${item.href}" class="${isActive ? "active" : ""}">${item.label}</a>`;
