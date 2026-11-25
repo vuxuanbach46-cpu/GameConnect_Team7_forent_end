@@ -51,11 +51,11 @@ function renderMyTeams() {
       <div class="my-teams-card-actions">
         <a class="my-teams-action"
            href="team-feed.html?id=${encodeURIComponent(team.id)}">
-          Bảng tin (bản mẫu)
+          Xem bảng tin
         </a>
         <a class="my-teams-secondary"
            href="team-detail.html?id=${encodeURIComponent(team.id)}">
-          Chi tiết đội (bản mẫu)
+          Chi tiết đội
         </a>
       </div>
     </article>
