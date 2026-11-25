@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết bài viết | GameConnect</title>
+  <script>
+    if (!localStorage.getItem("access_token")) {
+      const loginUrl = new URL("login.html", window.location.href);
+      loginUrl.searchParams.set("next", `${window.location.pathname.split("/").pop()}${window.location.search}${window.location.hash}`);
+      window.location.replace(loginUrl.href);
+    }
+  </script>
   <link rel="icon" href="../assets/images/logo.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/friends.css">
@@ -28,7 +35,7 @@
           <span id="comment-count">0</span>
         </div>
         <form id="comment-form" class="comment-form">
-          <div class="avatar avatar-self" aria-hidden="true">M</div>
+          <div class="avatar avatar-self" aria-hidden="true" data-fallback="G">G</div>
           <div class="comment-form-body">
             <p id="replying-to" class="replying-to" hidden></p>
             <textarea id="comment-content" rows="2" maxlength="500" placeholder="Viết bình luận hoặc chia sẻ suy nghĩ của bạn..."></textarea>
@@ -39,6 +46,7 @@
           </div>
         </form>
         <div id="comment-list" class="comment-list"></div>
+        <p id="comment-load-error" class="comment-load-error" role="alert" hidden></p>
         <div id="comment-empty" class="comment-empty" hidden>Chưa có bình luận nào. Hãy là người đầu tiên.</div>
       </section>
     </main>
