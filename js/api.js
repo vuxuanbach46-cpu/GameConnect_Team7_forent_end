@@ -51,6 +51,8 @@ function getErrorMessage(data, status) {
 function redirectToLoginOnExpired() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
+  localStorage.removeItem("remember_login");
+  localStorage.removeItem("auth_provider");
   const isLoginPage = window.location.pathname.endsWith("/login.html") || window.location.pathname.endsWith("/register.html");
   if (!isLoginPage) {
     window.location.href = window.location.pathname.includes("/pages/") ? "login.html" : "pages/login.html";
@@ -67,6 +69,10 @@ async function refreshAndRetry(originalConfig, data, status = 401) {
   }
 
   originalConfig._retry = true;
+  if (localStorage.getItem("remember_login") !== "true") {
+    redirectToLoginOnExpired();
+    throw new ApiError(getErrorMessage(data, status), status, data);
+  }
   const refreshToken = localStorage.getItem("refresh_token");
   const oldAccessToken = localStorage.getItem("access_token") || "";
   if (!refreshToken) {
@@ -90,6 +96,7 @@ async function refreshAndRetry(originalConfig, data, status = 401) {
         if (!tokenData.access_token) throw new Error("Không nhận được access_token mới");
         localStorage.setItem("access_token", tokenData.access_token);
         if (tokenData.refresh_token) localStorage.setItem("refresh_token", tokenData.refresh_token);
+        localStorage.setItem("remember_login", "true");
         return tokenData.access_token;
       }).finally(() => { _refreshTokenPromise = null; });
     }

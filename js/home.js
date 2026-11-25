@@ -860,9 +860,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const queryRefreshToken = urlParams.get("refresh_token");
 
     if (queryAccessToken) {
+        localStorage.setItem("auth_provider", "google");
         localStorage.setItem("access_token", queryAccessToken);
-        if (queryRefreshToken) {
+        if (localStorage.getItem("remember_login") === "true" && queryRefreshToken) {
             localStorage.setItem("refresh_token", queryRefreshToken);
+        } else {
+            localStorage.removeItem("refresh_token");
         }
         window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -883,6 +886,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 3. MENU AVATAR (CHUYỂN LIGHT/DARK MODE + ĐĂNG XUẤT) ---
     const avatarBtn = document.getElementById("btn-avatar-menu");
     const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+    const changePasswordMenuItem = document.getElementById("open-change-password");
+    if (changePasswordMenuItem) {
+        changePasswordMenuItem.hidden = localStorage.getItem("auth_provider") === "google";
+    }
 
     if (avatarBtn && avatarDropdown) {
         avatarBtn.addEventListener("click", (e) => {
@@ -999,6 +1006,8 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.addEventListener("click", () => {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
+            localStorage.removeItem("remember_login");
+            localStorage.removeItem("auth_provider");
             localStorage.removeItem("user_role");
             window.location.href = "../index.html";
         });

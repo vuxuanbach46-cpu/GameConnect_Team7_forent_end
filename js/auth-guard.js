@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
             logoutBtn.addEventListener("click", () => {
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("refresh_token");
+                localStorage.removeItem("remember_login");
+                localStorage.removeItem("auth_provider");
                 localStorage.removeItem("user_role");
                 window.location.href = indexLink;
             });

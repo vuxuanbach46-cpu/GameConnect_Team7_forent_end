@@ -1618,6 +1618,7 @@ body.fc-light-mode .home-player-status-line.is-sent {
     color: var(--fc-text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; text-align: left;
     transition: background-color .15s ease, border-color .15s ease, color .15s ease;
 }
+.fc-avatar-password-btn[hidden] { display: none !important; }
 .fc-avatar-password-btn:hover { color: var(--fc-text); background: var(--fc-bg-surface); border-color: var(--fc-border); }
 
 .gc-password-modal[hidden] { display: none !important; }
