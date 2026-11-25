@@ -134,7 +134,11 @@ function renderTeams(teams) {
                 : "Công khai";
 
         footer.append(members, mode);
-        card.append(header, description, footer);
+        const link = document.createElement("a");
+        link.href = `team-detail.html?id=${encodeURIComponent(team.id)}`;
+        link.className = "btn btn-primary";
+        link.textContent = "Xem chi tiết";
+        card.append(header, description, footer, link);
         teamsList.appendChild(card);
     });
 }
@@ -153,13 +157,13 @@ async function loadTeams() {
 
     const keyword = teamSearch.value.trim();
 
-    if (keyword) params.name = keyword;
+    if (keyword) params.keyword = keyword;
     if (gameFilter.value) {
         params.game_id = Number(gameFilter.value);
     }
 
     try {
-        const response = await api.get("/teams", params);
+        const response = await api.get("/api/teams", params);
 
         if (requestId !== latestRequest) return;
 
@@ -206,7 +210,7 @@ async function loadTeams() {
 
 async function loadGames() {
     try {
-        const response = await api.get("/games");
+        const response = await api.get("/api/games");
         games = getList(response, "games");
 
         gameFilter.length = 1;
@@ -377,7 +381,7 @@ createForm.addEventListener("submit", async event => {
     try {
         // Backend yêu cầu token đăng nhập khi tạo đội.
         // Chỉ gửi request khi đã có token.
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("access_token") || localStorage.getItem("token");
 
         if (!token) {
             throw new Error(
@@ -387,7 +391,7 @@ createForm.addEventListener("submit", async event => {
 
         // Sử dụng axios instance http có sẵn của nhóm,
         // thêm Authorization riêng cho request tạo đội.
-        await http.post("/teams", data, {
+        await http.post("/api/teams", data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -421,6 +425,15 @@ loadGames();
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {
   const current = location.pathname.split('/').pop();
+  const token = localStorage.getItem('access_token');
+  let role = localStorage.getItem('user_role') || '';
+  if (token) {
+    try {
+      const p = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (p && p.role) role = p.role;
+    } catch (e) {}
+  }
+  const isAdmin = Boolean(token) && String(role).toUpperCase() === 'ADMIN';
   const links = [
     ['home.html', '⌂', 'Trang chủ'],
     ['community.html', '▤', 'Cộng đồng'],
@@ -428,8 +441,12 @@ loadGames();
     ['team-posts.html', '⌕', 'Tìm đồng đội'],
     ['teams.html', '◈', 'Danh sách đội'],
     ['my-team.html', '♜', 'Đội của tôi'],
-    ['admin_users.html', '⚙', 'Quản lý người dùng']
   ];
+  if (isAdmin) {
+    links.push(['admin-dashboard.html', '📊', 'Dashboard Admin']);
+    links.push(['admin-reports.html', '🛡', 'Quản lý Báo cáo']);
+    links.push(['admin_users.html', '⚙', 'Quản lý người dùng']);
+  }
   const active = current === 'team-detail.html' ? 'teams.html' : current === 'team-feed.html' ? 'my-team.html' : current === 'admin_user-detail.html' ? 'admin_users.html' : current;
   const shell = document.createElement('aside');
   shell.className = 'gc-team-nav';

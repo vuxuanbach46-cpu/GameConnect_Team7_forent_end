@@ -4,7 +4,7 @@
 const ADMIN_MENU = [
     {
         label: "Tổng quan",
-        href: "admin_dashboard.html",
+        href: "admin-dashboard.html",
         icon: "📊"
     },
     {
@@ -14,12 +14,23 @@ const ADMIN_MENU = [
     },
     {
         label: "Báo cáo",
-        href: "admin_reports.html",
+        href: "admin-reports.html",
         icon: "📋"
     }
 ];
 
 function renderAdminLayout() {
+    const token = localStorage.getItem("access_token");
+    let role = localStorage.getItem("user_role") || "";
+    if (token) {
+        try {
+            const p = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+            if (p && p.role) role = p.role;
+        } catch (e) {}
+    }
+    if (!token || String(role).toUpperCase() !== "ADMIN") {
+        return;
+    }
     const sidebar = document.getElementById("admin-sidebar");
 
     if (!sidebar) return;
