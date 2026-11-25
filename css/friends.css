@@ -1641,3 +1641,36 @@ body.fc-dark-body #app-footer {
 
 .fc-team-invitations-link { display: inline-block; margin: 12px 24px 0; color: #ff9b62; font-weight: 600; }
 #team-invite-controls select { background: var(--fc-bg-surface); color: var(--fc-text); border: 1px solid var(--fc-border-strong); border-radius: 6px; padding: 8px; margin-right: 8px; max-width: 100%; }
+
+.fc-avatar-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    margin: 6px 8px;
+    border-radius: 8px;
+    color: var(--text-color, #ffffff);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.fc-avatar-profile-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
+
+.fc-profile-icon {
+    font-size: 18px;
+}
+
+.fc-avatar-profile-btn svg {
+    margin-left: auto;
+    opacity: 0.6;
+}
+
+.fc-avatar-profile-btn:hover svg {
+    opacity: 1;
+    transform: translate(2px, -2px);
+}
