@@ -36,24 +36,13 @@
 
             <div class="fc-nav-divider"></div>
 
-            <!-- Tìm kiếm nhanh -->
-            <a href="friends.html?tab=suggestions" class="fc-nav-item" title="Tìm kiếm người chơi">
-                <span class="fc-nav-icon">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </span>
-                <span class="fc-nav-label">Tìm kiếm</span>
-            </a>
-
             <!-- Kênh Esport -->
-            <button type="button" class="fc-nav-item" title="Kênh Esport">
+            <a href="team-posts.html" class="fc-nav-item" title="Kênh Esport / Tuyển đồng đội">
                 <span class="fc-nav-icon">
                     <span class="fc-game-pill">GC</span>
                 </span>
                 <span class="fc-nav-label">Kênh Esport</span>
-            </button>
+            </a>
 
             <!-- Dashboard Thống kê (Admin) -->
             <a href="admin-dashboard.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Dashboard Thống kê">
@@ -148,18 +137,6 @@
                 <span class="fc-nav-label">Câu lạc bộ</span>
             </a>
 
-            <!-- Tạo phòng đội -->
-            <a href="quick-match.html?view=lobby" class="fc-nav-item" title="Tạo phòng đội">
-                <span class="fc-nav-icon">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                </span>
-                <span class="fc-nav-label">Tạo phòng đội</span>
-            </a>
-
             <!-- Tìm phòng -->
             <a href="quick-match.html?view=rooms" class="fc-nav-item" title="Tìm phòng">
                 <span class="fc-nav-icon">
@@ -192,31 +169,11 @@
     <!-- ================================================================= -->
     <div class="home-main-shell flex-1 flex flex-col min-w-0 bg-[#0f1015]">
 
-        <!-- Topbar Sảnh chính + 5 Tab Bạn bè (đồng bộ số đếm thật & chuyển hướng sang friends.html) -->
+        <!-- Topbar Sảnh chính -->
         <header class="home-topbar">
-            <nav class="home-top-tabs" aria-label="Điều hướng nhanh Hub và Bạn bè">
+            <nav class="home-top-tabs" aria-label="Điều hướng Sảnh chính">
                 <a href="home.html" class="home-top-tab active">
                     <span>SẢNH CHÍNH HUB</span>
-                </a>
-                <a href="friends.html?tab=friends" class="home-top-tab">
-                    <span>BẠN BÈ</span>
-                    <span class="home-top-tab-count" id="home-count-friends">0</span>
-                </a>
-                <a href="friends.html?tab=received" class="home-top-tab">
-                    <span>LỜI MỜI ĐẾN</span>
-                    <span class="home-top-tab-count" id="home-count-received">0</span>
-                </a>
-                <a href="friends.html?tab=sent" class="home-top-tab" id="home-top-tab-sent">
-                    <span>ĐÃ GỬI</span>
-                    <span class="home-top-tab-count" id="home-count-sent">0</span>
-                </a>
-                <a href="friends.html?tab=suggestions" class="home-top-tab">
-                    <span>GỢI Ý KẾT BẠN</span>
-                    <span class="home-top-tab-count" id="home-count-suggestions">0</span>
-                </a>
-                <a href="friends.html?tab=blocked" class="home-top-tab">
-                    <span>DANH SÁCH CHẶN</span>
-                    <span class="home-top-tab-count" id="home-count-blocked">0</span>
                 </a>
             </nav>
         </header>
