@@ -1,3 +1,20 @@
+// Kiểm tra quyền Admin ngay khi tải trang
+(() => {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    window.location.replace("login.html");
+    return;
+  }
+  let role = localStorage.getItem("user_role") || "";
+  try {
+    const p = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (p && p.role) role = p.role;
+  } catch (e) {}
+  if (String(role).toUpperCase() !== "ADMIN") {
+    window.location.replace("home.html");
+  }
+})();
+
 const usersTableBody = document.getElementById("users-table-body");
 const userSearch = document.getElementById("user-search");
 const usersMessage = document.getElementById("users-message");
@@ -293,6 +310,15 @@ renderUsers();
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {
   const current = location.pathname.split('/').pop();
+  const token = localStorage.getItem('access_token');
+  let role = localStorage.getItem('user_role') || '';
+  if (token) {
+    try {
+      const p = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (p && p.role) role = p.role;
+    } catch (e) {}
+  }
+  const isAdmin = Boolean(token) && String(role).toUpperCase() === 'ADMIN';
   const links = [
     ['home.html', '⌂', 'Trang chủ'],
     ['community.html', '▤', 'Cộng đồng'],
@@ -300,8 +326,12 @@ renderUsers();
     ['team-posts.html', '⌕', 'Tìm đồng đội'],
     ['teams.html', '◈', 'Danh sách đội'],
     ['my-team.html', '♜', 'Đội của tôi'],
-    ['admin_users.html', '⚙', 'Quản lý người dùng']
   ];
+  if (isAdmin) {
+    links.push(['admin-dashboard.html', '📊', 'Dashboard Admin']);
+    links.push(['admin-reports.html', '🛡', 'Quản lý Báo cáo']);
+    links.push(['admin_users.html', '⚙', 'Quản lý người dùng']);
+  }
   const active = current === 'team-detail.html' ? 'teams.html' : current === 'team-feed.html' ? 'my-team.html' : current === 'admin_user-detail.html' ? 'admin_users.html' : current;
   const shell = document.createElement('aside');
   shell.className = 'gc-team-nav';
