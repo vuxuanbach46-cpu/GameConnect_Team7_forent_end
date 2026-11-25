@@ -10,6 +10,8 @@ const MENU = [
   { href: "index.html", label: "Trang chủ" },
   { href: "pages/community.html", label: "Bảng tin Cộng đồng" },
   { href: "pages/friends.html", label: "Bạn bè & Kết nối" },
+  { href: "pages/profile.html", label: "Hồ sơ" },
+  { href: "pages/items.html", label: "Items (CRUD mẫu)" },
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
   { href: "pages/admin-dashboard.html", label: "📊 Dashboard Thống kê", adminOnly: true },
   { href: "pages/admin-reports.html", label: "🛡️ Quản lý Báo cáo", adminOnly: true },

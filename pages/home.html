@@ -138,6 +138,16 @@
                 <span class="fc-nav-label">Bạn bè & Kết nối</span>
             </a>
 
+            <!-- Câu lạc bộ -->
+            <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ">
+                <span class="fc-nav-icon">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path>
+                    </svg>
+                </span>
+                <span class="fc-nav-label">Câu lạc bộ</span>
+            </a>
+
             <!-- Tạo phòng đội -->
             <a href="quick-match.html?view=lobby" class="fc-nav-item" title="Tạo phòng đội">
                 <span class="fc-nav-icon">
@@ -180,28 +190,42 @@
     <!-- ================================================================= -->
     <!-- 2. KHU VỰC TRUNG TÂM CHÍNH -->
     <!-- ================================================================= -->
-    <div class="flex-1 flex flex-col min-w-0 bg-[#0f1015]">
+    <div class="home-main-shell flex-1 flex flex-col min-w-0 bg-[#0f1015]">
 
-        <!-- Topbar nhỏ hiển thị trạng thái User & Đăng xuất -->
-        <header class="h-14 bg-[#13141a] border-b border-[#242631] px-6 flex items-center justify-between flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-white border-b-2 border-orange-500 py-4">SẢNH CHÍNH HUB</span>
-            </div>
-            <div id="user-header-info" class="flex items-center gap-4">
-                <span id="user-display-name" class="text-xs font-semibold text-zinc-200">
-                    <i class="fa-solid fa-circle-user text-orange-500 mr-1"></i> Đang tải...
-                </span>
-                <button id="logout-btn" class="px-3 py-1.5 text-xs font-semibold bg-[#1e2029] hover:bg-red-500/20 hover:text-red-400 border border-[#2e313e] rounded-md text-zinc-300 transition">
-                    Đăng xuất
-                </button>
-            </div>
+        <!-- Topbar Sảnh chính + 5 Tab Bạn bè (đồng bộ số đếm thật & chuyển hướng sang friends.html) -->
+        <header class="home-topbar">
+            <nav class="home-top-tabs" aria-label="Điều hướng nhanh Hub và Bạn bè">
+                <a href="home.html" class="home-top-tab active">
+                    <span>SẢNH CHÍNH HUB</span>
+                </a>
+                <a href="friends.html?tab=friends" class="home-top-tab">
+                    <span>BẠN BÈ</span>
+                    <span class="home-top-tab-count" id="home-count-friends">0</span>
+                </a>
+                <a href="friends.html?tab=received" class="home-top-tab">
+                    <span>LỜI MỜI ĐẾN</span>
+                    <span class="home-top-tab-count" id="home-count-received">0</span>
+                </a>
+                <a href="friends.html?tab=sent" class="home-top-tab" id="home-top-tab-sent">
+                    <span>ĐÃ GỬI</span>
+                    <span class="home-top-tab-count" id="home-count-sent">0</span>
+                </a>
+                <a href="friends.html?tab=suggestions" class="home-top-tab">
+                    <span>GỢI Ý KẾT BẠN</span>
+                    <span class="home-top-tab-count" id="home-count-suggestions">0</span>
+                </a>
+                <a href="friends.html?tab=blocked" class="home-top-tab">
+                    <span>DANH SÁCH CHẶN</span>
+                    <span class="home-top-tab-count" id="home-count-blocked">0</span>
+                </a>
+            </nav>
         </header>
 
         <!-- Nội dung Dashboard cuộn -->
-        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+        <main class="flex-1 overflow-y-auto p-6 space-y-5">
 
-            <!-- BANNER QUẢNG BÁ TRÊN CÙNG (Giống mẫu ảnh FACEIT) -->
-            <section class="relative rounded-xl overflow-hidden border border-[#283324] bg-gradient-to-r from-[#172115] via-[#1c2819] to-[#13141a] p-6 sm:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <!-- BANNER QUẢNG BÁ TRÊN CÙNG -->
+            <section class="home-banner relative rounded-xl overflow-hidden border border-[#283324] bg-gradient-to-r from-[#172115] via-[#1c2819] to-[#13141a] p-6 sm:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div class="space-y-3 max-w-xl relative z-10">
                     <h2 class="text-xl sm:text-2xl font-extrabold text-white leading-snug">
                         Thi đấu với những người chơi đã xác minh trong <span class="text-lime-400">Chế độ Xếp Hạng Đỉnh Cao</span>
@@ -212,188 +236,266 @@
                         <span><i class="fa-solid fa-award text-amber-400 mr-1"></i> Tích điểm đổi quà</span>
                     </div>
                     <div class="pt-1">
-                        <button class="px-5 py-2 rounded-md bg-lime-400 hover:bg-lime-300 text-black text-xs font-extrabold uppercase tracking-wider transition">
+                        <a href="quick-match.html" class="inline-block px-5 py-2 rounded-md bg-lime-400 hover:bg-lime-300 text-black text-xs font-extrabold uppercase tracking-wider transition">
                             THAM GIA NGAY
-                        </button>
+                        </a>
                     </div>
                 </div>
-                <div class="hidden md:flex items-center justify-center pr-4 opacity-90">
-                    <i class="fa-solid fa-headset text-7xl text-lime-400/20"></i>
+                <div class="hidden md:flex items-center justify-center pr-2 opacity-90 pointer-events-none select-none" aria-hidden="true">
+                    <svg class="w-32 h-32 text-emerald-400/20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3a9 9 0 0 0-9 9v7c0 1.1.9 2 2 2h3v-8H5v-1a7 7 0 0 1 14 0v1h-3v8h3c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z"/>
+                    </svg>
                 </div>
             </section>
 
-            <!-- LƯỚI 2 CỘT CHÍNH: TRÁI (CHỌN CHẾ ĐỘ CHƠI) - PHẢI (TỔ ĐỘI & CÂU LẠC BỘ) -->
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-
-                <!-- CỘT TRÁI (8 CỘT): TRÌNH ĐỘ KỸ NĂNG + 3 THẺ CHẾ ĐỘ LỚN -->
-                <div class="xl:col-span-8 space-y-4">
-                    <!-- Thanh trình độ kỹ năng -->
-                    <div class="bg-[#15161d] border border-[#242631] rounded-lg px-4 py-2.5 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">TRÌNH ĐỘ KỸ NĂNG HIỆN TẠI</span>
-                            <span class="px-2 py-0.5 rounded bg-orange-500/20 border border-orange-500/40 text-orange-400 text-xs font-extrabold">Level 8 • 1,850 ELO</span>
-                        </div>
-                        <span class="text-xs text-zinc-500">Valorant / CS2</span>
+            <!-- THANH TÌM KIẾM & BỘ LỌC NHANH -->
+            <section class="home-toolbar-card" aria-label="Tìm kiếm và lọc người chơi">
+                <div class="home-toolbar-left">
+                    <div class="home-search-box">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input
+                            type="text"
+                            id="home-search-input"
+                            placeholder="Tìm theo tên, tag, vị trí hoặc game đang chơi..."
+                            autocomplete="off"
+                        >
                     </div>
 
-                    <!-- 3 Thẻ Mode lớn (Ghép trận, Giải đấu mùa, Cúp tuần) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <!-- Card 1: Ghép trận -->
-                        <div class="mode-card p-6 h-72 flex flex-col items-center justify-between text-center cursor-pointer group">
-                            <div class="w-full h-36 mode-glow-orange rounded-lg flex items-center justify-center">
-                                <div class="w-20 h-20 rounded-full bg-[#181920] border-2 border-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-crosshairs text-3xl text-orange-500"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-base font-extrabold text-white">Ghép trận</h3>
-                                <p class="text-xs text-zinc-400 mt-1">Tìm đồng đội & đối thủ xứng tầm</p>
-                            </div>
-                        </div>
+                    <!-- Dropdown lọc Game -->
+                    <div class="home-dd-wrap" id="home-dd-game">
+                        <button type="button" class="home-dd-btn" id="home-btn-dd-game" aria-expanded="false">
+                            <span class="home-dd-btn-content" id="home-label-dd-game">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                                <span>Tất cả game</span>
+                            </span>
+                            <svg class="home-dd-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="home-dd-menu" id="home-menu-dd-game" hidden></div>
+                    </div>
 
-                        <!-- Card 2: Giải đấu cộng đồng -->
-                        <div class="mode-card p-6 h-72 flex flex-col items-center justify-between text-center cursor-pointer group">
-                            <div class="w-full h-36 mode-glow-emerald rounded-lg flex items-center justify-center">
-                                <div class="w-20 h-20 rounded-full bg-[#181920] border-2 border-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-star text-3xl text-emerald-400"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-base font-extrabold text-white">Giải đấu Team 7</h3>
-                                <p class="text-xs text-orange-400 font-semibold mt-1">Đăng ký đang mở</p>
-                            </div>
-                        </div>
-
-                        <!-- Card 3: Cúp & Sự kiện -->
-                        <div class="mode-card p-6 h-72 flex flex-col items-center justify-between text-center cursor-pointer group">
-                            <div class="w-full h-36 mode-glow-amber rounded-lg flex items-center justify-center">
-                                <div class="w-20 h-20 rounded-full bg-[#181920] border-2 border-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-trophy text-3xl text-amber-400"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-base font-extrabold text-white">Cúp hàng tuần</h3>
-                                <p class="text-xs text-zinc-400 mt-1">Đua top nhận thưởng vật phẩm</p>
-                            </div>
-                        </div>
+                    <!-- Dropdown lọc Trạng thái -->
+                    <div class="home-dd-wrap" id="home-dd-status">
+                        <button type="button" class="home-dd-btn" id="home-btn-dd-status" aria-expanded="false">
+                            <span class="home-dd-btn-content" id="home-label-dd-status">
+                                <span class="home-dd-dot is-all"></span>
+                                <span>Mọi trạng thái</span>
+                            </span>
+                            <svg class="home-dd-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="home-dd-menu" id="home-menu-dd-status" hidden></div>
                     </div>
                 </div>
 
-                <!-- CỘT PHẢI (4 CỘT): TỔ ĐỘI ĐANG HOẠT ĐỘNG & CÂU LẠC BỘ -->
-                <div class="xl:col-span-4 space-y-4">
-                    <!-- Box: Các tổ đội (Parties) -->
-                    <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-white">Tổ đội đang tìm người <span class="ml-1 px-1.5 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px]">16</span></span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex -space-x-2">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p1" class="w-8 h-8 rounded-full border-2 border-[#15161d] bg-zinc-800" alt="">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p2" class="w-8 h-8 rounded-full border-2 border-[#15161d] bg-zinc-800" alt="">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p3" class="w-8 h-8 rounded-full border-2 border-[#15161d] bg-zinc-800" alt="">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=p4" class="w-8 h-8 rounded-full border-2 border-[#15161d] bg-zinc-800" alt="">
+                <div class="home-toolbar-summary" id="home-toolbar-summary">
+                    Đang tải danh sách...
+                </div>
+            </section>
+
+            <!-- LƯỚI 2 CỘT CHÍNH: TRÁI (3 CHỨC NĂNG CHÍNH + DANH SÁCH NGƯỜI CHƠI) - PHẢI (TỔ ĐỘI & CÂU LẠC BỘ) -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+
+                <!-- CỘT TRÁI (8 CỘT): 3 THẺ CHỨC NĂNG CHÍNH + BẢNG NGƯỜI CHƠI / LỜI MỜI -->
+                <div class="xl:col-span-8 space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <!-- Card 1: Tìm đội nhanh -->
+                        <a href="quick-match.html" class="home-feature-card is-orange group">
+                            <div class="home-feature-top">
+                                <div class="home-feature-icon-box">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="22" y1="12" x2="18" y2="12"></line>
+                                        <line x1="6" y1="12" x2="2" y2="12"></line>
+                                        <line x1="12" y1="6" x2="12" y2="2"></line>
+                                        <line x1="12" y1="22" x2="12" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <span class="home-feature-tag">5V5 LOBBY</span>
                             </div>
-                            <span class="text-xs text-zinc-400"><i class="fa-solid fa-user-group text-orange-500 mr-1"></i> 16 phòng</span>
+                            <div class="home-feature-body">
+                                <h3 class="home-feature-title">Tìm đội nhanh</h3>
+                                <p class="home-feature-desc">
+                                    Tạo sảnh đội 5 người và ghép đồng đội theo game, mức rank, vai trò & mic.
+                                </p>
+                            </div>
+                            <div class="home-feature-footer">
+                                <span>Vào sảnh ghép đội</span>
+                                <span class="home-feature-arrow" aria-hidden="true">→</span>
+                            </div>
+                        </a>
+
+                        <!-- Card 2: Tuyển đồng đội (Team Posts) -->
+                        <a href="team-posts.html" class="home-feature-card is-emerald group">
+                            <div class="home-feature-top">
+                                <div class="home-feature-icon-box">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                </div>
+                                <span class="home-feature-tag">BÀI ĐĂNG</span>
+                            </div>
+                            <div class="home-feature-body">
+                                <h3 class="home-feature-title">Tuyển đồng đội</h3>
+                                <p class="home-feature-desc">
+                                    Đăng bài tìm thành viên theo vị trí hoặc ứng tuyển vào các đội đang thiếu người.
+                                </p>
+                            </div>
+                            <div class="home-feature-footer">
+                                <span>Xem bài tuyển đội</span>
+                                <span class="home-feature-arrow" aria-hidden="true">→</span>
+                            </div>
+                        </a>
+
+                        <!-- Card 3: Bạn bè & Kết nối -->
+                        <a href="friends.html" class="home-feature-card is-sky group">
+                            <div class="home-feature-top">
+                                <div class="home-feature-icon-box">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <span class="home-feature-tag">KẾT NỐI</span>
+                            </div>
+                            <div class="home-feature-body">
+                                <h3 class="home-feature-title">Bạn bè & Kết nối</h3>
+                                <p class="home-feature-desc">
+                                    Quản lý danh sách bạn bè, tìm kiếm người chơi và gửi lời mời vào đội ngay.
+                                </p>
+                            </div>
+                            <div class="home-feature-footer">
+                                <span>Mở danh sách bạn bè</span>
+                                <span class="home-feature-arrow" aria-hidden="true">→</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- KHUNG DANH SÁCH NGƯỜI CHƠI / LỜI MỜI TRỰC TIẾP (Giống mockup) -->
+                    <section class="home-players-card" aria-label="Danh sách kết nối nhanh">
+                        <div class="home-players-header">
+                            <div class="home-players-header-left">
+                                <span class="home-players-heading" id="home-players-heading">LỜI MỜI ĐÃ GỬI</span>
+                                <div class="home-mini-tabs" role="tablist" aria-label="Chuyển nhanh nhóm hiển thị">
+                                    <button type="button" class="home-mini-tab" data-home-tab="friends">Bạn bè</button>
+                                    <button type="button" class="home-mini-tab" data-home-tab="received">Lời mời đến</button>
+                                    <button type="button" class="home-mini-tab active" data-home-tab="sent">Đã gửi</button>
+                                    <button type="button" class="home-mini-tab" data-home-tab="suggestions">Gợi ý</button>
+                                </div>
+                            </div>
+                            <span class="home-players-cols-hint">NGƯỜI CHƠI · GAME & VỊ TRÍ CHÍNH · MỨC RANK / ELO · THAO TÁC</span>
                         </div>
-                        <a href="friends.html" class="block w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
-                            TÌM KIẾM TỔ ĐỘI
+
+                        <div id="home-players-list" class="home-players-list">
+                            <div class="home-players-empty">Đang tải dữ liệu kết nối...</div>
+                        </div>
+
+                        <div id="home-players-pagination" class="home-players-pagination"></div>
+                    </section>
+                </div>
+
+                <!-- CỘT PHẢI (4 CỘT): TỔ ĐỘI ĐANG TÌM NGƯỜI & CÂU LẠC BỘ -->
+                <div class="xl:col-span-4 space-y-4">
+                    <!-- Box: Tổ đội đang tìm người (Dữ liệu thật -> link sang phần Tìm phòng) -->
+                    <div class="home-rooms-card">
+                        <div class="home-rooms-header">
+                            <div class="home-rooms-title-wrap">
+                                <span class="home-rooms-live-dot" aria-hidden="true"></span>
+                                <span class="home-rooms-title">Tổ đội đang tìm người</span>
+                            </div>
+                            <span id="home-open-rooms-count" class="home-rooms-count">0 phòng</span>
+                        </div>
+
+                        <div id="home-open-rooms-list" class="home-room-list">
+                            <div class="home-room-empty">Đang tải danh sách phòng mở...</div>
+                        </div>
+
+                        <a href="quick-match.html?view=rooms" class="home-card-cta-btn">
+                            <span>TÌM PHÒNG NGAY</span>
+                            <span aria-hidden="true">→</span>
                         </a>
                     </div>
 
                     <!-- Box: Câu lạc bộ (Clubs) -->
                     <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-white">Câu lạc bộ nổi bật <span class="ml-1 px-1.5 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px]">344</span></span>
+                            <span class="text-xs font-bold text-white">Câu lạc bộ nổi bật</span>
+                            <span class="px-2 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px] font-bold">344</span>
                         </div>
                         <div class="space-y-2">
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition cursor-pointer">
+                            <a href="community.html" class="flex items-center justify-between p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-7 h-7 rounded bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">VN</div>
                                     <span class="text-xs font-bold text-white">Cộng đồng Valorant VN</span>
                                 </div>
                                 <span class="text-[11px] text-zinc-400"><i class="fa-solid fa-users mr-1"></i> 66,326</span>
-                            </div>
-                            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition cursor-pointer">
+                            </a>
+                            <a href="community.html" class="flex items-center justify-between p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-7 h-7 rounded bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs">CS</div>
                                     <span class="text-xs font-bold text-white">CS2 | Clan Hà Nội</span>
                                 </div>
                                 <span class="text-[11px] text-zinc-400"><i class="fa-solid fa-users mr-1"></i> 54,842</span>
-                            </div>
+                            </a>
                         </div>
-                        <button class="w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
+                        <a href="community.html" class="block w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
                             KHÁM PHÁ CÁC CÂU LẠC BỘ
-                        </button>
+                        </a>
                     </div>
                 </div>
 
             </div>
 
-            <!-- HÀNG DƯỚI CÙNG: BÀI ĐĂNG MỚI NHẤT - CỬA HÀNG - PHÁT SÓNG TRỰC TIẾP -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
-                <!-- Cột 1: Bài đăng mới nhất -->
+            <!-- HÀNG DƯỚI CÙNG: BÀI ĐĂNG MỚI NHẤT -->
+            <section class="pt-1">
                 <div class="space-y-2.5">
-                    <h3 class="text-xs font-bold text-white">Bài đăng mới nhất</h3>
-                    <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 space-y-3 h-44 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center gap-2.5 mb-2">
-                                <div class="w-7 h-7 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center text-xs font-bold">GC</div>
-                                <div>
-                                    <div class="text-xs font-bold text-white">GameConnect Official <i class="fa-solid fa-circle-check text-orange-500 text-[10px]"></i></div>
-                                    <div class="text-[10px] text-zinc-500">2 giờ trước</div>
-                                </div>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-white">BÀI ĐĂNG MỚI NHẤT</h3>
+                        <a href="community.html" class="text-xs font-semibold text-orange-400 hover:text-orange-300 transition">
+                            Xem cộng đồng →
+                        </a>
+                    </div>
+                    <div class="home-post-card">
+                        <div class="home-post-avatar">GC</div>
+                        <div class="home-post-content">
+                            <div class="home-post-meta">
+                                <strong class="home-post-author">GameConnect Official</strong>
+                                <i class="fa-solid fa-circle-check text-orange-500 text-[11px]" title="Tài khoản chính thức"></i>
+                                <span class="home-post-time">· 2 giờ trước</span>
                             </div>
-                            <p class="text-xs text-zinc-300 line-clamp-3 leading-relaxed">
-                                Thông báo mở cụm máy chủ ghép trận tốc độ cao tại khu vực Đông Nam Á. Tham gia ngay để nhận huy hiệu mùa giải mới!
+                            <p class="home-post-text">
+                                🔥 Chào mừng bản cập nhật hệ thống Matchmaking mới! Giờ đây bạn có thể tìm kiếm đồng đội theo bộ lọc Rank, Mic và Tỉ lệ thắng theo thời gian thực. Bắt đầu ghép đội ngay hôm nay để nhận huy hiệu độc quyền!
                             </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cột 2: Cửa hàng vật phẩm -->
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-bold text-white">Cửa hàng</h3>
-                        <span class="text-[11px] text-zinc-500">&lt; 1/9 &gt;</span>
-                    </div>
-                    <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 h-44 flex items-center justify-around relative overflow-hidden">
-                        <div class="text-center">
-                            <span class="px-2 py-0.5 rounded bg-red-500 text-white text-[10px] font-bold">-30%</span>
-                            <div class="my-2 text-3xl text-zinc-300"><i class="fa-solid fa-shirt"></i></div>
-                            <div class="text-xs font-bold text-white">Áo Hoodie Team 7</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="px-2 py-0.5 rounded bg-orange-500 text-white text-[10px] font-bold">HOT</span>
-                            <div class="my-2 text-3xl text-amber-400"><i class="fa-solid fa-gem"></i></div>
-                            <div class="text-xs font-bold text-white">Gói Khung Avatar</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cột 3: Phát sóng trực tiếp -->
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-bold text-white">Phát sóng trực tiếp</h3>
-                        <span class="text-[11px] text-zinc-500">&lt; 1/13 &gt;</span>
-                    </div>
-                    <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 h-44 flex flex-col justify-between">
-                        <div class="flex items-center gap-3">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=streamer" class="w-10 h-10 rounded-full border border-purple-500 bg-zinc-800" alt="">
-                            <div>
-                                <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                                    <span>ZeroCool_VN</span>
-                                    <span class="px-1.5 py-0.2 rounded bg-red-600 text-[9px] font-bold uppercase">LIVE</span>
-                                </div>
-                                <div class="text-[11px] text-zinc-400">Leo rank Immortal Valorant cùng team!</div>
+                            <div class="home-post-actions">
+                                <a href="community.html" class="home-post-action-link">
+                                    <i class="fa-regular fa-heart"></i>
+                                    <span>142</span>
+                                </a>
+                                <a href="community.html" class="home-post-action-link">
+                                    <i class="fa-regular fa-comment"></i>
+                                    <span>38 thảo luận</span>
+                                </a>
+                                <a href="community.html" class="home-post-action-link">
+                                    <i class="fa-solid fa-share-nodes"></i>
+                                    <span>Chia sẻ</span>
+                                </a>
                             </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button class="flex-1 py-1.5 rounded-md bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition">
-                                <i class="fa-solid fa-heart mr-1"></i> Theo dõi
-                            </button>
-                            <button class="px-3 py-1.5 rounded-md bg-[#22242e] hover:bg-[#2c2f3c] text-zinc-200 text-xs font-semibold transition">
-                                Xem ngay
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -403,12 +505,70 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- 3. THANH CÔNG CỤ NHANH BÊN PHẢI (Đồng bộ friends.html) -->
+    <!-- 3. THANH CÔNG CỤ NHANH BÊN PHẢI (Đồng bộ Avatar + Theme friends.html) -->
     <!-- ================================================================= -->
-    <aside class="w-12 bg-[#13141a] border-l border-[#242631] hidden sm:flex flex-col items-center py-4 gap-5 text-zinc-400 flex-shrink-0">
-        <a href="home.html" title="Trận đấu nhanh (VS)" class="w-8 h-8 rounded-lg bg-orange-500 text-white text-xs font-extrabold flex items-center justify-center">
-            VS
-        </a>
+    <aside class="fc-right-bar" aria-label="Thanh công cụ nhanh và tài khoản">
+        <div class="fc-avatar-menu-wrapper">
+            <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Tài khoản, giao diện Sáng / Tối & Đăng xuất">
+                <img
+                    src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4"
+                    alt="Avatar của bạn"
+                    class="fc-self-avatar"
+                >
+                <span class="fc-status-dot"></span>
+            </button>
+
+            <!-- Menu bật ra khi nhấn vào Avatar -->
+            <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
+                <div class="fc-avatar-dropdown-header">
+                    <strong id="avatar-user-name">Đang tải...</strong>
+                    <span>● Đang trực tuyến</span>
+                </div>
+                <div class="fc-avatar-dropdown-divider"></div>
+                <div class="fc-avatar-dropdown-label">Giao diện hiển thị</div>
+                <button type="button" class="fc-theme-option" data-set-theme="dark">
+                    <span>🌙 Chế độ Tối (Dark)</span>
+                    <span class="fc-theme-check" id="check-theme-dark">✓</span>
+                </button>
+                <button type="button" class="fc-theme-option" data-set-theme="light">
+                    <span>☀️ Chế độ Sáng (Light)</span>
+                    <span class="fc-theme-check" id="check-theme-light"></span>
+                </button>
+                <div class="fc-avatar-dropdown-divider"></div>
+                <!-- Nút truy cập hồ sơ game thủ -->
+                <a href="profile.html" id="avatar-profile-btn" class="fc-avatar-profile-btn">
+                    <span class="fc-profile-icon">🎮</span>
+                    <span>Hồ sơ game thủ</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M7 17L17 7"></path>
+                        <path d="M7 7h10v10"></path>
+                    </svg>
+                </a>
+
+                <div class="fc-avatar-dropdown-divider"></div>
+                <button type="button" id="logout-btn" class="fc-avatar-logout-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Đăng xuất</span>
+                </button>
+                <button type="button" id="open-change-password" class="fc-avatar-password-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>Đổi mật khẩu</span>
+                </button>
+            </div>
+        </div>
+
+        <a href="quick-match.html" class="fc-right-icon-btn" title="Tìm đội nhanh (VS)" style="font-weight: 800; font-size: 12px;">VS</a>
+
+        <!-- CHUÔNG THÔNG BÁO (Tài nguyên chung) -->
         <div id="gc-notif-bell"></div>
         <a href="admin-dashboard.html" title="Dashboard thống kê (Admin)" class="hover:text-orange-400 transition admin-nav-item" style="display: none;"><i class="fa-solid fa-chart-line"></i></a>
         <a href="admin-reports.html" title="Quản lý báo cáo (Admin)" class="hover:text-red-400 transition admin-nav-item" style="display: none;"><i class="fa-solid fa-shield-halved"></i></a>
@@ -416,6 +576,26 @@
         <a href="friends.html" title="Danh sách bạn bè" class="hover:text-orange-500 transition"><i class="fa-solid fa-users"></i></a>
         <button title="Cài đặt" class="mt-auto hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
     </aside>
+
+    <!-- Khung thông báo nhanh góc dưới -->
+    <div id="fc-toast-container" class="fc-toast-container"></div>
+
+    <div id="change-password-modal" class="gc-password-modal" hidden>
+        <button type="button" class="gc-password-backdrop" data-close-password aria-label="Đóng popup"></button>
+        <section class="gc-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+            <div class="gc-password-heading">
+                <div><span class="gc-password-kicker">ACCOUNT SECURITY</span><h2 id="change-password-title">Đổi mật khẩu</h2><p>Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p></div>
+                <button type="button" id="close-change-password" class="gc-password-close" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="change-password-form" class="gc-password-form">
+                <label><span>Mật khẩu hiện tại</span><input id="old-password" type="password" autocomplete="current-password" maxlength="128" required></label>
+                <label><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required><small>Tối thiểu 6 ký tự.</small></label>
+                <label><span>Xác nhận mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required></label>
+                <p id="change-password-message" class="gc-password-message" role="status" hidden></p>
+                <div class="gc-password-actions"><button type="button" id="cancel-change-password" class="gc-password-cancel">Huỷ</button><button type="submit" id="change-password-submit" class="gc-password-submit"><i class="fa-solid fa-key"></i> Cập nhật mật khẩu</button></div>
+            </form>
+        </section>
+    </div>
 
     <!-- SCRIPT BẢO VỆ ROUTE & HIỂN THỊ THÔNG TIN USER -->
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>

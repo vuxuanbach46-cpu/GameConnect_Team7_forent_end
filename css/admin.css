@@ -286,3 +286,28 @@ body.gc-team-page{margin:0;min-height:100vh;background:#0c0d12;color:#f1f5f9;fon
 @media(max-width:520px){.gc-team-brand strong{display:none}.gc-team-page .my-teams-summary,.gc-team-page .feed-summary{grid-template-columns:1fr}.gc-team-page .my-teams-heading,.gc-team-page .teams-heading,.gc-team-page .feed-heading,.gc-team-page .admin-toolbar{align-items:flex-start;flex-direction:column}.gc-team-page .team-info{flex-direction:column}}
 .gc-team-page #team-role-filter,.gc-team-page #feed-filter{background-color:#101219;border-color:#31374a;color:#f1f5f9}
 .gc-team-page .my-teams-avatar{background:#29211e;color:#ff8442}
+
+/* Phản hồi khi rê chuột, nhấn hoặc dùng bàn phím trên menu. */
+.gc-team-page .gc-team-nav nav a {
+  border: 1px solid transparent;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, transform .12s ease;
+}
+.gc-team-page .gc-team-nav nav a:hover {
+  background: #1b1e28;
+  border-color: #31374a;
+  color: #f1f5f9;
+}
+.gc-team-page .gc-team-nav nav a:active {
+  background: #30231d;
+  border-color: #e85002;
+  transform: scale(.97);
+}
+.gc-team-page .gc-team-nav nav a:focus-visible {
+  outline: 2px solid #ff8442;
+  outline-offset: 2px;
+}
+.gc-team-page .gc-team-nav nav a.active { color: #ff8442; }
+@media (prefers-reduced-motion: reduce) {
+  .gc-team-page .gc-team-nav nav a { transition: none; }
+  .gc-team-page .gc-team-nav nav a:active { transform: none; }
+}

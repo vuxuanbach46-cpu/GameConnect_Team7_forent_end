@@ -10,6 +10,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/index.css">
   <style>
+    [hidden], #form-error.hidden { display: none !important; }
+    .sidebar-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 8px; color: #a1a1aa; font-size: 13px; font-weight: 600; text-decoration: none; transition: background .15s, color .15s; }
+    .sidebar-item:hover { background: #20222d; color: #fff; }
+    .sidebar-item.active { background: #28211e; color: #fb923c; }
+    .sidebar-item.justify-between { justify-content: space-between; }
+    .top-tab { color: #a1a1aa; font-size: 12px; font-weight: 700; white-space: nowrap; text-decoration: none; }
+    .top-tab:hover, .top-tab.active { color: #fb923c; }
+
+
     .btn-orange {
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
@@ -80,6 +89,7 @@
         </a>
       </div>
     </div>
+  </aside>
 
     <div class="p-3 border-t border-[#242631]">
       <a href="team-posts.html" class="sidebar-item text-xs text-zinc-400 hover:text-white">

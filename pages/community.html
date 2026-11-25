@@ -4,10 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cộng đồng | GameConnect</title>
+  <script>
+    if (!localStorage.getItem("access_token")) {
+      const loginUrl = new URL("login.html", window.location.href);
+      loginUrl.searchParams.set("next", `${window.location.pathname.split("/").pop()}${window.location.search}${window.location.hash}`);
+      window.location.replace(loginUrl.href);
+    }
+  </script>
   <link rel="icon" href="../assets/images/logo.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/friends.css">
-  <link rel="stylesheet" href="../css/community.css">
+  <link rel="stylesheet" href="../css/community.css?v=2">
   <link rel="stylesheet" href="../css/notifications.css">
 </head>
 <body class="community-page fc-dark-body" data-root="../">
@@ -32,39 +39,39 @@
           </div>
         </a>
         <div class="fc-nav-divider"></div>
-        <button class="fc-nav-item" id="btn-focus-search" type="button" title="Tìm kiếm người chơi">
+        <a class="fc-nav-item" id="btn-focus-search" href="friends.html" title="Tìm kiếm người chơi">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </span><span class="fc-nav-label">Tìm kiếm</span>
-        </button>
-        <button class="fc-nav-item" type="button" title="Kênh Esport">
+        </a>
+        <a class="fc-nav-item" href="team-posts.html" title="Kênh Esport">
           <span class="fc-nav-icon"><span class="fc-game-pill">GC</span></span><span class="fc-nav-label">Kênh Esport</span>
-        </button>
+        </a>
         <div class="fc-nav-divider"></div>
-        <button class="fc-nav-item" type="button" title="Tìm đội nhanh">
+        <a class="fc-nav-item" href="quick-match.html" title="Tìm đội nhanh">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
           </span><span class="fc-nav-label">Tìm đội nhanh</span>
-        </button>
-        <button class="fc-nav-item" type="button" title="Bảng xếp hạng">
+        </a>
+        <a class="fc-nav-item" href="home.html" title="Bảng xếp hạng">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 20V10M12 20V4M6 20v-6"></path>
             </svg>
           </span><span class="fc-nav-label">Bảng xếp hạng</span>
-        </button>
-        <button class="fc-nav-item" type="button" title="Thống kê cá nhân">
+        </a>
+        <a class="fc-nav-item" href="profile.html" title="Thống kê cá nhân">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
             </svg>
           </span><span class="fc-nav-label">Thống kê</span>
-        </button>
+        </a>
         <a href="community.html" class="fc-nav-item active" aria-current="page" title="Bảng tin cộng đồng">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -88,7 +95,7 @@
             <span class="fc-nav-badge" id="sidebar-req-badge">10</span>
           </span><span class="fc-nav-label">Bạn bè & Kết nối</span>
         </a>
-        <button class="fc-nav-item" type="button" title="Tạo phòng đội">
+        <a class="fc-nav-item" href="quick-match.html?view=lobby" title="Tạo phòng đội">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
@@ -96,15 +103,15 @@
               <line x1="8" y1="12" x2="16" y2="12"></line>
             </svg>
           </span><span class="fc-nav-label">Tạo phòng đội</span>
-        </button>
-        <button class="fc-nav-item" type="button" title="Tìm phòng">
+        </a>
+        <a class="fc-nav-item" href="quick-match.html?view=rooms" title="Tìm phòng">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
             </svg>
           </span><span class="fc-nav-label">Tìm phòng</span>
-        </button>
+        </a>
       </div>
       <div class="fc-bar-group">
         <a href="items.html" class="fc-nav-item" title="Cửa hàng vật phẩm">
@@ -188,6 +195,7 @@
                   <button class="publish-button" id="publish-button" type="submit"><span aria-hidden="true">↗</span> Đăng bài</button>
                 </div>
               </div>
+              <p id="game-catalog-status" class="game-catalog-status" role="status" hidden></p>
               <p class="composer-error" id="composer-error" role="alert" hidden></p>
             </form>
           </section>
@@ -300,7 +308,7 @@
           </button>
         </div>
       </div>
-      <button type="button" class="fc-right-icon-btn community-vs" aria-label="Đấu nhanh VS">VS</button>
+      <a href="quick-match.html" class="fc-right-icon-btn community-vs" aria-label="Đấu nhanh VS">VS</a>
       <div id="gc-notif-bell"></div>
       <a class="fc-right-icon-btn" href="friends.html" aria-label="Bạn bè & Kết nối">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
