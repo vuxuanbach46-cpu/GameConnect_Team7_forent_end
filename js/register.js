@@ -110,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Lấy token từ phản hồi đăng ký hoặc tự động đăng nhập để lấy token
         const resData = response.data || response;
         let accessToken = resData.access_token;
-        let refreshToken = resData.refresh_token;
         let role = resData.role;
 
         // Fallback: nếu API register chưa cấp token, tự động đăng nhập ngay lập tức
@@ -123,7 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             const loginData = loginRes.data || loginRes;
             accessToken = loginData.access_token;
-            refreshToken = loginData.refresh_token;
             role = loginData.role;
           } catch (loginErr) {
             console.warn("Tự động đăng nhập sau đăng ký không thành công:", loginErr);
@@ -134,9 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (accessToken) {
           localStorage.setItem("access_token", accessToken);
         }
-        if (refreshToken) {
-          localStorage.setItem("refresh_token", refreshToken);
-        }
+        localStorage.removeItem("refresh_token");
+        localStorage.setItem("remember_login", "false");
+        localStorage.setItem("auth_provider", "password");
         if (role) {
           localStorage.setItem("user_role", role);
         }
