@@ -648,6 +648,50 @@ body.community-page {
 }
 .load-more:hover { border-color: var(--community-orange); color: var(--community-text); }
 .load-more[hidden] { display: none; }
+.fc-avatar-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--community-text);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.fc-avatar-profile-btn:hover {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+}
+.fc-profile-icon {
+  font-size: 16px;
+}
+.fc-avatar-profile-btn svg {
+  margin-left: auto;
+  opacity: 0.6;
+}
+.fc-avatar-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.fc-avatar-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.28);
+}
 .feed-empty {
   padding: 42px 18px;
   border: 1px dashed var(--community-border-strong);

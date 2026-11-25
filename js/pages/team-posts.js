@@ -489,4 +489,7 @@ function showGamerToast(message, type = "success") {
 (async function init() {
   await loadGamesCatalog();
   loadPosts(1, {});
+  if (new URLSearchParams(window.location.search).get("create") === "1") {
+    openCreateModal();
+  }
 })();
