@@ -292,8 +292,8 @@
                             </div>
                         </a>
 
-                        <!-- Card 2: Tuyển đồng đội (Team Posts) -->
-                        <a href="team-posts.html" class="home-feature-card is-emerald group">
+                        <!-- Card 2: Tuyển đồng đội (Liên kết sang Tìm đội nhanh) -->
+                        <a href="quick-match.html" class="home-feature-card is-emerald group">
                             <div class="home-feature-top">
                                 <div class="home-feature-icon-box">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -389,29 +389,16 @@
                         </a>
                     </div>
 
-                    <!-- Box: Câu lạc bộ (Clubs) -->
+                    <!-- Box: Câu lạc bộ nổi bật (Dữ liệu thật từ DB -> link sang clubs.html) -->
                     <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-white">Câu lạc bộ nổi bật</span>
-                            <span class="px-2 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px] font-bold">344</span>
+                            <span id="home-featured-clubs-count" class="px-2 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px] font-bold">0 CLB</span>
                         </div>
-                        <div class="space-y-2">
-                            <a href="community.html" class="flex items-center justify-between p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">VN</div>
-                                    <span class="text-xs font-bold text-white">Cộng đồng Valorant VN</span>
-                                </div>
-                                <span class="text-[11px] text-zinc-400"><i class="fa-solid fa-users mr-1"></i> 66,326</span>
-                            </a>
-                            <a href="community.html" class="flex items-center justify-between p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs">CS</div>
-                                    <span class="text-xs font-bold text-white">CS2 | Clan Hà Nội</span>
-                                </div>
-                                <span class="text-[11px] text-zinc-400"><i class="fa-solid fa-users mr-1"></i> 54,842</span>
-                            </a>
+                        <div id="home-featured-clubs-list" class="space-y-2">
+                            <div class="home-room-empty">Đang tải danh sách câu lạc bộ...</div>
                         </div>
-                        <a href="community.html" class="block w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
+                        <a href="clubs.html" class="block w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
                             KHÁM PHÁ CÁC CÂU LẠC BỘ
                         </a>
                     </div>
@@ -419,7 +406,7 @@
 
             </div>
 
-            <!-- HÀNG DƯỚI CÙNG: BÀI ĐĂNG MỚI NHẤT -->
+            <!-- HÀNG DƯỚI CÙNG: BÀI ĐĂNG MỚI NHẤT (Dữ liệu thật từ DB) -->
             <section class="pt-1">
                 <div class="space-y-2.5">
                     <div class="flex items-center justify-between">
@@ -428,32 +415,8 @@
                             Xem cộng đồng →
                         </a>
                     </div>
-                    <div class="home-post-card">
-                        <div class="home-post-avatar">GC</div>
-                        <div class="home-post-content">
-                            <div class="home-post-meta">
-                                <strong class="home-post-author">GameConnect Official</strong>
-                                <i class="fa-solid fa-circle-check text-orange-500 text-[11px]" title="Tài khoản chính thức"></i>
-                                <span class="home-post-time">· 2 giờ trước</span>
-                            </div>
-                            <p class="home-post-text">
-                                🔥 Chào mừng bản cập nhật hệ thống Matchmaking mới! Giờ đây bạn có thể tìm kiếm đồng đội theo bộ lọc Rank, Mic và Tỉ lệ thắng theo thời gian thực. Bắt đầu ghép đội ngay hôm nay để nhận huy hiệu độc quyền!
-                            </p>
-                            <div class="home-post-actions">
-                                <a href="community.html" class="home-post-action-link">
-                                    <i class="fa-regular fa-heart"></i>
-                                    <span>142</span>
-                                </a>
-                                <a href="community.html" class="home-post-action-link">
-                                    <i class="fa-regular fa-comment"></i>
-                                    <span>38 thảo luận</span>
-                                </a>
-                                <a href="community.html" class="home-post-action-link">
-                                    <i class="fa-solid fa-share-nodes"></i>
-                                    <span>Chia sẻ</span>
-                                </a>
-                            </div>
-                        </div>
+                    <div id="home-latest-posts-list" class="space-y-3">
+                        <div class="home-room-empty">Đang tải bài đăng mới nhất...</div>
                     </div>
                 </div>
             </section>
