@@ -1,9 +1,22 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+  function getPostLoginDestination() {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (!next) return "home.html";
+    const target = new URL(next, window.location.href);
+    if (
+      target.origin !== window.location.origin ||
+      !["community.html", "community-detail.html"].includes(target.pathname.split("/").pop())
+    ) {
+      return "home.html";
+    }
+    return `${target.pathname}${target.search}${target.hash}`;
+  }
+
   // --- 0. NẾU ĐÃ ĐĂNG NHẬP -> CHUYỂN HƯỚNG VÀO FILE HOME ---
   const existingToken = localStorage.getItem("access_token");
   if (existingToken) {
-    window.location.href = "home.html";
+    window.location.href = getPostLoginDestination();
     return;
   }
 
@@ -115,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Chuyển hướng người dùng vào file home sau khi đăng nhập thành công
         setTimeout(() => {
-          window.location.href = "home.html";
+          window.location.href = getPostLoginDestination();
         }, 800);
       } catch (error) {
         console.error("Lỗi đăng nhập:", error);
@@ -137,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ? CONFIG.API_BASE_URL
         : "http://127.0.0.1:8000";
       const loginUrl = new URL("/auth/google/login", baseUrl);
-      loginUrl.searchParams.set("redirect_to", new URL("home.html", window.location.href).href);
+      loginUrl.searchParams.set("redirect_to", new URL(getPostLoginDestination(), window.location.href).href);
       window.location.href = loginUrl.href;
     });
   }
