@@ -2335,3 +2335,6 @@ body.gc-password-modal-open {
   border-radius: 50%;
   border: 2px solid var(--fc-bg-sidebar);
 }
+
+/* Giữ các mục điều hướng có thể truy cập ở màn hình thấp. */
+.fc-left-bar { overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; }
