@@ -973,32 +973,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        passwordSubmit.disabled = true;
-        passwordSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...';
-        try {
-            const response = await api.put("/auth/change-password", {
-                old_password: oldPassword,
-                new_password: newPassword,
-            });
-            showPasswordMessage(response?.message || "Đổi mật khẩu thành công.");
-            passwordForm.reset();
-        } catch (error) {
-            showPasswordMessage(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
-        } finally {
-            passwordSubmit.disabled = false;
-            passwordSubmit.innerHTML = '<i class="fa-solid fa-key"></i> Cập nhật mật khẩu';
-        }
-    });
-
-    // Tải tên & avatar thật vào menu Avatar
-    loadHomeUserAvatar(token);
-
-    // Tải danh sách phòng đang mở thật cho khối "Tổ đội đang tìm người"
-    loadOpenRoomsPreview();
-
-    // Khởi tạo & tải dữ liệu thật cho 5 tab Topbar + bảng người chơi/lời mời nhanh
-    initHomeSocialControls();
-    loadHomeSocialData();
+    // Hiển thị các mục điều hướng Admin nếu là ADMIN, ẩn/xóa nếu là USER thường
+    const isAdmin = String(userRole || "").toUpperCase() === "ADMIN";
+    const adminNavItems = document.querySelectorAll(".admin-nav-item");
+    if (isAdmin) {
+        adminNavItems.forEach(el => el.style.display = "");
+    } else {
+        adminNavItems.forEach(el => el.remove());
+    }
 
     // --- 4. XỬ LÝ ĐĂNG XUẤT (TRONG MENU AVATAR) ---
     const logoutBtn = document.getElementById("logout-btn");
