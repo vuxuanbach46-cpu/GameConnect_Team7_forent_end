@@ -51,11 +51,11 @@ function renderMyTeams() {
       <div class="my-teams-card-actions">
         <a class="my-teams-action"
            href="team-feed.html?id=${encodeURIComponent(team.id)}">
-          Bảng tin (bản mẫu)
+          Xem bảng tin
         </a>
         <a class="my-teams-secondary"
            href="team-detail.html?id=${encodeURIComponent(team.id)}">
-          Chi tiết đội (bản mẫu)
+          Chi tiết đội
         </a>
       </div>
     </article>
@@ -90,6 +90,15 @@ loadMyTeams();
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {
   const current = location.pathname.split('/').pop();
+  const token = localStorage.getItem('access_token');
+  let role = localStorage.getItem('user_role') || '';
+  if (token) {
+    try {
+      const p = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (p && p.role) role = p.role;
+    } catch (e) {}
+  }
+  const isAdmin = Boolean(token) && String(role).toUpperCase() === 'ADMIN';
   const links = [
     ['home.html', '⌂', 'Trang chủ'],
     ['community.html', '▤', 'Cộng đồng'],
@@ -97,8 +106,12 @@ loadMyTeams();
     ['team-posts.html', '⌕', 'Tìm đồng đội'],
     ['teams.html', '◈', 'Danh sách đội'],
     ['my-team.html', '♜', 'Đội của tôi'],
-    ['admin_users.html', '⚙', 'Quản lý người dùng']
   ];
+  if (isAdmin) {
+    links.push(['admin-dashboard.html', '📊', 'Dashboard Admin']);
+    links.push(['admin-reports.html', '🛡', 'Quản lý Báo cáo']);
+    links.push(['admin_users.html', '⚙', 'Quản lý người dùng']);
+  }
   const active = current === 'team-detail.html' ? 'teams.html' : current === 'team-feed.html' ? 'my-team.html' : current === 'admin_user-detail.html' ? 'admin_users.html' : current;
   const shell = document.createElement('aside');
   shell.className = 'gc-team-nav';

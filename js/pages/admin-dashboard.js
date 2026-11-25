@@ -403,11 +403,15 @@ const AdminDashboard = (() => {
 
   // ---- INIT ----
   function init() {
-    // 1. Kiểm tra đăng nhập
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      window.location.href = "login.html";
-      return;
+    // 1. Kiểm tra đăng nhập & quyền ADMIN
+    if (typeof requireAdminAccess === "function") {
+      if (!requireAdminAccess()) return;
+    } else {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        window.location.replace("login.html");
+        return;
+      }
     }
 
     // 2. Gắn sự kiện các nút chọn số ngày
