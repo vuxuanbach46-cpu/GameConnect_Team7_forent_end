@@ -860,9 +860,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const queryRefreshToken = urlParams.get("refresh_token");
 
     if (queryAccessToken) {
+        localStorage.setItem("auth_provider", "google");
         localStorage.setItem("access_token", queryAccessToken);
-        if (queryRefreshToken) {
+        if (localStorage.getItem("remember_login") === "true" && queryRefreshToken) {
             localStorage.setItem("refresh_token", queryRefreshToken);
+        } else {
+            localStorage.removeItem("refresh_token");
         }
         window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -883,6 +886,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 3. MENU AVATAR (CHUYỂN LIGHT/DARK MODE + ĐĂNG XUẤT) ---
     const avatarBtn = document.getElementById("btn-avatar-menu");
     const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+    const changePasswordMenuItem = document.getElementById("open-change-password");
+    if (changePasswordMenuItem) {
+        changePasswordMenuItem.hidden = localStorage.getItem("auth_provider") === "google";
+    }
 
     if (avatarBtn && avatarDropdown) {
         avatarBtn.addEventListener("click", (e) => {
@@ -913,6 +920,76 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Popup đổi mật khẩu từ menu avatar
+    const passwordModal = document.getElementById("change-password-modal");
+    const passwordForm = document.getElementById("change-password-form");
+    const passwordMessage = document.getElementById("change-password-message");
+    const passwordSubmit = document.getElementById("change-password-submit");
+    const setPasswordModal = (open) => {
+        if (!passwordModal) return;
+        passwordModal.hidden = !open;
+        document.body.classList.toggle("gc-password-modal-open", open);
+        if (open) {
+            if (avatarDropdown) avatarDropdown.hidden = true;
+            window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+        } else {
+            passwordForm?.reset();
+            if (passwordMessage) {
+                passwordMessage.hidden = true;
+                passwordMessage.textContent = "";
+                passwordMessage.classList.remove("error");
+            }
+        }
+    };
+    document.getElementById("open-change-password")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setPasswordModal(true);
+    });
+    ["close-change-password", "cancel-change-password"].forEach((id) => {
+        document.getElementById(id)?.addEventListener("click", () => setPasswordModal(false));
+    });
+    passwordModal?.querySelectorAll("[data-close-password]").forEach((el) => {
+        el.addEventListener("click", () => setPasswordModal(false));
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && passwordModal && !passwordModal.hidden) setPasswordModal(false);
+    });
+    passwordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const oldPassword = document.getElementById("old-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const showPasswordMessage = (text, isError = false) => {
+            passwordMessage.textContent = text;
+            passwordMessage.classList.toggle("error", isError);
+            passwordMessage.hidden = false;
+        };
+        if (newPassword !== confirmPassword) {
+            showPasswordMessage("Mật khẩu xác nhận không khớp.", true);
+            return;
+        }
+        if (oldPassword === newPassword) {
+            showPasswordMessage("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+            return;
+        }
+
+        passwordSubmit.disabled = true;
+        passwordSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...';
+        try {
+            const response = await api.put("/auth/change-password", {
+                old_password: oldPassword,
+                new_password: newPassword,
+            });
+            showPasswordMessage(response?.message || "Đổi mật khẩu thành công.");
+            passwordForm.reset();
+        } catch (error) {
+            showPasswordMessage(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+        } finally {
+            passwordSubmit.disabled = false;
+            passwordSubmit.innerHTML = '<i class="fa-solid fa-key"></i> Cập nhật mật khẩu';
+        }
+    });
+
     // Tải tên & avatar thật vào menu Avatar
     loadHomeUserAvatar(token);
 
@@ -929,6 +1006,8 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.addEventListener("click", () => {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
+            localStorage.removeItem("remember_login");
+            localStorage.removeItem("auth_provider");
             localStorage.removeItem("user_role");
             window.location.href = "../index.html";
         });

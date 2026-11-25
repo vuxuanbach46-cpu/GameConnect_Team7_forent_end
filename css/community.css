@@ -217,6 +217,13 @@ body.community-page {
   font-size: 14px;
   font-weight: 800;
 }
+.avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
 .avatar-self {
   border: 1px solid rgba(255, 133, 59, .5);
   background: radial-gradient(circle at 30% 20%, #7a351b, #3e211a 72%);
@@ -224,6 +231,8 @@ body.community-page {
 }
 #post-content {
   display: block;
+  width: 100%;
+  box-sizing: border-box;
   min-height: 92px;
   resize: vertical;
   padding: 13px 14px;
@@ -323,7 +332,9 @@ body.community-page {
   cursor: pointer;
 }
 .cancel-edit:hover { color: var(--community-text); }
+.game-catalog-status { margin: 8px 0 0; color: var(--community-secondary); font-size: 12px; }
 .composer-error { margin: 12px 0 0; color: #f87171; font-size: 12px; }
+.post-image-error, .comment-load-error { color: #f87171; font-size: 13px; }
 
 .feed-toolbar {
   display: flex;
@@ -412,6 +423,7 @@ body.community-page {
   color: #ffad7b;
   font-size: 11px;
 }
+.active-game-filter[hidden] { display: none; }
 .active-game-filter button { border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
 .feed-list { display: grid; gap: 13px; }
 .post-card {
