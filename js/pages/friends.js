@@ -1470,11 +1470,99 @@ function initFriendsPage() {
     });
 
     document.addEventListener("click", (e) => {
-      if (!avatarDropdown.hidden && !avatarDropdown.contains(e.target) && e.target !== avatarBtn) {
+      if (!avatarDropdown.hidden && !avatarDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
         avatarDropdown.hidden = true;
       }
     });
   }
+
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("auth_provider");
+      window.location.href = "../index.html";
+    });
+  }
+
+  const changePasswordMenuItem = document.getElementById("open-change-password");
+  if (changePasswordMenuItem) {
+    changePasswordMenuItem.hidden = localStorage.getItem("auth_provider") === "google";
+  }
+  const passwordModal = document.getElementById("change-password-modal");
+  const passwordForm = document.getElementById("change-password-form");
+  const passwordMessage = document.getElementById("change-password-message");
+  const passwordSubmit = document.getElementById("change-password-submit");
+  const setPasswordModal = (open) => {
+    if (!passwordModal) return;
+    passwordModal.hidden = !open;
+    document.body.classList.toggle("gc-password-modal-open", open);
+    if (open) {
+      if (avatarDropdown) avatarDropdown.hidden = true;
+      window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+    } else {
+      passwordForm?.reset();
+      if (passwordMessage) {
+        passwordMessage.hidden = true;
+        passwordMessage.textContent = "";
+        passwordMessage.classList.remove("error");
+      }
+    }
+  };
+  changePasswordMenuItem?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setPasswordModal(true);
+  });
+  ["close-change-password", "cancel-change-password"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", () => setPasswordModal(false));
+  });
+  passwordModal?.querySelectorAll("[data-close-password]").forEach((el) => {
+    el.addEventListener("click", () => setPasswordModal(false));
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && passwordModal && !passwordModal.hidden) setPasswordModal(false);
+  });
+  passwordForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const oldPassword = document.getElementById("old-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    const showPasswordMessage = (text, isError = false) => {
+      if (!passwordMessage) return;
+      passwordMessage.textContent = text;
+      passwordMessage.classList.toggle("error", isError);
+      passwordMessage.hidden = false;
+    };
+    if (newPassword !== confirmPassword) {
+      showPasswordMessage("Mật khẩu xác nhận không khớp.", true);
+      return;
+    }
+    if (oldPassword === newPassword) {
+      showPasswordMessage("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+      return;
+    }
+    if (passwordSubmit) {
+      passwordSubmit.disabled = true;
+      passwordSubmit.textContent = "Đang cập nhật...";
+    }
+    try {
+      const response = await api.put("/auth/change-password", {
+        old_password: oldPassword,
+        new_password: newPassword
+      });
+      showPasswordMessage(response?.message || "Đổi mật khẩu thành công.");
+      passwordForm.reset();
+    } catch (error) {
+      showPasswordMessage(error?.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+    } finally {
+      if (passwordSubmit) {
+        passwordSubmit.disabled = false;
+        passwordSubmit.textContent = "Cập nhật mật khẩu";
+      }
+    }
+  });
 
   document.querySelectorAll(".fc-tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));

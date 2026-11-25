@@ -424,6 +424,262 @@ body.fc-dark-body #app-footer {
   color: var(--fc-orange);
 }
 
+.fc-avatar-profile-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.fc-avatar-profile-btn:hover {
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border);
+  color: #818cf8;
+}
+
+.fc-profile-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.fc-avatar-profile-btn svg {
+  margin-left: auto;
+  opacity: 0.65;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.fc-avatar-profile-btn:hover svg {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+.fc-avatar-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-danger);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-avatar-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.fc-avatar-password-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.fc-avatar-password-btn[hidden] {
+  display: none !important;
+}
+
+.fc-avatar-password-btn:hover {
+  color: var(--fc-text);
+  background: var(--fc-bg-surface);
+  border-color: var(--fc-border);
+}
+
+.gc-password-modal[hidden] {
+  display: none !important;
+}
+
+.gc-password-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+body.gc-password-modal-open {
+  overflow: hidden;
+}
+
+.gc-password-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(3, 5, 10, 0.72);
+  backdrop-filter: blur(5px);
+  cursor: default;
+}
+
+.gc-password-dialog {
+  position: relative;
+  width: min(450px, 100%);
+  padding: 25px;
+  border: 1px solid var(--fc-border-strong);
+  border-radius: 16px;
+  background: var(--fc-bg-card);
+  color: var(--fc-text);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.48);
+}
+
+.gc-password-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.gc-password-kicker {
+  color: var(--fc-orange);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.gc-password-heading h2 {
+  margin: 6px 0;
+  font-size: 22px;
+  letter-spacing: -0.4px;
+}
+
+.gc-password-heading p {
+  margin: 0;
+  color: var(--fc-text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.gc-password-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid var(--fc-border);
+  border-radius: 9px;
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+  cursor: pointer;
+}
+
+.gc-password-close:hover {
+  color: var(--fc-text);
+  border-color: var(--fc-border-strong);
+}
+
+.gc-password-form {
+  display: grid;
+  gap: 14px;
+}
+
+.gc-password-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.gc-password-form label span {
+  color: var(--fc-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gc-password-form input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--fc-border-strong);
+  border-radius: 8px;
+  outline: none;
+  background: var(--fc-bg-main);
+  color: var(--fc-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gc-password-form input:focus {
+  border-color: var(--fc-orange);
+}
+
+.gc-password-form label small {
+  margin-top: -2px;
+  color: var(--fc-text-muted);
+  font-size: 10px;
+}
+
+.gc-password-message {
+  margin: 0;
+  color: var(--fc-online);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gc-password-message.error {
+  color: var(--fc-danger);
+}
+
+.gc-password-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 3px;
+}
+
+.gc-password-actions button {
+  min-height: 39px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gc-password-cancel {
+  border: 1px solid var(--fc-border-strong);
+  background: var(--fc-bg-surface);
+  color: var(--fc-text-secondary);
+}
+
+.gc-password-submit {
+  border: 1px solid var(--fc-orange);
+  background: var(--fc-orange);
+  color: #ffffff;
+}
+
+.gc-password-submit:hover {
+  background: var(--fc-orange-hover);
+  border-color: var(--fc-orange-hover);
+}
+
+.gc-password-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
 .fc-status-dot {
   position: absolute;
   bottom: 0;

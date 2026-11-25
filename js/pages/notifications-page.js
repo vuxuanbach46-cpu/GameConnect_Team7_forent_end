@@ -318,4 +318,125 @@ const NotificationPage = (() => {
 
 document.addEventListener("DOMContentLoaded", () => {
   NotificationPage.init({ rootPath: "../" });
+
+  function applyNotifTheme(theme) {
+    const isLight = theme === "light";
+    document.body.classList.toggle("fc-light-mode", isLight);
+    const checkDark = document.getElementById("check-theme-dark");
+    const checkLight = document.getElementById("check-theme-light");
+    if (checkDark) checkDark.textContent = isLight ? "" : "✓";
+    if (checkLight) checkLight.textContent = isLight ? "✓" : "";
+    document.querySelectorAll(".fc-theme-option").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.setTheme === (isLight ? "light" : "dark"));
+    });
+    localStorage.setItem("gc_friends_theme", isLight ? "light" : "dark");
+  }
+
+  applyNotifTheme(localStorage.getItem("gc_friends_theme") || "dark");
+
+  const avatarBtn = document.getElementById("btn-avatar-menu");
+  const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+  if (avatarBtn && avatarDropdown) {
+    avatarBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      avatarDropdown.hidden = !avatarDropdown.hidden;
+    });
+    document.querySelectorAll(".fc-theme-option").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        applyNotifTheme(opt.dataset.setTheme);
+        avatarDropdown.hidden = true;
+      });
+    });
+    document.addEventListener("click", (e) => {
+      if (!avatarDropdown.hidden && !avatarDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        avatarDropdown.hidden = true;
+      }
+    });
+  }
+
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("auth_provider");
+    window.location.href = "../index.html";
+  });
+
+  const changePwdBtn = document.getElementById("open-change-password");
+  if (changePwdBtn) {
+    changePwdBtn.hidden = localStorage.getItem("auth_provider") === "google";
+  }
+  const pwdModal = document.getElementById("change-password-modal");
+  const pwdForm = document.getElementById("change-password-form");
+  const pwdMsg = document.getElementById("change-password-message");
+  const pwdSubmit = document.getElementById("change-password-submit");
+  const setPwdModal = (open) => {
+    if (!pwdModal) return;
+    pwdModal.hidden = !open;
+    document.body.classList.toggle("gc-password-modal-open", open);
+    if (open) {
+      if (avatarDropdown) avatarDropdown.hidden = true;
+      window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+    } else {
+      pwdForm?.reset();
+      if (pwdMsg) {
+        pwdMsg.hidden = true;
+        pwdMsg.textContent = "";
+        pwdMsg.classList.remove("error");
+      }
+    }
+  };
+  changePwdBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setPwdModal(true);
+  });
+  ["close-change-password", "cancel-change-password"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", () => setPwdModal(false));
+  });
+  pwdModal?.querySelectorAll("[data-close-password]").forEach((el) => {
+    el.addEventListener("click", () => setPwdModal(false));
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && pwdModal && !pwdModal.hidden) setPwdModal(false);
+  });
+  pwdForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const oldPassword = document.getElementById("old-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    const showMsg = (text, isError = false) => {
+      if (!pwdMsg) return;
+      pwdMsg.textContent = text;
+      pwdMsg.classList.toggle("error", isError);
+      pwdMsg.hidden = false;
+    };
+    if (newPassword !== confirmPassword) {
+      showMsg("Mật khẩu xác nhận không khớp.", true);
+      return;
+    }
+    if (oldPassword === newPassword) {
+      showMsg("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+      return;
+    }
+    if (pwdSubmit) {
+      pwdSubmit.disabled = true;
+      pwdSubmit.textContent = "Đang cập nhật...";
+    }
+    try {
+      const res = await api.put("/auth/change-password", {
+        old_password: oldPassword,
+        new_password: newPassword
+      });
+      showMsg(res?.message || "Đổi mật khẩu thành công.");
+      pwdForm.reset();
+    } catch (err) {
+      showMsg(err?.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+    } finally {
+      if (pwdSubmit) {
+        pwdSubmit.disabled = false;
+        pwdSubmit.textContent = "Cập nhật mật khẩu";
+      }
+    }
+  });
 });
