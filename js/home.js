@@ -193,6 +193,180 @@ async function loadOpenRoomsPreview() {
     }
 }
 
+function getHomeClubInitials(name) {
+    return String(name || "GC")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase() || "GC";
+}
+
+function resolveHomeClubLogoUrl(rawUrl) {
+    if (!rawUrl || typeof rawUrl !== "string" || !rawUrl.trim()) return "";
+    const trimmed = rawUrl.trim();
+    if (/^(https?:|data:|blob:)/i.test(trimmed)) return trimmed;
+    const apiBase = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+        ? CONFIG.API_BASE_URL.replace(/\/api\/?$/, "").replace(/\/$/, "")
+        : "http://127.0.0.1:8000";
+    return `${apiBase}/${trimmed.replace(/^\//, "")}`;
+}
+
+async function loadFeaturedClubsPreview() {
+    const countEl = document.getElementById("home-featured-clubs-count");
+    const listEl = document.getElementById("home-featured-clubs-list");
+    if (!listEl || typeof api === "undefined") return;
+
+    try {
+        const res = await api.get("/api/teams", { page: 1, page_size: 4 });
+        const data = res?.data !== undefined ? res.data : res;
+        const items = Array.isArray(data?.items)
+            ? data.items
+            : (Array.isArray(data) ? data : []);
+        const total = Number(data?.total ?? items.length) || 0;
+
+        if (countEl) {
+            countEl.textContent = `${total} CLB`;
+        }
+
+        if (items.length === 0) {
+            listEl.innerHTML = `<div class="home-room-empty">Hiện chưa có câu lạc bộ nào trong hệ thống — bấm bên dưới để tạo hoặc khám phá.</div>`;
+            return;
+        }
+
+        const badgePalettes = [
+            "bg-sky-500/20 text-sky-400",
+            "bg-orange-500/20 text-orange-400",
+            "bg-emerald-500/20 text-emerald-400",
+            "bg-purple-500/20 text-purple-400",
+        ];
+
+        listEl.innerHTML = items.slice(0, 4).map((team, idx) => {
+            const clubName = team.name || `Câu lạc bộ #${team.id}`;
+            const gameName = team.game_name || team.game?.name || "";
+            const memberCount = Number(team.total_members ?? team.member_count ?? team.members_count ?? 1);
+            const maxMembers = Number(team.max_members) || 0;
+            const memberText = maxMembers > 0 ? `${memberCount}/${maxMembers}` : `${memberCount}`;
+            const logoUrl = resolveHomeClubLogoUrl(team.logo_url || team.logo);
+            const initials = escapeHomeHtml(getHomeClubInitials(clubName));
+            const palette = badgePalettes[idx % badgePalettes.length];
+
+            const avatarHtml = logoUrl
+                ? `<img src="${escapeHomeHtml(logoUrl)}" alt="${escapeHomeHtml(clubName)}" class="w-7 h-7 rounded object-cover flex-shrink-0 border border-[#2e313e]" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded ${palette} flex items-center justify-center font-bold text-xs flex-shrink-0\\'>${initials}</div>'">`
+                : `<div class="w-7 h-7 rounded ${palette} flex items-center justify-center font-bold text-xs flex-shrink-0">${initials}</div>`;
+
+            return `
+                <a href="clubs.html" class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        ${avatarHtml}
+                        <div class="min-w-0 flex flex-col">
+                            <span class="text-xs font-bold text-white truncate">${escapeHomeHtml(clubName)}</span>
+                            ${gameName ? `<span class="text-[10.5px] text-zinc-400 truncate">${escapeHomeHtml(gameName)}</span>` : ""}
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-zinc-400 flex-shrink-0" title="Số lượng thành viên"><i class="fa-solid fa-users mr-1"></i>${escapeHomeHtml(memberText)}</span>
+                </a>
+            `;
+        }).join("");
+    } catch (_) {
+        if (countEl) countEl.textContent = "0 CLB";
+        listEl.innerHTML = `<div class="home-room-empty">Chưa tải được danh sách câu lạc bộ. Bấm bên dưới để mở trang Câu lạc bộ.</div>`;
+    }
+}
+
+function formatHomePostTimeAgo(isoStr) {
+    if (!isoStr) return "Vừa xong";
+    const dt = new Date(isoStr);
+    if (Number.isNaN(dt.getTime())) return "Vừa xong";
+    const diffMin = Math.max(1, Math.floor((Date.now() - dt.getTime()) / 60000));
+    if (diffMin < 60) return `${diffMin} phút trước`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} ngày trước`;
+}
+
+async function loadLatestPostsPreview() {
+    const listEl = document.getElementById("home-latest-posts-list");
+    if (!listEl || typeof api === "undefined") return;
+
+    try {
+        const res = await api.get("/posts", { skip: 0, limit: 3 });
+        const rawPosts = Array.isArray(res?.data)
+            ? res.data
+            : (Array.isArray(res?.items)
+                ? res.items
+                : (Array.isArray(res?.posts)
+                    ? res.posts
+                    : (Array.isArray(res) ? res : [])));
+
+        if (rawPosts.length === 0) {
+            listEl.innerHTML = `<div class="home-room-empty">Chưa có bài đăng nào trong cộng đồng — bấm "Xem cộng đồng →" để chia sẻ bài viết đầu tiên.</div>`;
+            return;
+        }
+
+        const sortedPosts = [...rawPosts].sort((a, b) => {
+            const ta = new Date(a.created_at || a.createdAt || 0).getTime() || 0;
+            const tb = new Date(b.created_at || b.createdAt || 0).getTime() || 0;
+            return tb - ta;
+        });
+
+        listEl.innerHTML = sortedPosts.slice(0, 3).map((post) => {
+            const postId = post.id ?? post.post_id;
+            const detailHref = postId != null
+                ? `community-detail.html?id=${encodeURIComponent(postId)}`
+                : "community.html";
+            const authorName = post.author_name || post.author || post.user_name || post.username || "Game thủ";
+            const username = post.author_username || post.username || "";
+            const handle = username ? `@${String(username).replace(/^@/, "")}` : "";
+            const initials = escapeHomeHtml(getHomeClubInitials(authorName));
+            const rawAvatar = post.author_avatar || post.avatar || "";
+            const avatarUrl = rawAvatar ? resolveHomeAvatarUrl(rawAvatar, username || authorName) : "";
+            const timeLabel = formatHomePostTimeAgo(post.created_at || post.createdAt || post.created);
+            const content = post.content || post.body || post.title || "";
+            const likesCount = Number(post.likes ?? post.like_count ?? 0);
+            const commentsCount = Number(post.comments ?? post.comment_count ?? 0);
+            const isLiked = Boolean(post.liked_by_current_user ?? post.is_liked);
+
+            const avatarInner = avatarUrl
+                ? `<img src="${escapeHomeHtml(avatarUrl)}" alt="${escapeHomeHtml(authorName)}" class="w-full h-full rounded-[7px] object-cover" onerror="this.parentElement.textContent='${initials}'">`
+                : initials;
+
+            return `
+                <div class="home-post-card">
+                    <div class="home-post-avatar overflow-hidden">${avatarInner}</div>
+                    <div class="home-post-content">
+                        <div class="home-post-meta">
+                            <strong class="home-post-author">${escapeHomeHtml(authorName)}</strong>
+                            ${handle ? `<span class="home-post-time">${escapeHomeHtml(handle)}</span>` : ""}
+                            <span class="home-post-time">· ${escapeHomeHtml(timeLabel)}</span>
+                        </div>
+                        <p class="home-post-text">${escapeHomeHtml(content)}</p>
+                        <div class="home-post-actions">
+                            <a href="${detailHref}" class="home-post-action-link">
+                                <i class="${isLiked ? "fa-solid text-orange-500" : "fa-regular"} fa-heart"></i>
+                                <span>${likesCount}</span>
+                            </a>
+                            <a href="${detailHref}#comments" class="home-post-action-link">
+                                <i class="fa-regular fa-comment"></i>
+                                <span>${commentsCount} thảo luận</span>
+                            </a>
+                            <a href="${detailHref}" class="home-post-action-link">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                <span>Xem chi tiết</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    } catch (_) {
+        listEl.innerHTML = `<div class="home-room-empty">Chưa tải được bài đăng mới nhất. Bấm "Xem cộng đồng →" để xem tất cả bài viết.</div>`;
+    }
+}
+
 // =========================================================================
 // KHU VỰC KẾT NỐI & LỜI MỜI NHANH TRÊN TRANG HOME (100% DỮ LIỆU THẬT TỪ API)
 // =========================================================================
