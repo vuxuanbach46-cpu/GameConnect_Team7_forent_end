@@ -73,3 +73,16 @@ function requireAdminAccess() {
 
   return true;
 }
+
+// Tự động ẩn/xóa các mục menu Admin trên mọi trang nếu không phải ADMIN
+document.addEventListener("DOMContentLoaded", () => {
+  const adminItems = document.querySelectorAll(".admin-nav-item");
+  if (!adminItems.length) return;
+  if (isCurrentUserAdmin()) {
+    adminItems.forEach((el) => {
+      el.style.display = "";
+    });
+  } else {
+    adminItems.forEach((el) => el.remove());
+  }
+});
