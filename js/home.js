@@ -193,6 +193,180 @@ async function loadOpenRoomsPreview() {
     }
 }
 
+function getHomeClubInitials(name) {
+    return String(name || "GC")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase() || "GC";
+}
+
+function resolveHomeClubLogoUrl(rawUrl) {
+    if (!rawUrl || typeof rawUrl !== "string" || !rawUrl.trim()) return "";
+    const trimmed = rawUrl.trim();
+    if (/^(https?:|data:|blob:)/i.test(trimmed)) return trimmed;
+    const apiBase = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+        ? CONFIG.API_BASE_URL.replace(/\/api\/?$/, "").replace(/\/$/, "")
+        : "http://127.0.0.1:8000";
+    return `${apiBase}/${trimmed.replace(/^\//, "")}`;
+}
+
+async function loadFeaturedClubsPreview() {
+    const countEl = document.getElementById("home-featured-clubs-count");
+    const listEl = document.getElementById("home-featured-clubs-list");
+    if (!listEl || typeof api === "undefined") return;
+
+    try {
+        const res = await api.get("/api/teams", { page: 1, page_size: 4 });
+        const data = res?.data !== undefined ? res.data : res;
+        const items = Array.isArray(data?.items)
+            ? data.items
+            : (Array.isArray(data) ? data : []);
+        const total = Number(data?.total ?? items.length) || 0;
+
+        if (countEl) {
+            countEl.textContent = `${total} CLB`;
+        }
+
+        if (items.length === 0) {
+            listEl.innerHTML = `<div class="home-room-empty">Hiện chưa có câu lạc bộ nào trong hệ thống — bấm bên dưới để tạo hoặc khám phá.</div>`;
+            return;
+        }
+
+        const badgePalettes = [
+            "bg-sky-500/20 text-sky-400",
+            "bg-orange-500/20 text-orange-400",
+            "bg-emerald-500/20 text-emerald-400",
+            "bg-purple-500/20 text-purple-400",
+        ];
+
+        listEl.innerHTML = items.slice(0, 4).map((team, idx) => {
+            const clubName = team.name || `Câu lạc bộ #${team.id}`;
+            const gameName = team.game_name || team.game?.name || "";
+            const memberCount = Number(team.total_members ?? team.member_count ?? team.members_count ?? 1);
+            const maxMembers = Number(team.max_members) || 0;
+            const memberText = maxMembers > 0 ? `${memberCount}/${maxMembers}` : `${memberCount}`;
+            const logoUrl = resolveHomeClubLogoUrl(team.logo_url || team.logo);
+            const initials = escapeHomeHtml(getHomeClubInitials(clubName));
+            const palette = badgePalettes[idx % badgePalettes.length];
+
+            const avatarHtml = logoUrl
+                ? `<img src="${escapeHomeHtml(logoUrl)}" alt="${escapeHomeHtml(clubName)}" class="w-7 h-7 rounded object-cover flex-shrink-0 border border-[#2e313e]" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded ${palette} flex items-center justify-center font-bold text-xs flex-shrink-0\\'>${initials}</div>'">`
+                : `<div class="w-7 h-7 rounded ${palette} flex items-center justify-center font-bold text-xs flex-shrink-0">${initials}</div>`;
+
+            return `
+                <a href="clubs.html" class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        ${avatarHtml}
+                        <div class="min-w-0 flex flex-col">
+                            <span class="text-xs font-bold text-white truncate">${escapeHomeHtml(clubName)}</span>
+                            ${gameName ? `<span class="text-[10.5px] text-zinc-400 truncate">${escapeHomeHtml(gameName)}</span>` : ""}
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-zinc-400 flex-shrink-0" title="Số lượng thành viên"><i class="fa-solid fa-users mr-1"></i>${escapeHomeHtml(memberText)}</span>
+                </a>
+            `;
+        }).join("");
+    } catch (_) {
+        if (countEl) countEl.textContent = "0 CLB";
+        listEl.innerHTML = `<div class="home-room-empty">Chưa tải được danh sách câu lạc bộ. Bấm bên dưới để mở trang Câu lạc bộ.</div>`;
+    }
+}
+
+function formatHomePostTimeAgo(isoStr) {
+    if (!isoStr) return "Vừa xong";
+    const dt = new Date(isoStr);
+    if (Number.isNaN(dt.getTime())) return "Vừa xong";
+    const diffMin = Math.max(1, Math.floor((Date.now() - dt.getTime()) / 60000));
+    if (diffMin < 60) return `${diffMin} phút trước`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} ngày trước`;
+}
+
+async function loadLatestPostsPreview() {
+    const listEl = document.getElementById("home-latest-posts-list");
+    if (!listEl || typeof api === "undefined") return;
+
+    try {
+        const res = await api.get("/posts", { skip: 0, limit: 3 });
+        const rawPosts = Array.isArray(res?.data)
+            ? res.data
+            : (Array.isArray(res?.items)
+                ? res.items
+                : (Array.isArray(res?.posts)
+                    ? res.posts
+                    : (Array.isArray(res) ? res : [])));
+
+        if (rawPosts.length === 0) {
+            listEl.innerHTML = `<div class="home-room-empty">Chưa có bài đăng nào trong cộng đồng — bấm "Xem cộng đồng →" để chia sẻ bài viết đầu tiên.</div>`;
+            return;
+        }
+
+        const sortedPosts = [...rawPosts].sort((a, b) => {
+            const ta = new Date(a.created_at || a.createdAt || 0).getTime() || 0;
+            const tb = new Date(b.created_at || b.createdAt || 0).getTime() || 0;
+            return tb - ta;
+        });
+
+        listEl.innerHTML = sortedPosts.slice(0, 3).map((post) => {
+            const postId = post.id ?? post.post_id;
+            const detailHref = postId != null
+                ? `community-detail.html?id=${encodeURIComponent(postId)}`
+                : "community.html";
+            const authorName = post.author_name || post.author || post.user_name || post.username || "Game thủ";
+            const username = post.author_username || post.username || "";
+            const handle = username ? `@${String(username).replace(/^@/, "")}` : "";
+            const initials = escapeHomeHtml(getHomeClubInitials(authorName));
+            const rawAvatar = post.author_avatar || post.avatar || "";
+            const avatarUrl = rawAvatar ? resolveHomeAvatarUrl(rawAvatar, username || authorName) : "";
+            const timeLabel = formatHomePostTimeAgo(post.created_at || post.createdAt || post.created);
+            const content = post.content || post.body || post.title || "";
+            const likesCount = Number(post.likes ?? post.like_count ?? 0);
+            const commentsCount = Number(post.comments ?? post.comment_count ?? 0);
+            const isLiked = Boolean(post.liked_by_current_user ?? post.is_liked);
+
+            const avatarInner = avatarUrl
+                ? `<img src="${escapeHomeHtml(avatarUrl)}" alt="${escapeHomeHtml(authorName)}" class="w-full h-full rounded-[7px] object-cover" onerror="this.parentElement.textContent='${initials}'">`
+                : initials;
+
+            return `
+                <div class="home-post-card">
+                    <div class="home-post-avatar overflow-hidden">${avatarInner}</div>
+                    <div class="home-post-content">
+                        <div class="home-post-meta">
+                            <strong class="home-post-author">${escapeHomeHtml(authorName)}</strong>
+                            ${handle ? `<span class="home-post-time">${escapeHomeHtml(handle)}</span>` : ""}
+                            <span class="home-post-time">· ${escapeHomeHtml(timeLabel)}</span>
+                        </div>
+                        <p class="home-post-text">${escapeHomeHtml(content)}</p>
+                        <div class="home-post-actions">
+                            <a href="${detailHref}" class="home-post-action-link">
+                                <i class="${isLiked ? "fa-solid text-orange-500" : "fa-regular"} fa-heart"></i>
+                                <span>${likesCount}</span>
+                            </a>
+                            <a href="${detailHref}#comments" class="home-post-action-link">
+                                <i class="fa-regular fa-comment"></i>
+                                <span>${commentsCount} thảo luận</span>
+                            </a>
+                            <a href="${detailHref}" class="home-post-action-link">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                <span>Xem chi tiết</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    } catch (_) {
+        listEl.innerHTML = `<div class="home-room-empty">Chưa tải được bài đăng mới nhất. Bấm "Xem cộng đồng →" để xem tất cả bài viết.</div>`;
+    }
+}
+
 // =========================================================================
 // KHU VỰC KẾT NỐI & LỜI MỜI NHANH TRÊN TRANG HOME (100% DỮ LIỆU THẬT TỪ API)
 // =========================================================================
@@ -860,9 +1034,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const queryRefreshToken = urlParams.get("refresh_token");
 
     if (queryAccessToken) {
+        localStorage.setItem("auth_provider", "google");
         localStorage.setItem("access_token", queryAccessToken);
-        if (queryRefreshToken) {
+        if (localStorage.getItem("remember_login") === "true" && queryRefreshToken) {
             localStorage.setItem("refresh_token", queryRefreshToken);
+        } else {
+            localStorage.removeItem("refresh_token");
         }
         window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -883,6 +1060,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 3. MENU AVATAR (CHUYỂN LIGHT/DARK MODE + ĐĂNG XUẤT) ---
     const avatarBtn = document.getElementById("btn-avatar-menu");
     const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+    const changePasswordMenuItem = document.getElementById("open-change-password");
+    if (changePasswordMenuItem) {
+        changePasswordMenuItem.hidden = localStorage.getItem("auth_provider") === "google";
+    }
 
     if (avatarBtn && avatarDropdown) {
         avatarBtn.addEventListener("click", (e) => {
@@ -913,15 +1094,67 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Tải tên & avatar thật vào menu Avatar
-    loadHomeUserAvatar(token);
+    // Popup đổi mật khẩu từ menu avatar
+    const passwordModal = document.getElementById("change-password-modal");
+    const passwordForm = document.getElementById("change-password-form");
+    const passwordMessage = document.getElementById("change-password-message");
+    const passwordSubmit = document.getElementById("change-password-submit");
+    const setPasswordModal = (open) => {
+        if (!passwordModal) return;
+        passwordModal.hidden = !open;
+        document.body.classList.toggle("gc-password-modal-open", open);
+        if (open) {
+            if (avatarDropdown) avatarDropdown.hidden = true;
+            window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+        } else {
+            passwordForm?.reset();
+            if (passwordMessage) {
+                passwordMessage.hidden = true;
+                passwordMessage.textContent = "";
+                passwordMessage.classList.remove("error");
+            }
+        }
+    };
+    document.getElementById("open-change-password")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setPasswordModal(true);
+    });
+    ["close-change-password", "cancel-change-password"].forEach((id) => {
+        document.getElementById(id)?.addEventListener("click", () => setPasswordModal(false));
+    });
+    passwordModal?.querySelectorAll("[data-close-password]").forEach((el) => {
+        el.addEventListener("click", () => setPasswordModal(false));
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && passwordModal && !passwordModal.hidden) setPasswordModal(false);
+    });
+    passwordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const oldPassword = document.getElementById("old-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const showPasswordMessage = (text, isError = false) => {
+            passwordMessage.textContent = text;
+            passwordMessage.classList.toggle("error", isError);
+            passwordMessage.hidden = false;
+        };
+        if (newPassword !== confirmPassword) {
+            showPasswordMessage("Mật khẩu xác nhận không khớp.", true);
+            return;
+        }
+        if (oldPassword === newPassword) {
+            showPasswordMessage("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+            return;
+        }
 
-    // Tải danh sách phòng đang mở thật cho khối "Tổ đội đang tìm người"
-    loadOpenRoomsPreview();
-
-    // Khởi tạo & tải dữ liệu thật cho 5 tab Topbar + bảng người chơi/lời mời nhanh
-    initHomeSocialControls();
-    loadHomeSocialData();
+    // Hiển thị các mục điều hướng Admin nếu là ADMIN, ẩn/xóa nếu là USER thường
+    const isAdmin = String(userRole || "").toUpperCase() === "ADMIN";
+    const adminNavItems = document.querySelectorAll(".admin-nav-item");
+    if (isAdmin) {
+        adminNavItems.forEach(el => el.style.display = "");
+    } else {
+        adminNavItems.forEach(el => el.remove());
+    }
 
     // --- 4. XỬ LÝ ĐĂNG XUẤT (TRONG MENU AVATAR) ---
     const logoutBtn = document.getElementById("logout-btn");
@@ -929,6 +1162,8 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.addEventListener("click", () => {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
+            localStorage.removeItem("remember_login");
+            localStorage.removeItem("auth_provider");
             localStorage.removeItem("user_role");
             window.location.href = "../index.html";
         });

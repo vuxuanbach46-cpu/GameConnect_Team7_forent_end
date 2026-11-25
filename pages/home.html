@@ -36,27 +36,16 @@
 
             <div class="fc-nav-divider"></div>
 
-            <!-- Tìm kiếm nhanh -->
-            <a href="friends.html?tab=suggestions" class="fc-nav-item" title="Tìm kiếm người chơi">
-                <span class="fc-nav-icon">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </span>
-                <span class="fc-nav-label">Tìm kiếm</span>
-            </a>
-
             <!-- Kênh Esport -->
-            <button type="button" class="fc-nav-item" title="Kênh Esport">
+            <a href="team-posts.html" class="fc-nav-item" title="Kênh Esport / Tuyển đồng đội">
                 <span class="fc-nav-icon">
                     <span class="fc-game-pill">GC</span>
                 </span>
                 <span class="fc-nav-label">Kênh Esport</span>
-            </button>
+            </a>
 
             <!-- Dashboard Thống kê (Admin) -->
-            <a href="admin-dashboard.html" class="fc-nav-item admin-nav-item" title="Dashboard Thống kê">
+            <a href="admin-dashboard.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Dashboard Thống kê">
                 <span class="fc-nav-icon" style="color: #f59e0b;">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -68,7 +57,7 @@
             </a>
 
             <!-- Quản lý Báo cáo (Admin) -->
-            <a href="admin-reports.html" class="fc-nav-item admin-nav-item" title="Quản lý Báo cáo">
+            <a href="admin-reports.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Quản lý Báo cáo">
                 <span class="fc-nav-icon" style="color: #ef4444;">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -138,16 +127,14 @@
                 <span class="fc-nav-label">Bạn bè & Kết nối</span>
             </a>
 
-            <!-- Tạo phòng đội -->
-            <a href="quick-match.html?view=lobby" class="fc-nav-item" title="Tạo phòng đội">
+            <!-- Câu lạc bộ -->
+            <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ">
                 <span class="fc-nav-icon">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path>
                     </svg>
                 </span>
-                <span class="fc-nav-label">Tạo phòng đội</span>
+                <span class="fc-nav-label">Câu lạc bộ</span>
             </a>
 
             <!-- Tìm phòng -->
@@ -182,31 +169,11 @@
     <!-- ================================================================= -->
     <div class="home-main-shell flex-1 flex flex-col min-w-0 bg-[#0f1015]">
 
-        <!-- Topbar Sảnh chính + 5 Tab Bạn bè (đồng bộ số đếm thật & chuyển hướng sang friends.html) -->
+        <!-- Topbar Sảnh chính -->
         <header class="home-topbar">
-            <nav class="home-top-tabs" aria-label="Điều hướng nhanh Hub và Bạn bè">
+            <nav class="home-top-tabs" aria-label="Điều hướng Sảnh chính">
                 <a href="home.html" class="home-top-tab active">
                     <span>SẢNH CHÍNH HUB</span>
-                </a>
-                <a href="friends.html?tab=friends" class="home-top-tab">
-                    <span>BẠN BÈ</span>
-                    <span class="home-top-tab-count" id="home-count-friends">0</span>
-                </a>
-                <a href="friends.html?tab=received" class="home-top-tab">
-                    <span>LỜI MỜI ĐẾN</span>
-                    <span class="home-top-tab-count" id="home-count-received">0</span>
-                </a>
-                <a href="friends.html?tab=sent" class="home-top-tab" id="home-top-tab-sent">
-                    <span>ĐÃ GỬI</span>
-                    <span class="home-top-tab-count" id="home-count-sent">0</span>
-                </a>
-                <a href="friends.html?tab=suggestions" class="home-top-tab">
-                    <span>GỢI Ý KẾT BẠN</span>
-                    <span class="home-top-tab-count" id="home-count-suggestions">0</span>
-                </a>
-                <a href="friends.html?tab=blocked" class="home-top-tab">
-                    <span>DANH SÁCH CHẶN</span>
-                    <span class="home-top-tab-count" id="home-count-blocked">0</span>
                 </a>
             </nav>
         </header>
@@ -325,8 +292,8 @@
                             </div>
                         </a>
 
-                        <!-- Card 2: Tuyển đồng đội (Team Posts) -->
-                        <a href="team-posts.html" class="home-feature-card is-emerald group">
+                        <!-- Card 2: Tuyển đồng đội (Liên kết sang Tìm đội nhanh) -->
+                        <a href="quick-match.html" class="home-feature-card is-emerald group">
                             <div class="home-feature-top">
                                 <div class="home-feature-icon-box">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -422,29 +389,16 @@
                         </a>
                     </div>
 
-                    <!-- Box: Câu lạc bộ (Clubs) -->
+                    <!-- Box: Câu lạc bộ nổi bật (Dữ liệu thật từ DB -> link sang clubs.html) -->
                     <div class="bg-[#15161d] border border-[#242631] rounded-xl p-4 space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-white">Câu lạc bộ nổi bật</span>
-                            <span class="px-2 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px] font-bold">344</span>
+                            <span id="home-featured-clubs-count" class="px-2 py-0.5 rounded bg-[#242631] text-zinc-400 text-[10px] font-bold">0 CLB</span>
                         </div>
-                        <div class="space-y-2">
-                            <a href="community.html" class="flex items-center justify-between p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">VN</div>
-                                    <span class="text-xs font-bold text-white">Cộng đồng Valorant VN</span>
-                                </div>
-                                <span class="text-[11px] text-zinc-400"><i class="fa-solid fa-users mr-1"></i> 66,326</span>
-                            </a>
-                            <a href="community.html" class="flex items-center justify-between p-2.5 rounded-lg bg-[#1b1d26] hover:bg-[#222530] transition">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs">CS</div>
-                                    <span class="text-xs font-bold text-white">CS2 | Clan Hà Nội</span>
-                                </div>
-                                <span class="text-[11px] text-zinc-400"><i class="fa-solid fa-users mr-1"></i> 54,842</span>
-                            </a>
+                        <div id="home-featured-clubs-list" class="space-y-2">
+                            <div class="home-room-empty">Đang tải danh sách câu lạc bộ...</div>
                         </div>
-                        <a href="community.html" class="block w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
+                        <a href="clubs.html" class="block w-full py-2 text-center text-xs font-bold uppercase tracking-wider bg-[#1e2029] hover:bg-[#282b37] border border-[#2e313e] rounded-lg text-zinc-200 transition">
                             KHÁM PHÁ CÁC CÂU LẠC BỘ
                         </a>
                     </div>
@@ -452,7 +406,7 @@
 
             </div>
 
-            <!-- HÀNG DƯỚI CÙNG: BÀI ĐĂNG MỚI NHẤT -->
+            <!-- HÀNG DƯỚI CÙNG: BÀI ĐĂNG MỚI NHẤT (Dữ liệu thật từ DB) -->
             <section class="pt-1">
                 <div class="space-y-2.5">
                     <div class="flex items-center justify-between">
@@ -461,32 +415,8 @@
                             Xem cộng đồng →
                         </a>
                     </div>
-                    <div class="home-post-card">
-                        <div class="home-post-avatar">GC</div>
-                        <div class="home-post-content">
-                            <div class="home-post-meta">
-                                <strong class="home-post-author">GameConnect Official</strong>
-                                <i class="fa-solid fa-circle-check text-orange-500 text-[11px]" title="Tài khoản chính thức"></i>
-                                <span class="home-post-time">· 2 giờ trước</span>
-                            </div>
-                            <p class="home-post-text">
-                                🔥 Chào mừng bản cập nhật hệ thống Matchmaking mới! Giờ đây bạn có thể tìm kiếm đồng đội theo bộ lọc Rank, Mic và Tỉ lệ thắng theo thời gian thực. Bắt đầu ghép đội ngay hôm nay để nhận huy hiệu độc quyền!
-                            </p>
-                            <div class="home-post-actions">
-                                <a href="community.html" class="home-post-action-link">
-                                    <i class="fa-regular fa-heart"></i>
-                                    <span>142</span>
-                                </a>
-                                <a href="community.html" class="home-post-action-link">
-                                    <i class="fa-regular fa-comment"></i>
-                                    <span>38 thảo luận</span>
-                                </a>
-                                <a href="community.html" class="home-post-action-link">
-                                    <i class="fa-solid fa-share-nodes"></i>
-                                    <span>Chia sẻ</span>
-                                </a>
-                            </div>
-                        </div>
+                    <div id="home-latest-posts-list" class="space-y-3">
+                        <div class="home-room-empty">Đang tải bài đăng mới nhất...</div>
                     </div>
                 </div>
             </section>
@@ -547,6 +477,12 @@
                     </svg>
                     <span>Đăng xuất</span>
                 </button>
+                <button type="button" id="open-change-password" class="fc-avatar-password-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>Đổi mật khẩu</span>
+                </button>
             </div>
         </div>
 
@@ -554,37 +490,30 @@
 
         <!-- CHUÔNG THÔNG BÁO (Tài nguyên chung) -->
         <div id="gc-notif-bell"></div>
-
-        <a href="friends.html?tab=received" class="fc-right-icon-btn" title="Lời mời kết bạn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="8.5" cy="7" r="4"></circle>
-                <line x1="20" y1="8" x2="20" y2="14"></line>
-                <line x1="23" y1="11" x2="17" y2="11"></line>
-            </svg>
-        </a>
-
-        <div class="fc-party-box">
-            <a href="friends.html" class="fc-right-icon-btn" title="Danh sách bạn bè">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-            </a>
-        </div>
-
-        <a href="quick-match.html?view=lobby" class="fc-right-icon-btn fc-right-bottom-btn" title="Tạo phòng đội nhanh">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-        </a>
+        <a href="friends.html" title="Thêm bạn bè" class="hover:text-white transition"><i class="fa-solid fa-user-plus"></i></a>
+        <a href="friends.html" title="Danh sách bạn bè" class="hover:text-orange-500 transition"><i class="fa-solid fa-users"></i></a>
+        <button title="Cài đặt" class="mt-auto hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
     </aside>
 
     <!-- Khung thông báo nhanh góc dưới -->
     <div id="fc-toast-container" class="fc-toast-container"></div>
+
+    <div id="change-password-modal" class="gc-password-modal" hidden>
+        <button type="button" class="gc-password-backdrop" data-close-password aria-label="Đóng popup"></button>
+        <section class="gc-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+            <div class="gc-password-heading">
+                <div><span class="gc-password-kicker">ACCOUNT SECURITY</span><h2 id="change-password-title">Đổi mật khẩu</h2><p>Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p></div>
+                <button type="button" id="close-change-password" class="gc-password-close" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="change-password-form" class="gc-password-form">
+                <label><span>Mật khẩu hiện tại</span><input id="old-password" type="password" autocomplete="current-password" maxlength="128" required></label>
+                <label><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required><small>Tối thiểu 6 ký tự.</small></label>
+                <label><span>Xác nhận mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required></label>
+                <p id="change-password-message" class="gc-password-message" role="status" hidden></p>
+                <div class="gc-password-actions"><button type="button" id="cancel-change-password" class="gc-password-cancel">Huỷ</button><button type="submit" id="change-password-submit" class="gc-password-submit"><i class="fa-solid fa-key"></i> Cập nhật mật khẩu</button></div>
+            </form>
+        </section>
+    </div>
 
     <!-- SCRIPT BẢO VỆ ROUTE & HIỂN THỊ THÔNG TIN USER -->
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>

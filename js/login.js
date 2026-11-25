@@ -57,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePwdBtn = document.getElementById("toggle-pwd");
   const passwordInput = document.getElementById("password");
   const googleBtn = document.getElementById("google-login-btn");
+  const rememberLogin = document.getElementById("remember-login");
+  if (rememberLogin) rememberLogin.checked = localStorage.getItem("remember_login") === "true";
 
   // Ẩn/hiện mật khẩu
   if (togglePwdBtn && passwordInput) {
@@ -106,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const accessToken = responseData.access_token;
         const refreshToken = responseData.refresh_token;
         let role = responseData.role;
+        const shouldRemember = Boolean(rememberLogin?.checked);
+        localStorage.setItem("auth_provider", "password");
 
         if (accessToken) {
           localStorage.setItem("access_token", accessToken);
@@ -118,8 +122,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        if (refreshToken) {
+        if (shouldRemember && refreshToken) {
           localStorage.setItem("refresh_token", refreshToken);
+          localStorage.setItem("remember_login", "true");
+        } else {
+          localStorage.removeItem("refresh_token");
+          localStorage.setItem("remember_login", "false");
         }
 
         if (role) {
@@ -146,6 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Nút Google OAuth Login
   if (googleBtn) {
     googleBtn.addEventListener("click", () => {
+      localStorage.setItem("remember_login", String(Boolean(rememberLogin?.checked)));
+      localStorage.setItem("auth_provider", "google_pending");
       const baseUrl = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
         ? CONFIG.API_BASE_URL
         : "http://127.0.0.1:8000";

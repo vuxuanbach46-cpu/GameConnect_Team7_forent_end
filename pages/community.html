@@ -23,7 +23,7 @@
   <div class="fc-app-shell community-app-shell">
     <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
       <div class="fc-bar-group">
-        <a href="../index.html" class="fc-brand-link" title="GameConnect - Trang chủ">
+        <a href="home.html" class="fc-brand-link" title="GameConnect - Sảnh chính">
           <div class="fc-brand-logo" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="6" y1="12" x2="10" y2="12"></line>
@@ -42,8 +42,9 @@
         <a class="fc-nav-item" id="btn-focus-search" href="friends.html" title="Tìm kiếm người chơi">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
             </svg>
           </span><span class="fc-nav-label">Tìm kiếm</span>
         </a>
@@ -97,10 +98,8 @@
         </a>
         <a class="fc-nav-item" href="quick-match.html?view=lobby" title="Tạo phòng đội">
           <span class="fc-nav-icon" aria-hidden="true">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path>
             </svg>
           </span><span class="fc-nav-label">Tạo phòng đội</span>
         </a>
@@ -128,7 +127,7 @@
 
     <main class="fc-main-area">
       <header class="fc-top-tabbar">
-        <a href="../index.html" class="fc-tab-back-home">
+        <a href="home.html" class="fc-tab-back-home">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
@@ -337,6 +336,23 @@
         </svg>
       </a>
     </aside>
+  </div>
+
+  <div id="change-password-modal" class="gc-password-modal" hidden>
+    <button type="button" class="gc-password-backdrop" data-close-password aria-label="Đóng popup"></button>
+    <section class="gc-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+      <div class="gc-password-heading">
+        <div><span class="gc-password-kicker">ACCOUNT SECURITY</span><h2 id="change-password-title">Đổi mật khẩu</h2><p>Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p></div>
+        <button type="button" id="close-change-password" class="gc-password-close" aria-label="Đóng">✕</button>
+      </div>
+      <form id="change-password-form" class="gc-password-form">
+        <label><span>Mật khẩu hiện tại</span><input id="old-password" type="password" autocomplete="current-password" maxlength="128" required></label>
+        <label><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required><small>Tối thiểu 6 ký tự.</small></label>
+        <label><span>Xác nhận mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required></label>
+        <p id="change-password-message" class="gc-password-message" role="status" hidden></p>
+        <div class="gc-password-actions"><button type="button" id="cancel-change-password" class="gc-password-cancel">Huỷ</button><button type="submit" id="change-password-submit" class="gc-password-submit">Cập nhật mật khẩu</button></div>
+      </form>
+    </section>
   </div>
 
   <footer id="app-footer"></footer>
