@@ -1157,10 +1157,6 @@ body.community-page {
     z-index: 60;
   }
 
-  .community-app-shell .fc-right-bar > .fc-right-icon-btn {
-    display: none;
-  }
-
   .community-app-shell .fc-top-tabbar {
     height: 56px;
     justify-content: flex-end;

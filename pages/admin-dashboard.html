@@ -76,7 +76,7 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
           </span>
-          <span class="fc-nav-label">Cộng đồng</span>
+          <span class="fc-nav-label">Bảng tin</span>
         </a>
 
         <!-- Tìm đồng đội -->
@@ -98,8 +98,15 @@
               <line x1="8" y1="12" x2="16" y2="12"></line>
             </svg>
           </span>
-          <span class="fc-nav-label">Bạn bè</span>
+          <span class="fc-nav-label">Bạn bè &amp; Kết nối</span>
         </a>
+        <a href="quick-match.html" class="fc-nav-item" title="Tìm đội nhanh"><span class="fc-nav-icon"><i class="fa-solid fa-play"></i></span><span class="fc-nav-label">Tìm đội nhanh</span></a>
+        <a href="quick-match.html?view=lobby" class="fc-nav-item" title="Tạo phòng đội"><span class="fc-nav-icon"><i class="fa-solid fa-circle-plus"></i></span><span class="fc-nav-label">Tạo phòng đội</span></a>
+        <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ"><span class="fc-nav-icon"><i class="fa-solid fa-circle-nodes"></i></span><span class="fc-nav-label">Câu lạc bộ</span></a>
+        <a href="teams.html" class="fc-nav-item" title="Danh sách đội"><span class="fc-nav-icon"><i class="fa-solid fa-people-group"></i></span><span class="fc-nav-label">Danh sách đội</span></a>
+        <a href="my-team.html" class="fc-nav-item" title="Đội của tôi"><span class="fc-nav-icon"><i class="fa-solid fa-shield-halved"></i></span><span class="fc-nav-label">Đội của tôi</span></a>
+        <a href="quick-match.html?view=rooms" class="fc-nav-item" title="Tìm phòng"><span class="fc-nav-icon"><i class="fa-regular fa-compass"></i></span><span class="fc-nav-label">Tìm phòng</span></a>
+        <a href="#" class="fc-nav-item" title="Cửa hàng vật phẩm"><span class="fc-nav-icon"><i class="fa-solid fa-bag-shopping"></i></span><span class="fc-nav-label">Cửa hàng vật phẩm</span></a>
       </div>
 
       <!-- Đăng xuất -->
@@ -348,6 +355,7 @@
   <script src="../js/utils.js"></script>
   <script src="../js/notifications.js"></script>
   <script src="../js/pages/admin-dashboard.js"></script>
+  <script src="../js/pages/sidebar-order.js"></script>
   <script>
     // Khởi tạo chuông thông báo
     NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
@@ -365,5 +373,6 @@
       });
     }
   </script>
+  <script src="../js/pages/rightbar-sync.js"></script>
 </body>
 </html>

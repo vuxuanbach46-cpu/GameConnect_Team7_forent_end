@@ -1053,6 +1053,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    // Khởi tạo tabs, bộ lọc game/trạng thái và nạp dữ liệu cho khu vực kết nối.
+    // Nếu thiếu hai lời gọi này, dropdown vẫn hiện nhưng không có sự kiện chọn.
+    initHomeSocialControls();
+    loadHomeSocialData();
+
     // --- 2. ĐỒNG BỘ GIAO DIỆN SÁNG / TỐI (CHUNG KEY VỚI FRIENDS.HTML) ---
     const savedTheme = localStorage.getItem("gc_friends_theme") || "dark";
     applyHomeTheme(savedTheme);

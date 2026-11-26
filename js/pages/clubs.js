@@ -80,6 +80,30 @@ function clubImageUrl(value) {
   return `${apiRoot}/${raw.replace(/^\//, "")}`;
 }
 
+async function uploadClubImage(file) {
+  if (!file) return null;
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error("Ảnh phải có định dạng JPG, PNG hoặc WebP.");
+  if (file.size > 5 * 1024 * 1024) throw new Error("Dung lượng mỗi ảnh tối đa là 5MB.");
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = clubUnwrap(await api.upload("/api/teams/images", formData));
+  if (!response?.image_url) throw new Error("Máy chủ không trả về đường dẫn ảnh đã tải lên.");
+  return response.image_url;
+}
+
+function showClubImagePreview(input, preview, emptyLabel) {
+  if (!input || !preview) return;
+  const file = input.files?.[0];
+  if (!file) {
+    preview.innerHTML = `<i class="fa-regular fa-image"></i><span>${clubEscape(emptyLabel)}</span>`;
+    return;
+  }
+  const image = document.createElement("img");
+  image.src = URL.createObjectURL(file);
+  image.alt = "Xem trước ảnh đã chọn";
+  preview.replaceChildren(image);
+}
+
 function clubInitials(name) {
   return String(name || "GC").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 }
@@ -113,6 +137,7 @@ function renderClubCard(team) {
   const isPending = clubsPending.has(id);
   const myClub = clubsMine.get(id);
   const logo = clubImageUrl(team.logo_url || team.logo);
+  const cover = clubImageUrl(team.cover_url || team.background_url || team.banner_url);
   const game = clubEscape(clubGameName(team));
   const mode = team.join_mode || "PUBLIC";
   const isApproval = mode === "APPROVAL_REQUIRED";
@@ -123,7 +148,7 @@ function renderClubCard(team) {
     : clubEscape(clubInitials(team.name));
 
   return `<article class="club-card" data-team-id="${id}">
-    <div class="club-card-cover ${logo ? "has-image" : ""}">${logo ? `<img src="${clubEscape(logo)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<span class="club-game-chip"><i class="fa-solid fa-gamepad"></i> ${game}</span></div>
+    <div class="club-card-cover ${cover ? "has-image" : ""}">${cover ? `<img src="${clubEscape(cover)}" alt="" loading="lazy" onerror="this.remove()">` : ""}<span class="club-game-chip"><i class="fa-solid fa-gamepad"></i> ${game}</span></div>
     <div class="club-card-body">
       <div class="club-card-identity"><div class="club-logo">${logoMarkup}</div><div class="club-card-title"><h3 title="${clubEscape(team.name)}">${clubEscape(team.name || "Chưa đặt tên")}</h3><p>${isMine ? "Đội của bạn" : memberLabel}</p></div></div>
       <p class="club-card-description">${clubEscape(team.description || "Chưa có phần giới thiệu. Mở chi tiết để tìm hiểu thêm về đội.")}</p>
@@ -464,15 +489,18 @@ function bindClubEvents() {
     clubEls.createMessage.hidden = true;
     clubEls.createButton.disabled = true;
     clubEls.createButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo...';
-    const payload = {
-      name: document.getElementById("club-name").value.trim(),
-      main_game_id: Number(clubEls.createGame.value),
-      description: document.getElementById("club-description").value.trim() || null,
-      max_members: Number(document.getElementById("club-max-members").value),
-      join_mode: document.getElementById("club-join-mode").value,
-      logo_url: document.getElementById("club-logo-url").value.trim() || null,
-    };
     try {
+      const logoUrl = await uploadClubImage(document.getElementById("club-logo-file").files?.[0]);
+      const coverUrl = await uploadClubImage(document.getElementById("club-cover-file").files?.[0]);
+      const payload = {
+        name: document.getElementById("club-name").value.trim(),
+        main_game_id: Number(clubEls.createGame.value),
+        description: document.getElementById("club-description").value.trim() || null,
+        max_members: Number(document.getElementById("club-max-members").value),
+        join_mode: document.getElementById("club-join-mode").value,
+        logo_url: logoUrl,
+        cover_url: coverUrl,
+      };
       await api.post("/api/teams", payload);
       clubEls.createMessage.textContent = "Đã tạo câu lạc bộ thành công.";
       clubEls.createMessage.classList.add("success");
@@ -622,6 +650,8 @@ function initClubRightbar() {
 async function initClubsPage() {
   initClubRightbar();
   bindClubEvents();
+  document.getElementById("club-logo-file")?.addEventListener("change", (event) => showClubImagePreview(event.currentTarget, document.getElementById("club-logo-preview"), "Chưa chọn ảnh logo"));
+  document.getElementById("club-cover-file")?.addEventListener("change", (event) => showClubImagePreview(event.currentTarget, document.getElementById("club-cover-preview"), "Chưa chọn ảnh nền"));
   const results = await Promise.allSettled([loadClubGames(), loadMyClubs()]);
   if (results[0].status === "rejected") {
     console.error("Không tải được danh mục game:", results[0].reason);
