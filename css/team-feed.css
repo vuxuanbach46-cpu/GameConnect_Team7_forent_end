@@ -1,496 +1,1178 @@
-.team-feed-page {
-    padding-top: 32px;
-    padding-bottom: 60px;
-    min-height: 75vh;
+/* ==========================================================================
+   GAMECONNECT - KHÔNG GIAN CÂU LẠC BỘ (BẢNG TIN ĐỘI TRƯỞNG & THÀNH VIÊN CLB)
+   Phong cách Minimalist & Clean (FACEIT Club Layout), hỗ trợ Dark & Light Mode
+   ========================================================================== */
+
+:root {
+  --cf-bg: #0c0d12;
+  --cf-panel-bg: #101218;
+  --cf-surface: #151821;
+  --cf-surface-hover: #1a1e29;
+  --cf-surface-elevated: #181c26;
+  --cf-members-bg: #0e1015;
+  --cf-member-row-hover: #1c202b;
+  --cf-member-row-active: #232734;
+  --cf-border: #222634;
+  --cf-border-strong: #31374a;
+  --cf-text: #f1f5f9;
+  --cf-text-secondary: #94a3b8;
+  --cf-text-muted: #64748b;
+  --cf-orange: #e85002;
+  --cf-orange-hover: #ff6114;
+  --cf-gold: #f59e0b;
+  --cf-gold-bright: #fbbf24;
+  --cf-blue-star: #38bdf8;
+  --cf-green: #22c55e;
+}
+
+body.fc-light-mode {
+  --cf-bg: #f1f5f9;
+  --cf-panel-bg: #ffffff;
+  --cf-surface: #ffffff;
+  --cf-surface-hover: #f8fafc;
+  --cf-surface-elevated: #ffffff;
+  --cf-members-bg: #f8fafc;
+  --cf-member-row-hover: #eef2f6;
+  --cf-member-row-active: #e2e8f0;
+  --cf-border: #e2e8f0;
+  --cf-border-strong: #cbd5e1;
+  --cf-text: #0f172a;
+  --cf-text-secondary: #475569;
+  --cf-text-muted: #64748b;
+  --cf-gold: #d97706;
+  --cf-gold-bright: #f59e0b;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body.gc-club-feed-body {
+  margin: 0;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+  background: var(--cf-bg);
+  color: var(--cf-text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Thanh Taskbar trái */
+.gc-club-feed-body .fc-left-bar {
+  width: 68px;
+  padding: 18px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  flex-shrink: 0;
+}
+
+.gc-club-feed-body .fc-left-bar:hover {
+  width: 244px;
+}
+
+/* ==========================================================================
+   VÙNG GIỮA: TỪ TASKBAR TRÁI ĐẾN MÉP DANH SÁCH THÀNH VIÊN CLB
+   ========================================================================== */
+
+.club-feed-workspace {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cf-bg);
+  overflow: hidden;
+}
+
+.club-feed-scroll {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px clamp(24px, 3vw, 44px) 56px;
+  scrollbar-width: thin;
+}
+
+.club-feed-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.club-feed-scroll::-webkit-scrollbar-thumb {
+  background: var(--cf-border-strong);
+  border-radius: 6px;
+}
+
+.club-feed-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .feed-back {
-    display: inline-block;
-    color: #a5b4fc;
-    text-decoration: none;
-    margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cf-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--cf-border);
+  background: var(--cf-surface);
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .feed-back:hover {
-    color: #c7d2fe;
-}
-
-.feed-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 28px;
-}
-
-.feed-label {
-    color: #a5b4fc;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.feed-heading h1 {
-    color: #f8fafc;
-    font-size: 30px;
-    margin: 10px 0;
-}
-
-.feed-heading p,
-.feed-captain-tools p {
-    color: #94a3b8;
-    margin: 0;
+  color: var(--cf-text);
+  border-color: var(--cf-border-strong);
+  background: var(--cf-surface-hover);
 }
 
 .feed-private {
-    background: #1e293b;
-    color: #c4b5fd;
-    border: 1px solid #475569;
-    padding: 10px 15px;
-    border-radius: 20px;
-    white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-surface);
+  color: var(--cf-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.feed-private i {
+  color: var(--cf-orange);
+  font-size: 11px;
+}
+
+/* Header Câu lạc bộ */
+.feed-heading {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feed-club-identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.feed-club-avatar {
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-panel-bg);
+  color: var(--cf-orange);
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.feed-club-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.feed-club-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-club-eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.feed-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(232, 80, 2, 0.12);
+  border: 1px solid rgba(232, 80, 2, 0.35);
+  color: #ff7a33;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.feed-member-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--cf-border);
+  background: var(--cf-panel-bg);
+  color: var(--cf-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.feed-heading h1 {
+  margin: 0 0 6px;
+  color: var(--cf-text);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.feed-heading p {
+  margin: 0;
+  color: var(--cf-text-secondary);
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
 .feed-summary {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cf-border);
 }
 
 .feed-stat {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 14px;
-    padding: 22px;
+  background: var(--cf-panel-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .feed-stat span {
-    display: block;
-    color: #94a3b8;
-    font-size: 14px;
-    margin-bottom: 12px;
+  color: var(--cf-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .feed-stat strong {
-    color: #fff;
-    font-size: 25px;
+  color: var(--cf-text);
+  font-size: 18px;
+  font-weight: 800;
 }
 
+/* Khu vực Đội trưởng đăng bài thông báo */
 .feed-captain-tools {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    background: #1e293b;
-    border: 1px solid #6366f1;
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: var(--cf-surface);
+  border: 1px solid rgba(232, 80, 2, 0.45);
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 22px;
+}
+
+.feed-captain-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.feed-captain-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--cf-gold-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
 }
 
 .feed-captain-tools h2 {
-    color: #f8fafc;
-    margin: 0 0 8px;
-    font-size: 20px;
+  margin: 0 0 3px;
+  color: var(--cf-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.feed-captain-tools p {
+  margin: 0;
+  color: var(--cf-text-secondary);
+  font-size: 13px;
 }
 
 .feed-primary {
-    display: inline-block;
-    background: #6366f1;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 11px 18px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 1px solid var(--cf-orange);
+  background: var(--cf-orange);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.feed-primary:hover {
-    background: #4f46e5;
+.feed-primary:hover:not(:disabled) {
+  background: var(--cf-orange-hover);
+  border-color: var(--cf-orange-hover);
 }
 
+.feed-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.feed-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-panel-bg);
+  color: var(--cf-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.feed-secondary:hover {
+  background: var(--cf-surface-hover);
+}
+
+/* Danh sách bài đăng của Đội trưởng */
 .feed-content {
-    margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .feed-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
 }
 
-.feed-toolbar h2 {
-    margin: 0;
-    font-size: 22px;
-    color: #f8fafc;
+.feed-toolbar-title h2 {
+  margin: 0;
+  color: var(--cf-text);
+  font-size: 18px;
+  font-weight: 800;
 }
 
-#feed-filter,
+.feed-toolbar-sub {
+  display: block;
+  margin-top: 2px;
+  color: var(--cf-text-secondary);
+  font-size: 12.5px;
+}
+
+.feed-filter-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 9px;
+  border: 1px solid var(--cf-border);
+  background: var(--cf-surface);
+}
+
+.feed-filter-tab {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cf-text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+
+.feed-filter-tab:hover {
+  color: var(--cf-text);
+}
+
+.feed-filter-tab.active {
+  background: var(--cf-panel-bg);
+  border-color: var(--cf-border-strong);
+  color: var(--cf-text);
+}
+
+.feed-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feed-post-card {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  transition: border-color 0.16s ease;
+}
+
+.feed-post-card:hover {
+  border-color: var(--cf-border-strong);
+}
+
+.feed-post-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.feed-post-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feed-post-author-avatar-wrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.feed-post-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-panel-bg);
+}
+
+.feed-post-captain-star {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--cf-gold-bright);
+  color: #11131a;
+  font-size: 10px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--cf-surface);
+}
+
+.feed-post-author-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feed-post-author-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feed-post-author-name {
+  color: var(--cf-gold-bright);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.feed-post-role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--cf-gold-bright);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.feed-post-date {
+  color: var(--cf-text-muted);
+  font-size: 12px;
+}
+
+.feed-post-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid rgba(232, 80, 2, 0.35);
+  background: rgba(232, 80, 2, 0.12);
+  color: #ff8442;
+  white-space: nowrap;
+}
+
+.feed-post-badge.schedule {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+.feed-post-title {
+  margin: 0 0 10px;
+  color: var(--cf-text);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.feed-post-body {
+  margin: 0;
+  color: var(--cf-text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.feed-schedule-banner {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-panel-bg);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.feed-schedule-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--cf-text-secondary);
+}
+
+.feed-schedule-item i {
+  color: #38bdf8;
+}
+
+.feed-schedule-item strong {
+  color: var(--cf-text);
+}
+
+.feed-empty {
+  text-align: center;
+  background: var(--cf-surface);
+  border: 1px dashed var(--cf-border-strong);
+  border-radius: 12px;
+  padding: 48px 24px;
+  color: var(--cf-text-secondary);
+}
+
+.feed-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  border-radius: 12px;
+  background: var(--cf-panel-bg);
+  border: 1px solid var(--cf-border-strong);
+  color: var(--cf-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.feed-empty h3 {
+  margin: 0 0 6px;
+  color: var(--cf-text);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.feed-empty p {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+}
+
+/* ==========================================================================
+   CỘT THÀNH VIÊN CÂU LẠC BỘ: NẰM SÁT VỚI THANH TASKBAR BÊN PHẢI (FACEIT STYLE)
+   ========================================================================== */
+
+.club-members-panel {
+  position: relative;
+  width: 262px;
+  flex-shrink: 0;
+  height: 100vh;
+  background: var(--cf-members-bg);
+  border-left: 1px solid var(--cf-border);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  z-index: 30;
+}
+
+.club-members-header {
+  padding: 16px 14px 12px;
+  border-bottom: 1px solid var(--cf-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.club-members-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.club-members-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--cf-text-secondary);
+}
+
+.club-members-count {
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border-strong);
+  color: var(--cf-text);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.club-members-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid var(--cf-border);
+  background: var(--cf-surface);
+  color: var(--cf-text-muted);
+  transition: border-color 0.15s ease;
+}
+
+.club-members-search:focus-within {
+  border-color: var(--cf-border-strong);
+}
+
+.club-members-search i {
+  font-size: 12px;
+}
+
+.club-members-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--cf-text);
+  font: 500 12px "Inter", sans-serif;
+}
+
+.club-members-search input::placeholder {
+  color: var(--cf-text-muted);
+}
+
+.club-members-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+}
+
+.club-members-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.club-members-list::-webkit-scrollbar-thumb {
+  background: var(--cf-border-strong);
+  border-radius: 4px;
+}
+
+/* Từng dòng thành viên CLB giống ảnh mẫu FACEIT */
+.club-member-item {
+  position: relative;
+  width: 100%;
+  min-height: 54px;
+  padding: 8px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--cf-text);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.14s ease;
+}
+
+.club-member-item:hover,
+.club-member-item.is-selected {
+  background: var(--cf-member-row-active);
+}
+
+.club-member-avatar-box {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.club-member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1b1f2a;
+  border: 1px solid var(--cf-border-strong);
+  display: block;
+}
+
+/* Huy hiệu ngôi sao Đội trưởng / Thành viên ở góc trên phải avatar */
+.club-member-star {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--cf-members-bg);
+}
+
+.club-member-star.is-captain {
+  background: var(--cf-gold-bright);
+  color: #11131a;
+}
+
+.club-member-star.is-member {
+  background: var(--cf-blue-star);
+  color: #0b1320;
+}
+
+/* Tooltip "Club supporter" khi rê chuột vào huy hiệu sao */
+.club-member-star[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-30%);
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #1c1f29;
+  border: 1px solid #323746;
+  color: #f1f5f9;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* Chấm xanh trạng thái trực tuyến ở góc dưới phải avatar */
+.club-member-status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--cf-green);
+  border: 2px solid var(--cf-members-bg);
+}
+
+.club-member-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.club-member-name {
+  color: var(--cf-gold-bright);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-member-item:hover .club-member-name {
+  text-decoration: underline;
+}
+
+.club-member-sub {
+  color: var(--cf-text-secondary);
+  font-size: 11.5px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Logo nhỏ của CLB ở mép phải mỗi dòng thành viên */
+.club-member-emblem {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.club-member-emblem-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  object-fit: cover;
+  border: 1px solid var(--cf-border-strong);
+  background: #ffffff;
+}
+
+.club-member-emblem-tag {
+  display: inline-block;
+  max-width: 48px;
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border-strong);
+  color: var(--cf-text);
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  text-align: center;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-members-loading,
+.club-members-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--cf-text-secondary);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   POPOVER MENU KHI ẤN VÀO TÊN THÀNH VIÊN: XEM CHI TIẾT HỒ SƠ GAME THỦ
+   ========================================================================== */
+
+.club-member-popover {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 120px;
+  z-index: 120;
+  background: var(--cf-surface-elevated);
+  border: 1px solid var(--cf-border-strong);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.club-popover-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 6px;
+}
+
+.club-popover-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-panel-bg);
+  flex-shrink: 0;
+}
+
+.club-popover-meta {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.club-popover-meta strong {
+  color: var(--cf-gold-bright);
+  font-size: 13px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-popover-meta span {
+  color: var(--cf-text-secondary);
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.club-popover-divider {
+  height: 1px;
+  background: var(--cf-border);
+  margin: 6px 0;
+}
+
+.club-popover-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(232, 80, 2, 0.4);
+  background: rgba(232, 80, 2, 0.14);
+  color: var(--cf-text);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+
+.club-popover-action i:first-child {
+  color: var(--cf-orange);
+  font-size: 13px;
+}
+
+.club-popover-action span {
+  flex: 1;
+}
+
+.club-popover-ext {
+  font-size: 10px;
+  color: var(--cf-text-secondary);
+}
+
+.club-popover-action:hover {
+  background: var(--cf-orange);
+  border-color: var(--cf-orange);
+  color: #ffffff;
+}
+
+.club-popover-action:hover i {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   MODAL ĐỘI TRƯỞNG ĐĂNG BÀI THÔNG BÁO
+   ========================================================================== */
+
+.feed-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(5, 7, 11, 0.76);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.feed-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border-strong);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.feed-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.feed-modal-eyebrow {
+  display: block;
+  color: var(--cf-gold-bright);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.feed-modal-header h2 {
+  margin: 0;
+  color: var(--cf-text);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.feed-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-panel-bg);
+  color: var(--cf-text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.feed-close:hover {
+  color: var(--cf-text);
+}
+
+#feed-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#feed-post-form label {
+  color: var(--cf-text);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
 #feed-post-type,
 #feed-post-title,
 #feed-post-content,
 #feed-play-date,
 #feed-play-time {
-    background: #0f172a;
-    border: 1px solid #475569;
-    border-radius: 9px;
-    padding: 11px 13px;
-    color: #f8fafc;
-    font: inherit;
+  width: 100%;
+  background: var(--cf-panel-bg);
+  border: 1px solid var(--cf-border-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--cf-text);
+  font: 500 13px "Inter", sans-serif;
+  outline: none;
 }
 
-#feed-filter {
-    cursor: pointer;
-}
-
-.feed-post-list {
-    display: grid;
-    gap: 18px;
-}
-
-.feed-post-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 15px;
-    padding: 24px;
-}
-
-.feed-post-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-
-.feed-post-badge {
-    display: inline-block;
-    background: #312e81;
-    color: #c4b5fd;
-    border-radius: 20px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.feed-post-badge.schedule {
-    background: #164e63;
-    color: #a5f3fc;
-}
-
-.feed-post-date {
-    color: #94a3b8;
-    font-size: 13px;
-}
-
-.feed-post-card h3 {
-    color: #f8fafc;
-    font-size: 19px;
-    margin: 0 0 12px;
-}
-
-.feed-post-card p {
-    color: #cbd5e1;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    margin: 0 0 16px;
-}
-
-.feed-post-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    color: #94a3b8;
-    font-size: 13px;
-}
-
-.feed-play-info {
-    color: #a5f3fc;
-    font-weight: 600;
-}
-
-.feed-empty {
-    text-align: center;
-    background: #1e293b;
-    border: 1px dashed #475569;
-    border-radius: 14px;
-    padding: 45px 20px;
-    color: #94a3b8;
-}
-
-.feed-empty h3 {
-    color: #f8fafc;
-}
-
-.feed-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.feed-modal {
-    width: 100%;
-    max-width: 520px;
-    max-height: 90vh;
-    overflow-y: auto;
-    background: #1e293b;
-    border: 1px solid #475569;
-    border-radius: 16px;
-    padding: 26px;
-}
-
-.feed-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-}
-
-.feed-modal-header h2 {
-    margin: 0;
-    color: #f8fafc;
-    font-size: 22px;
-}
-
-.feed-close {
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-#feed-post-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-#feed-post-form label {
-    color: #e2e8f0;
-    font-size: 14px;
-    font-weight: 600;
+#feed-post-type:focus,
+#feed-post-title:focus,
+#feed-post-content:focus,
+#feed-play-date:focus,
+#feed-play-time:focus {
+  border-color: var(--cf-orange);
 }
 
 #feed-post-content {
-    resize: vertical;
-    min-height: 110px;
+  resize: vertical;
+  min-height: 116px;
+  line-height: 1.55;
 }
 
-#feed-schedule-fields {
-    display: grid;
-    gap: 12px;
+.feed-schedule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.feed-form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 14px;
-}
-
-.feed-secondary {
-    background: #334155;
-    color: #f8fafc;
-    border: none;
-    border-radius: 10px;
-    padding: 11px 18px;
-    cursor: pointer;
+.feed-schedule-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .feed-form-error {
-    color: #fca5a5;
-    font-size: 13px;
+  margin: 0;
+  color: #f87171;
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
-.feed-modal-overlay[hidden],
-.feed-captain-tools[hidden],
-#feed-schedule-fields[hidden],
-.feed-empty[hidden],
-.feed-form-error[hidden] {
-    display: none !important;
+.feed-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
 }
 
-@media (max-width: 700px) {
-
-    .feed-heading,
-    .feed-captain-tools,
-    .feed-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .feed-summary {
-        grid-template-columns: 1fr;
-    }
-
-    .feed-primary {
-        text-align: center;
-    }
-
-    .feed-post-card {
-        padding: 18px;
-    }
-
-    .feed-heading h1 {
-        font-size: 25px;
-    }
+@media (max-width: 960px) {
+  .club-members-panel {
+    width: 220px;
+  }
+  .feed-summary {
+    grid-template-columns: 1fr;
+  }
+  .feed-captain-tools {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
-/* Header */
-body {
-    margin: 0;
-    background: #0f1117;
-    color: #f8fafc;
-    font-family: Arial, sans-serif;
-}
-
-#app-header {
-    background: #171c29;
-    border-bottom: 1px solid #30384b;
-}
-
-#app-header .header-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 18px 32px;
-}
-
-#app-header .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #fff;
-    font-size: 22px;
-    font-weight: 700;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-#app-header .nav {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 24px;
-}
-
-#app-header .nav a {
-    color: #cbd5e1;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-#app-header .nav a:hover,
-#app-header .nav a.active {
-    color: #a5b4fc;
-}
-
-/* Bố cục chính */
-.team-feed-page {
-    width: min(1180px, calc(100% - 48px));
-    margin: 0 auto;
-    padding-top: 40px;
-    padding-bottom: 80px;
-}
-
-.feed-heading {
-    padding: 30px;
-    background: linear-gradient(135deg, #1e293b, #25204d);
-    border: 1px solid #373b65;
-    border-radius: 18px;
-}
-
-.feed-heading h1 {
-    font-size: 34px;
-}
-
-/* Footer */
-#app-footer {
-    border-top: 1px solid #30384b;
-    padding: 24px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 13px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    #app-header .header-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 18px;
-    }
-
-    #app-header .nav {
-        gap: 14px;
-    }
-
-    .team-feed-page {
-        width: calc(100% - 32px);
-    }
-
-    .feed-heading {
-        padding: 22px;
-    }
-
-    .feed-heading h1 {
-        font-size: 26px;
-    }
-}
-
-/* Cùng hệ màu và nhịp bố cục với trang Bạn bè & Kết nối. */
-:root{--color-bg:#0c0d12;--color-card:#161922;--color-border:#232734;--color-text:#f1f5f9;--color-muted:#94a3b8;--color-primary:#e85002;--radius:8px}
-body.gc-team-page{margin:0;min-height:100vh;background:#0c0d12;color:#f1f5f9;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;padding-left:220px}
-.gc-team-page *{box-sizing:border-box}.gc-team-page [hidden]{display:none!important}
-.gc-team-page #app-header,.gc-team-page #app-footer{display:none}
-.gc-team-nav{position:fixed;z-index:20;inset:0 auto 0 0;width:220px;background:#11131a;border-right:1px solid #232734;padding:24px 14px;display:flex;flex-direction:column}
-.gc-team-brand{display:flex;align-items:center;gap:11px;color:#f1f5f9;text-decoration:none;padding:0 6px 25px;border-bottom:1px solid #232734}
-.gc-team-brand-icon{width:38px;height:38px;border-radius:10px;background:#e85002;display:grid;place-items:center;font-size:23px}.gc-team-brand strong{display:block;font-size:15px}.gc-team-brand small{display:block;color:#64748b;font-size:10px;letter-spacing:.14em;margin-top:3px}
-.gc-team-nav-heading{font-size:11px;letter-spacing:.12em;color:#64748b;font-weight:700;margin:27px 10px 12px}.gc-team-nav nav{display:grid;gap:4px}.gc-team-nav nav a{display:flex;align-items:center;gap:13px;padding:12px 10px;color:#94a3b8;text-decoration:none;border-radius:7px;font-size:14px;font-weight:600}.gc-team-nav nav a span{font-size:19px;width:23px;text-align:center}.gc-team-nav nav a:hover{background:#1b1e28;color:#fff}.gc-team-nav nav a.active{background:#26201d;color:#ff8442}.gc-team-nav-bottom{margin-top:auto;padding:17px 8px 0;border-top:1px solid #232734;color:#f1f5f9;text-decoration:none;font-size:13px;font-weight:700}.gc-team-nav-bottom span{display:block;color:#22c55e;font-size:12px;margin-top:5px}
-.gc-team-page main.container{width:min(1200px,100%);max-width:1200px;margin:0 auto;padding:44px 42px 70px}.gc-team-page h1,.gc-team-page h2,.gc-team-page h3{color:#f1f5f9;letter-spacing:-.025em}.gc-team-page p,.gc-team-page .muted{color:#94a3b8;line-height:1.6}.gc-team-page a{transition:color .15s,background .15s,border-color .15s}
-.gc-team-page .card,.gc-team-page .my-teams-card,.gc-team-page .my-teams-stat,.gc-team-page .feed-stat,.gc-team-page .feed-captain-tools,.gc-team-page .feed-post-card,.gc-team-page .team-card,.gc-team-page .feed-empty,.gc-team-page .my-teams-empty{background:#161922;border:1px solid #232734;border-radius:10px;box-shadow:none;color:#f1f5f9}.gc-team-page .card{padding:24px;margin-bottom:20px}.gc-team-page .my-teams-card:hover,.gc-team-page .team-card:hover{border-color:#384050;background:#191d27;transform:none}
-.gc-team-page button,.gc-team-page input,.gc-team-page select,.gc-team-page textarea{font:inherit}.gc-team-page input,.gc-team-page select,.gc-team-page textarea{background:#101219;color:#f1f5f9;border:1px solid #31374a;border-radius:7px;padding:10px 12px;max-width:100%}.gc-team-page input:focus,.gc-team-page select:focus,.gc-team-page textarea:focus{outline:2px solid #e85002;outline-offset:2px}.gc-team-page label{color:#cbd5e1}.gc-team-page button{cursor:pointer}.gc-team-page .btn,.gc-team-page .my-teams-secondary,.gc-team-page .feed-secondary{background:#20242f;color:#f1f5f9;border:1px solid #31374a;border-radius:7px;padding:10px 14px;text-decoration:none}.gc-team-page .btn-primary,.gc-team-page .my-teams-explore,.gc-team-page .my-teams-action,.gc-team-page .feed-primary{background:#e85002;border:1px solid #e85002;color:#fff;border-radius:7px;padding:10px 16px;font-weight:700;text-decoration:none}.gc-team-page .btn-primary:hover,.gc-team-page .my-teams-explore:hover,.gc-team-page .my-teams-action:hover,.gc-team-page .feed-primary:hover{background:#c84500;border-color:#c84500}.gc-team-page .btn-danger{background:#a52c2c;color:white;border:0}.gc-team-page .team-logo{background:#262b36;border-radius:12px;color:#ff8442}
-.gc-team-page .feed-label,.gc-team-page .feed-back,.gc-team-page .team-back{color:#ff8442}.gc-team-page .feed-private,.gc-team-page .my-teams-role,.gc-team-page .feed-post-badge{background:#29211e;color:#ffad80;border-color:#50362a}.gc-team-page .feed-modal,.gc-team-page dialog{background:#161922;color:#f1f5f9;border:1px solid #31374a;border-radius:10px}.gc-team-page .feed-modal-overlay{z-index:50}
-.gc-team-page .admin-shell{min-height:100vh}.gc-team-page #admin-sidebar{display:none}.gc-team-page .admin-topbar{background:#11131a;border-color:#232734;padding:28px 42px}.gc-team-page .admin-main{max-width:1200px;margin:auto;padding:38px 42px}.gc-team-page .admin-main th{background:#101219;color:#94a3b8}.gc-team-page table{border-collapse:collapse}.gc-team-page th,.gc-team-page td{padding:14px;text-align:left;border-bottom:1px solid #232734}.gc-team-page .table-wrap{overflow:auto}.gc-team-page .admin-detail-item{background:#101219;border-color:#232734}.gc-team-page .admin-nav a.active{background:#29211e}.gc-team-page .admin-back-link{color:#ff8442}
-@media(max-width:800px){body.gc-team-page{padding-left:0;padding-top:62px}.gc-team-nav{inset:0 0 auto;width:auto;height:62px;flex-direction:row;align-items:center;padding:8px 14px;gap:15px;overflow-x:auto}.gc-team-brand{border:0;padding:0;flex:none}.gc-team-brand small,.gc-team-nav-heading,.gc-team-nav-bottom{display:none}.gc-team-nav nav{display:flex;gap:4px}.gc-team-nav nav a{white-space:nowrap;padding:10px}.gc-team-nav nav a span{display:none}.gc-team-page main.container,.gc-team-page .admin-main{padding:28px 20px 50px}.gc-team-page .admin-topbar{padding:22px 20px}.gc-team-page .my-teams-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
-@media(max-width:520px){.gc-team-brand strong{display:none}.gc-team-page .my-teams-summary,.gc-team-page .feed-summary{grid-template-columns:1fr}.gc-team-page .my-teams-heading,.gc-team-page .teams-heading,.gc-team-page .feed-heading,.gc-team-page .admin-toolbar{align-items:flex-start;flex-direction:column}.gc-team-page .team-info{flex-direction:column}}
-.gc-team-page #team-role-filter,.gc-team-page #feed-filter{background-color:#101219;border-color:#31374a;color:#f1f5f9}
-.gc-team-page .my-teams-avatar{background:#29211e;color:#ff8442}
-
-/* Phản hồi khi rê chuột, nhấn hoặc dùng bàn phím trên menu. */
-.gc-team-page .gc-team-nav nav a {
-  border: 1px solid transparent;
-  transition: background-color .16s ease, border-color .16s ease, color .16s ease, transform .12s ease;
-}
-.gc-team-page .gc-team-nav nav a:hover {
-  background: #1b1e28;
-  border-color: #31374a;
-  color: #f1f5f9;
-}
-.gc-team-page .gc-team-nav nav a:active {
-  background: #30231d;
-  border-color: #e85002;
-  transform: scale(.97);
-}
-.gc-team-page .gc-team-nav nav a:focus-visible {
-  outline: 2px solid #ff8442;
-  outline-offset: 2px;
-}
-.gc-team-page .gc-team-nav nav a.active { color: #ff8442; }
-@media (prefers-reduced-motion: reduce) {
-  .gc-team-page .gc-team-nav nav a { transition: none; }
-  .gc-team-page .gc-team-nav nav a:active { transform: none; }
+@media (max-width: 720px) {
+  body.gc-club-feed-body {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  .club-feed-workspace,
+  .club-members-panel {
+    height: auto;
+    width: 100%;
+  }
 }

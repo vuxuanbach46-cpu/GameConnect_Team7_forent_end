@@ -46,26 +46,39 @@ function applyHomeTheme(theme) {
     });
 }
 
+function syncHomeAdminNav(isAdmin) {
+    document.body.classList.toggle("is-admin", Boolean(isAdmin));
+    document.querySelectorAll(".admin-nav-item").forEach((el) => {
+        el.style.display = isAdmin ? "" : "none";
+    });
+}
+
 async function loadHomeUserAvatar(token) {
-    const nameEl = document.getElementById("avatar-user-name");
-    const avatarImg = document.querySelector(".fc-self-avatar");
+    const getNameEl = () =>
+        document.getElementById("avatar-user-name") ||
+        document.querySelector("#avatar-dropdown-menu .fc-avatar-dropdown-header strong");
+    const getAvatarImg = () => document.querySelector(".fc-self-avatar");
 
     let fallbackName = "Game thủ";
     try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        const base64Url = token.split(".")[1] || "";
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(atob(base64));
         if (payload.username) {
             fallbackName = payload.username;
         } else if (payload.email && typeof payload.email === "string") {
             fallbackName = payload.email.split("@")[0] || "Game thủ";
         } else if (payload.sub) {
-            fallbackName = String(payload.sub);
+            fallbackName = `User #${payload.sub}`;
         }
     } catch (_) {}
 
-    if (nameEl) nameEl.textContent = fallbackName;
-    if (avatarImg) {
-        avatarImg.src = buildDiceBearAvatar(fallbackName);
-        avatarImg.alt = fallbackName;
+    const initialNameEl = getNameEl();
+    const initialAvatarImg = getAvatarImg();
+    if (initialNameEl) initialNameEl.textContent = fallbackName;
+    if (initialAvatarImg) {
+        initialAvatarImg.src = buildDiceBearAvatar(fallbackName);
+        initialAvatarImg.alt = fallbackName;
     }
 
     if (typeof api === "undefined") return;
@@ -73,9 +86,16 @@ async function loadHomeUserAvatar(token) {
     try {
         const meRes = await api.get("/user/me");
         const meData = meRes?.data || meRes || {};
+        if (meData.role) {
+            const roleUpper = String(meData.role).toUpperCase();
+            localStorage.setItem("user_role", roleUpper);
+            syncHomeAdminNav(roleUpper === "ADMIN");
+        }
         const username = meData.username || fallbackName;
-        let displayName = username;
-        let avatarUrl = buildDiceBearAvatar(username);
+        let displayName = meData.display_name || username;
+        let avatarUrl = meData.avatar
+            ? resolveHomeAvatarUrl(meData.avatar, username)
+            : buildDiceBearAvatar(username);
 
         try {
             const profRes = await api.get("/api/profiles/me");
@@ -86,6 +106,8 @@ async function loadHomeUserAvatar(token) {
             // Tài khoản chưa có profile -> dùng username & avatar mặc định
         }
 
+        const nameEl = getNameEl();
+        const avatarImg = getAvatarImg();
         if (nameEl) nameEl.textContent = displayName;
         if (avatarImg) {
             avatarImg.src = avatarUrl;
@@ -648,6 +670,7 @@ function renderHomePlayerActionBtns(player, tabKey) {
     if (tabKey === "friends") {
         return `
             <button type="button" class="home-action-btn is-primary" data-home-action="invite" data-id="${player.id}">+ Mời vào đội</button>
+            <button type="button" class="home-action-btn" data-home-action="message" data-id="${player.id}">Nhắn tin</button>
             ${moreLink}
         `;
     }
@@ -883,6 +906,16 @@ async function handleHomeSocialAction(e) {
             const targetUserId = (target && target.userId) || id;
             await api.post(`/api/matchmaking/invite/${targetUserId}`);
             showHomeToast(`🎮 Đã gửi lời mời vào đội cho ${target ? target.name : `#${id}`}`);
+            return;
+        }
+        if (action === "message") {
+            const target = HOME_SOCIAL.friends.find((x) => x.id === id);
+            if (typeof window.openChatByFriendId === "function") {
+                await window.openChatByFriendId(target || id);
+            } else {
+                const targetUserId = (target && target.userId) || id;
+                window.location.href = `friends.html?tab=friends&chat=${encodeURIComponent(targetUserId)}`;
+            }
         }
     } catch (err) {
         showHomeToast(`⚠️ ${err?.message || "Không thể thực hiện thao tác"}`);
@@ -1168,16 +1201,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Hiển thị các mục điều hướng Admin nếu là ADMIN, ẩn/xóa nếu là USER thường
+    // Hiển thị các mục điều hướng Admin nếu là ADMIN, ẩn nếu là USER thường
     const isAdmin = typeof isCurrentUserAdmin === "function"
         ? isCurrentUserAdmin()
         : String(localStorage.getItem("user_role") || "").toUpperCase() === "ADMIN";
-    const adminNavItems = document.querySelectorAll(".admin-nav-item");
-    if (isAdmin) {
-        adminNavItems.forEach(el => el.style.display = "");
-    } else {
-        adminNavItems.forEach(el => el.remove());
-    }
+    syncHomeAdminNav(isAdmin);
+
+    // Kết nối DB tải tên hiển thị & avatar thật vào menu Avatar bên phải
+    loadHomeUserAvatar(token);
+
+    // Tải dữ liệu thật từ DB cho Tổ đội đang tìm người, Câu lạc bộ nổi bật và Bài đăng mới nhất
+    loadOpenRoomsPreview();
+    loadFeaturedClubsPreview();
+    loadLatestPostsPreview();
 
     // --- 4. XỬ LÝ ĐĂNG XUẤT (TRONG MENU AVATAR) ---
     const logoutBtn = document.getElementById("logout-btn");

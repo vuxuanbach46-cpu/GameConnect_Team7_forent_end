@@ -1742,10 +1742,65 @@ function refreshGlobalNotificationBell() {
   }
 }
 
+function getFriendsRecentChatKey() {
+  if (currentUserInfo && currentUserInfo.id) {
+    return `gc_recent_chat_friends_${currentUserInfo.id}`;
+  }
+  try {
+    const token = localStorage.getItem("access_token");
+    if (!token) return "gc_recent_chat_friends_guest";
+    const base64Url = token.split(".")[1] || "";
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(base64));
+    return `gc_recent_chat_friends_${payload.sub || payload.user_id || payload.id || "guest"}`;
+  } catch (_) {
+    return "gc_recent_chat_friends_guest";
+  }
+}
+
+function loadStoredRecentChatFriends() {
+  if (typeof window.gcLoadRecentChatFriends === "function") {
+    return window.gcLoadRecentChatFriends();
+  }
+  try {
+    const raw = localStorage.getItem(getFriendsRecentChatKey());
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x) => x && Number(x.id) > 0) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveStoredRecentChatFriend(friendObj) {
+  if (!friendObj) return;
+  if (typeof window.gcSaveRecentChatFriend === "function") {
+    window.gcSaveRecentChatFriend(friendObj);
+    return;
+  }
+  const fid = Number(friendObj.userId || friendObj.id);
+  if (!fid || fid <= 0) return;
+  const existing = loadStoredRecentChatFriends();
+  const entry = {
+    id: fid,
+    userId: fid,
+    username: friendObj.username || "",
+    name: friendObj.name || friendObj.username || `Người bạn #${fid}`,
+    avatar: friendObj.avatar || buildDiceBearAvatar(friendObj.username || `user${fid}`),
+    presence: friendObj.presence || "online",
+    statusText: friendObj.statusText || "Đang trực tuyến",
+    updatedAt: Date.now()
+  };
+  const next = [entry, ...existing.filter((x) => Number(x.id) !== fid)].slice(0, 8);
+  try {
+    localStorage.setItem(getFriendsRecentChatKey(), JSON.stringify(next));
+  } catch (_) {}
+}
+
 function rememberRecentChatFriend(friendId) {
   const fid = Number(friendId);
   if (!fid || fid <= 0) return;
-  chatState.recentFriendIds = [fid, ...chatState.recentFriendIds.filter((id) => id !== fid)].slice(0, 6);
+  chatState.recentFriendIds = [fid, ...chatState.recentFriendIds.filter((id) => id !== fid)].slice(0, 8);
+  saveStoredRecentChatFriend(resolveFriendForChat(fid));
 }
 
 function resolveFriendForChat(friendId) {
@@ -1771,6 +1826,9 @@ function resolveFriendForChat(friendId) {
 
   const inAny = findPlayerAnywhere(fid);
   if (inAny) return inAny;
+
+  const inStored = loadStoredRecentChatFriends().find((x) => Number(x.id) === fid);
+  if (inStored) return inStored;
 
   return {
     id: fid,
@@ -1813,9 +1871,10 @@ function renderRightBarChatHeads() {
     })
     .forEach(pushUnique);
 
-  // 2. Cuộc trò chuyện đang mở hoặc vừa nhắn gần đây
+  // 2. Cuộc trò chuyện đang mở hoặc vừa nhắn gần đây (bao gồm danh sách đã lưu trong localStorage)
   if (chatState.activeFriendId) pushUnique(chatState.activeFriendId);
   chatState.recentFriendIds.forEach(pushUnique);
+  loadStoredRecentChatFriends().forEach((item) => pushUnique(item.id));
 
   if (orderedIds.length === 0) {
     listEl.hidden = true;
@@ -1860,9 +1919,22 @@ function renderRightBarChatHeads() {
     .join("");
 }
 
-window.openChatByFriendId = async function openChatByFriendId(friendId) {
-  const fid = Number(friendId);
+window.renderRightBarChatHeads = renderRightBarChatHeads;
+
+window.openChatByFriendId = async function openChatByFriendId(friendId, options = {}) {
+  const fid = Number(typeof friendId === "object" && friendId !== null ? (friendId.userId || friendId.id) : friendId);
   if (!fid || fid <= 0) return;
+  const widget = document.getElementById("fc-chat-widget");
+  if (Number(chatState.activeFriendId) === fid && widget && !widget.hidden) {
+    if (chatState.isMinimized) {
+      toggleMinimizeChatWidget();
+    } else if (options && options.toggleOnSame) {
+      closeChatWidget();
+    } else {
+      document.getElementById("fc-chat-input")?.focus();
+    }
+    return;
+  }
   const player = resolveFriendForChat(fid);
   await openChatWithFriend(player);
 };
@@ -2353,21 +2425,12 @@ function initDirectChat() {
     chatForm.addEventListener("submit", handleSendChatMessage);
   }
 
-  if (rightChatListEl) {
-    rightChatListEl.addEventListener("click", (e) => {
-      const itemBtn = e.target.closest("button[data-chat-head-id]");
-      if (!itemBtn) return;
-      const fid = Number(itemBtn.dataset.chatHeadId);
-      if (!fid) return;
-
-      const widget = document.getElementById("fc-chat-widget");
-      if (Number(chatState.activeFriendId) === fid && widget && !widget.hidden) {
-        toggleMinimizeChatWidget();
-      } else {
-        window.openChatByFriendId(fid);
-      }
-    });
-  }
+  loadStoredRecentChatFriends().forEach((item) => {
+    const fid = Number(item.id);
+    if (fid > 0 && !chatState.recentFriendIds.includes(fid)) {
+      chatState.recentFriendIds.push(fid);
+    }
+  });
 
   renderRightBarChatHeads();
   connectChatWebSocket();
