@@ -293,7 +293,16 @@ const NotificationBell = (() => {
       return;
     }
 
-    // 5. Các đường dẫn khác
+    // 5. Thông báo community (like / bình luận bài viết) → mở chi tiết bài viết
+    if (type === "POST_LIKE" || type === "POST_COMMENT") {
+      const postMatch = (link || type === "POST_LIKE" || type === "POST_COMMENT") && link.match(/\/posts\/(\d+)/);
+      if (postMatch) {
+        window.location.href = `${_rootPath}pages/community-detail.html?id=${postMatch[1]}#comments`;
+        return;
+      }
+    }
+
+    // 6. Các đường dẫn khác
     if (link) {
       if (link.startsWith("http")) {
         window.location.href = link;
