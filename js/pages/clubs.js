@@ -47,13 +47,74 @@ function clubEscape(value) {
   })[character]);
 }
 
+const CLUB_GAME_LOGOS = {
+  valorant: "../assets/images/games/valorant.png",
+  lol: "../assets/images/games/lol.png",
+  tft: "../assets/images/games/tft.png",
+  cs2: "../assets/images/games/cs2.png",
+  aov: "../assets/images/games/aov.png",
+};
+
+const CLUB_GRID_ICON_SVG = `<svg class="club-dd-grid-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`;
+
+function resolveClubGameLogo(gameName, rawIconUrl = "") {
+  const s = String(gameName || "").trim().toLowerCase();
+  if (s.includes("valorant")) return CLUB_GAME_LOGOS.valorant;
+  if (s.includes("cs2") || s.includes("counter-strike") || s.includes("counter strike")) return CLUB_GAME_LOGOS.cs2;
+  if (s.includes("liên quân") || s.includes("lien quan") || s.includes("aov") || s.includes("arena of valor")) return CLUB_GAME_LOGOS.aov;
+  if (s.includes("chân lý") || s.includes("chan ly") || s.includes("tft") || s.includes("đtcl") || s.includes("teamfight")) return CLUB_GAME_LOGOS.tft;
+  if (s.includes("liên minh") || s.includes("lien minh") || s.includes("lol") || s.includes("league")) return CLUB_GAME_LOGOS.lol;
+  if (rawIconUrl) return clubImageUrl(rawIconUrl);
+  return "";
+}
+
+function getClubOptionLogo(selectId, optionValue, optionText) {
+  if (selectId !== "club-game-filter" && selectId !== "club-create-game") return "";
+  if (!optionValue) return "";
+  const matchedGame = clubsGames.find((g) => String(g.id ?? g.game_id) === String(optionValue));
+  return resolveClubGameLogo(optionText || matchedGame?.name, matchedGame?.icon_url || matchedGame?.logo_url || "");
+}
+
 function renderClubFilterDropdown(select, menu, label, trigger) {
   if (!select || !menu || !label || !trigger) return;
-  menu.innerHTML = Array.from(select.options).map((option) => `
-    <button type="button" class="club-filter-option${option.value === select.value ? " is-selected" : ""}" role="option" aria-selected="${option.value === select.value}" data-filter-select="${select.id}" data-filter-value="${clubEscape(option.value)}">
-      <span>${clubEscape(option.textContent)}</span><i class="fa-solid fa-check" aria-hidden="true"></i>
-    </button>`).join("");
-  label.textContent = select.selectedOptions[0]?.textContent || "Chọn";
+  const isGameDropdown = select.id === "club-game-filter" || select.id === "club-create-game";
+
+  menu.innerHTML = Array.from(select.options).map((option) => {
+    const isSelected = option.value === select.value;
+    const logoUrl = getClubOptionLogo(select.id, option.value, option.textContent);
+    const leftIconHtml = isGameDropdown
+      ? (logoUrl
+          ? `<img src="${clubEscape(logoUrl)}" alt="" class="club-dd-logo">`
+          : CLUB_GRID_ICON_SVG)
+      : "";
+
+    return `
+      <button type="button" class="club-filter-option${isSelected ? " is-selected" : ""}" role="option" aria-selected="${isSelected}" data-filter-select="${select.id}" data-filter-value="${clubEscape(option.value)}">
+        <span class="club-dd-option-left">
+          ${leftIconHtml}
+          <span>${clubEscape(option.textContent)}</span>
+        </span>
+        <span class="club-dd-option-right">
+          <span class="club-dd-check">${isSelected ? "✓" : ""}</span>
+        </span>
+      </button>`;
+  }).join("");
+
+  const selectedOpt = select.selectedOptions[0] || select.options[0];
+  const selectedText = selectedOpt?.textContent || "Chọn";
+  const selectedValue = selectedOpt?.value || "";
+  if (isGameDropdown) {
+    const selectedLogo = getClubOptionLogo(select.id, selectedValue, selectedText);
+    const triggerIcon = selectedLogo
+      ? `<img src="${clubEscape(selectedLogo)}" alt="" class="club-dd-logo">`
+      : CLUB_GRID_ICON_SVG;
+    label.innerHTML = `${triggerIcon}<span>${clubEscape(selectedText)}</span>`;
+    // Ẩn icon fa-gamepad cũ ngoài label nếu có
+    const legacyIcon = trigger.querySelector(":scope > i.fa-gamepad");
+    if (legacyIcon) legacyIcon.style.display = "none";
+  } else {
+    label.textContent = selectedText;
+  }
 }
 
 function setupClubFilterDropdown(selectId, menuId, labelId, triggerId) {
@@ -93,15 +154,39 @@ async function uploadClubImage(file) {
 
 function showClubImagePreview(input, preview, emptyLabel) {
   if (!input || !preview) return;
+  const isCover = preview.id === "club-cover-preview";
+  const defaultTitle = isCover ? "Tải ảnh nền bìa lên" : "Tải ảnh logo lên";
+  const defaultSub = isCover ? "JPG, PNG, WebP · Tỉ lệ ngang 16:9" : "JPG, PNG, WebP · Tối đa 5 MB";
+  const defaultIcon = isCover ? "fa-regular fa-image" : "fa-solid fa-cloud-arrow-up";
   const file = input.files?.[0];
   if (!file) {
-    preview.innerHTML = `<i class="fa-regular fa-image"></i><span>${clubEscape(emptyLabel)}</span>`;
+    preview.classList.remove("has-file");
+    preview.innerHTML = `
+      <div class="club-upload-placeholder">
+        <span class="club-upload-icon"><i class="${defaultIcon}"></i></span>
+        <strong class="club-upload-title">${clubEscape(defaultTitle)}</strong>
+        <span class="club-upload-sub">${clubEscape(defaultSub || emptyLabel)}</span>
+      </div>`;
     return;
   }
-  const image = document.createElement("img");
-  image.src = URL.createObjectURL(file);
-  image.alt = "Xem trước ảnh đã chọn";
-  preview.replaceChildren(image);
+  const objectUrl = URL.createObjectURL(file);
+  preview.classList.add("has-file");
+  preview.innerHTML = `
+    <img src="${clubEscape(objectUrl)}" alt="Xem trước ảnh đã chọn">
+    <div class="club-upload-overlay">
+      <span class="club-upload-filename" title="${clubEscape(file.name)}">${clubEscape(file.name)}</span>
+      <div class="club-upload-actions">
+        <span class="club-upload-change">Đổi ảnh</span>
+        <button type="button" class="club-upload-remove" data-clear-file="${clubEscape(input.id)}" title="Xoá ảnh đã chọn" aria-label="Xoá ảnh đã chọn">✕</button>
+      </div>
+    </div>`;
+}
+
+function syncClubCapacityChips(val) {
+  const num = Number(val) || 100;
+  document.querySelectorAll("[data-capacity-preset]").forEach((chip) => {
+    chip.classList.toggle("active", Number(chip.dataset.capacityPreset) === num);
+  });
 }
 
 function clubInitials(name) {
@@ -153,7 +238,7 @@ function renderClubCard(team) {
       <div class="club-card-identity"><div class="club-logo">${logoMarkup}</div><div class="club-card-title"><h3 title="${clubEscape(team.name)}">${clubEscape(team.name || "Chưa đặt tên")}</h3><p>${isMine ? "Đội của bạn" : memberLabel}</p></div></div>
       <p class="club-card-description">${clubEscape(team.description || "Chưa có phần giới thiệu. Mở chi tiết để tìm hiểu thêm về đội.")}</p>
       <div class="club-card-stats"><div class="club-card-stat"><strong>${memberCount == null ? "—" : clubEscape(memberCount)}</strong><span>Thành viên</span></div><div class="club-card-stat"><strong>${clubEscape(team.max_members ?? "—")}</strong><span>Sức chứa tối đa</span></div></div>
-      <div class="club-card-footer"><span class="club-access ${isApproval ? "is-approval" : ""}"><i class="fa-solid ${isApproval ? "fa-user-check" : "fa-circle-check"}"></i>${isApproval ? "Cần phê duyệt" : "Tham gia tự do"}</span><div class="club-card-actions"><button type="button" data-club-detail="${id}">Chi tiết</button><button type="button" class="club-join-btn" data-club-join="${id}" ${(isMine || isPending) ? "disabled" : ""}>${isMine ? "Đã tham gia" : isPending ? "Đang chờ duyệt" : "Tham gia"}</button></div></div>
+      <div class="club-card-footer"><span class="club-access ${isApproval ? "is-approval" : ""}"><i class="fa-solid ${isApproval ? "fa-user-check" : "fa-circle-check"}"></i>${isApproval ? "Cần phê duyệt" : "Tham gia tự do"}</span><div class="club-card-actions"><button type="button" data-club-detail="${id}">Chi tiết</button>${isMine ? `<a href="team-feed.html?id=${id}" class="club-join-btn">Bảng tin CLB</a>` : `<button type="button" class="club-join-btn" data-club-join="${id}" ${isPending ? "disabled" : ""}>${isPending ? "Đang chờ duyệt" : "Tham gia"}</button>`}</div></div>
     </div>
   </article>`;
 }
@@ -178,13 +263,19 @@ async function loadClubGames() {
     });
   }
   setupClubFilterDropdown("club-game-filter", "club-game-menu", "club-game-label", "club-game-trigger");
+  setupClubFilterDropdown("club-create-game", "club-create-game-menu", "club-create-game-label", "club-create-game-trigger");
+  setupClubFilterDropdown("club-join-mode", "club-join-mode-menu", "club-join-mode-label", "club-join-mode-trigger");
 }
 
 async function loadMyClubs() {
   if (!localStorage.getItem("access_token")) return;
   clubsMine.clear();
   const response = await api.get("/api/teams/me");
-  clubList(response, "teams").forEach((team) => clubsMine.set(Number(team.id), team));
+  const myTeams = clubList(response, "teams");
+  myTeams.forEach((team) => clubsMine.set(Number(team.id), team));
+  if (typeof window.gcRefreshSidebarClubs === "function") {
+    window.gcRefreshSidebarClubs(myTeams);
+  }
 }
 
 async function loadClubs() {
@@ -228,7 +319,13 @@ function setClubModal(modal, open) {
   document.body.classList.toggle("club-modal-open", open);
   if (open && modal === clubEls.createModal) setTimeout(() => document.getElementById("club-name").focus(), 30);
   if (!open && modal === clubEls.createModal) {
+    closeClubFilterDropdowns();
     clubEls.createForm.reset();
+    setupClubFilterDropdown("club-create-game", "club-create-game-menu", "club-create-game-label", "club-create-game-trigger");
+    setupClubFilterDropdown("club-join-mode", "club-join-mode-menu", "club-join-mode-label", "club-join-mode-trigger");
+    syncClubCapacityChips(100);
+    showClubImagePreview(document.getElementById("club-logo-file"), document.getElementById("club-logo-preview"), "Chưa chọn ảnh logo");
+    showClubImagePreview(document.getElementById("club-cover-file"), document.getElementById("club-cover-preview"), "Chưa chọn ảnh nền");
     clubEls.createMessage.hidden = true;
     clubEls.createMessage.classList.remove("success");
   }
@@ -270,9 +367,11 @@ async function openClubDetails(teamId) {
     }).join("") : `<div class="club-member-row"><span>Chưa có dữ liệu thành viên</span></div>`;
     let primaryAction = "";
     if (clubsMine.has(Number(team.id))) {
-      primaryAction = isCaptain
-        ? `<button type="button" class="club-btn club-btn-primary" data-edit-team="${Number(team.id)}"><i class="fa-solid fa-pen"></i> Chỉnh sửa</button>`
-        : `<button type="button" class="club-btn club-btn-primary" data-leave-team="${Number(team.id)}"><i class="fa-solid fa-right-from-bracket"></i> Rời đội</button>`;
+      const feedLink = `<a href="team-feed.html?id=${Number(team.id)}" class="club-btn club-btn-primary"><i class="fa-solid fa-bullhorn"></i> Bảng tin CLB</a>`;
+      const secondaryManage = isCaptain
+        ? `<button type="button" class="club-btn club-btn-quiet" data-edit-team="${Number(team.id)}"><i class="fa-solid fa-pen"></i> Chỉnh sửa</button>`
+        : `<button type="button" class="club-btn club-btn-quiet" data-leave-team="${Number(team.id)}"><i class="fa-solid fa-right-from-bracket"></i> Rời CLB</button>`;
+      primaryAction = `${secondaryManage}${feedLink}`;
     } else if (joinRequest?.status === "PENDING") {
       primaryAction = `<button type="button" class="club-btn club-btn-primary" data-cancel-request="${Number(team.id)}"><i class="fa-solid fa-xmark"></i> Hủy yêu cầu</button>`;
     } else {
@@ -379,6 +478,62 @@ async function removeClubMember(teamId, userId, button) {
 
 function bindClubEvents() {
   setupClubFilterDropdown("club-access-filter", "club-access-menu", "club-access-label", "club-access-trigger");
+  setupClubFilterDropdown("club-create-game", "club-create-game-menu", "club-create-game-label", "club-create-game-trigger");
+  setupClubFilterDropdown("club-join-mode", "club-join-mode-menu", "club-join-mode-label", "club-join-mode-trigger");
+
+  // Điều khiển tăng/giảm & chọn nhanh Sức chứa câu lạc bộ
+  const capInput = document.getElementById("club-max-members");
+  const clampCap = (n) => Math.min(100, Math.max(2, Number(n) || 2));
+  document.querySelectorAll("[data-capacity-step]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (!capInput) return;
+      const step = Number(btn.dataset.capacityStep) || 0;
+      const next = clampCap((Number(capInput.value) || 100) + step);
+      capInput.value = String(next);
+      syncClubCapacityChips(next);
+    });
+  });
+  document.querySelectorAll("[data-capacity-preset]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      if (!capInput) return;
+      const next = clampCap(chip.dataset.capacityPreset);
+      capInput.value = String(next);
+      syncClubCapacityChips(next);
+    });
+  });
+  capInput?.addEventListener("input", () => {
+    syncClubCapacityChips(capInput.value);
+  });
+  capInput?.addEventListener("blur", () => {
+    const clamped = clampCap(capInput.value);
+    capInput.value = String(clamped);
+    syncClubCapacityChips(clamped);
+  });
+
+  // Điều khiển chọn ảnh / xoá ảnh custom cho Logo & Ảnh nền
+  document.querySelectorAll("[data-trigger-file]").forEach((zone) => {
+    zone.addEventListener("click", (event) => {
+      const removeBtn = event.target.closest("[data-clear-file]");
+      if (removeBtn) {
+        event.stopPropagation();
+        const fileInput = document.getElementById(removeBtn.dataset.clearFile);
+        if (fileInput) {
+          fileInput.value = "";
+          showClubImagePreview(fileInput, zone, "");
+        }
+        return;
+      }
+      const fileInput = document.getElementById(zone.dataset.triggerFile);
+      fileInput?.click();
+    });
+    zone.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        const fileInput = document.getElementById(zone.dataset.triggerFile);
+        fileInput?.click();
+      }
+    });
+  });
   document.querySelectorAll(".club-filter-trigger").forEach((trigger) => trigger.addEventListener("click", () => {
     const dropdown = trigger.closest(".club-filter-dropdown");
     const opening = !dropdown.classList.contains("is-open");
@@ -486,6 +641,21 @@ function bindClubEvents() {
   clubEls.createForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!requireClubLogin()) return;
+    const clubNameVal = document.getElementById("club-name").value.trim();
+    if (!clubNameVal || clubNameVal.length < 2) {
+      clubEls.createMessage.textContent = "Tên câu lạc bộ phải có từ 2 đến 100 ký tự.";
+      clubEls.createMessage.classList.remove("success");
+      clubEls.createMessage.hidden = false;
+      document.getElementById("club-name")?.focus();
+      return;
+    }
+    if (!clubEls.createGame.value) {
+      clubEls.createMessage.textContent = "Vui lòng chọn tựa game cho câu lạc bộ.";
+      clubEls.createMessage.classList.remove("success");
+      clubEls.createMessage.hidden = false;
+      document.getElementById("club-create-game-trigger")?.focus();
+      return;
+    }
     clubEls.createMessage.hidden = true;
     clubEls.createButton.disabled = true;
     clubEls.createButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo...';

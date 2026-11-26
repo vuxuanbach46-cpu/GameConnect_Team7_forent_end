@@ -308,8 +308,31 @@ async function loadProfile() {
       };
     }
   } else {
-    currentProfile = unwrapData(await api.get(PROFILE_API.PROFILE_BY_USERNAME(requestedUsername)));
-    profileCreated = true;
+    try {
+      currentProfile = unwrapData(await api.get(PROFILE_API.PROFILE_BY_USERNAME(requestedUsername)));
+      profileCreated = true;
+    } catch (error) {
+      if (error && (error.status === 404 || error.status === 403)) {
+        profileCreated = false;
+        currentProfile = {
+          user_id: null,
+          username: requestedUsername,
+          display_name: requestedUsername,
+          bio: error.status === 403
+            ? "Người chơi này đang đặt hồ sơ ở chế độ riêng tư."
+            : "Người chơi này chưa cập nhật chi tiết hồ sơ game thủ.",
+          region: "Chưa cập nhật khu vực",
+          play_time: "Chưa cập nhật giờ chơi",
+          has_mic: false,
+          is_public: error.status !== 403,
+          avatar: `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(requestedUsername)}&backgroundColor=b6e3f4`,
+          user_games: [],
+          teams: [],
+        };
+      } else {
+        throw error;
+      }
+    }
   }
 
   if (!currentProfile || typeof currentProfile !== "object") throw new Error("Dữ liệu hồ sơ không hợp lệ.");

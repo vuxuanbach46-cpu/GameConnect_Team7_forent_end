@@ -80,6 +80,370 @@ body.gc-rightbar-has-fixed { padding-right: 64px; }
 .fc-right-bar.gc-rightbar-unified #gc-notif-bell > button { width: 40px; height: 40px; }
 .fc-right-bar.gc-rightbar-unified svg { flex: 0 0 auto; }
 
+/* ==================== AVATAR NGƯỜI ĐANG NHẮN TIN & KHUNG CHAT 1-1 TOÀN HỆ THỐNG ==================== */
+.fc-right-chat-list {
+  margin-top: 6px;
+  padding: 12px 6px 6px;
+  border-top: 1px solid var(--fc-border, #232734);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto !important;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: visible;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong, #31374a) transparent;
+}
+
+.fc-right-chat-list[hidden] {
+  display: none !important;
+}
+
+.fc-right-chat-item {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.fc-right-chat-item:hover {
+  transform: translateY(-1px);
+}
+
+.fc-right-chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--fc-border-strong, #31374a);
+  background: var(--fc-bg-surface, #161922);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.fc-right-chat-item:hover .fc-right-chat-avatar,
+.fc-right-chat-item.has-unread .fc-right-chat-avatar {
+  border-color: var(--fc-orange, #e85002);
+}
+
+.fc-right-chat-item.is-active .fc-right-chat-avatar {
+  border-color: var(--fc-orange, #e85002);
+  box-shadow: 0 0 0 3px rgba(232, 80, 2, 0.25);
+}
+
+.fc-right-chat-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--fc-orange, #e85002);
+  color: #ffffff;
+  border: 2px solid var(--fc-bg-sidebar, #11131a);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.fc-right-chat-presence,
+.fc-presence-badge {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--fc-bg-sidebar, #11131a);
+}
+
+.fc-presence-online {
+  background: var(--fc-online, #22c55e);
+}
+
+.fc-presence-ingame {
+  background: var(--fc-ingame, #eab308);
+}
+
+.fc-presence-offline {
+  background: var(--fc-offline, #64748b);
+}
+
+.fc-chat-widget {
+  position: fixed;
+  right: 82px;
+  bottom: 18px;
+  width: 350px;
+  height: 460px;
+  z-index: 260;
+  display: flex;
+  flex-direction: column;
+  background: var(--fc-bg-card, #13161f);
+  border: 1px solid var(--fc-border-strong, #31374a);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: height 0.18s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.fc-chat-widget[hidden] {
+  display: none !important;
+}
+
+.fc-chat-widget.is-minimized {
+  height: auto;
+}
+
+.fc-chat-widget.is-minimized .fc-chat-messages,
+.fc-chat-widget.is-minimized .fc-chat-input-bar {
+  display: none;
+}
+
+.fc-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--fc-bg-surface, #161922);
+  border-bottom: 1px solid var(--fc-border, #232734);
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.fc-chat-widget.is-minimized .fc-chat-header {
+  border-bottom: none;
+}
+
+.fc-chat-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fc-chat-avatar-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.fc-chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--fc-border-strong, #31374a);
+  background: var(--fc-bg-card, #13161f);
+}
+
+.fc-chat-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fc-chat-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--fc-text, #f1f5f9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-chat-status {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fc-text-muted, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-chat-status.is-online {
+  color: var(--fc-online, #22c55e);
+}
+
+.fc-chat-status.is-inroom {
+  color: var(--fc-ingame, #eab308);
+}
+
+.fc-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.fc-chat-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fc-text-secondary, #94a3b8);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.fc-chat-icon-btn:hover {
+  background: var(--fc-bg-card, #13161f);
+  border-color: var(--fc-border, #232734);
+  color: var(--fc-text, #f1f5f9);
+}
+
+.fc-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--fc-bg-main, #0c0d12);
+  scrollbar-width: thin;
+  scrollbar-color: var(--fc-border-strong, #31374a) var(--fc-bg-main, #0c0d12);
+}
+
+.fc-chat-welcome {
+  margin: auto 0;
+  padding: 18px 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--fc-border-strong, #31374a);
+  background: var(--fc-bg-card, #13161f);
+  color: var(--fc-text-secondary, #94a3b8);
+  font-size: 12.5px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.fc-chat-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 82%;
+}
+
+.fc-chat-msg.is-mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.fc-chat-msg.is-theirs {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.fc-chat-bubble {
+  padding: 9px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.fc-chat-msg.is-mine .fc-chat-bubble {
+  background: var(--fc-orange, #e85002);
+  color: #ffffff;
+  border: 1px solid var(--fc-orange, #e85002);
+  border-radius: 12px 12px 2px 12px;
+}
+
+.fc-chat-msg.is-theirs .fc-chat-bubble {
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text, #f1f5f9);
+  border: 1px solid var(--fc-border, #232734);
+  border-radius: 12px 12px 12px 2px;
+}
+
+.fc-chat-msg-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  padding: 0 2px;
+  font-size: 10.5px;
+  color: var(--fc-text-muted, #64748b);
+}
+
+.fc-chat-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--fc-bg-card, #13161f);
+  border-top: 1px solid var(--fc-border, #232734);
+  flex-shrink: 0;
+}
+
+.fc-chat-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--fc-border-strong, #31374a);
+  background: var(--fc-bg-surface, #161922);
+  color: var(--fc-text, #f1f5f9);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.fc-chat-input::placeholder {
+  color: var(--fc-text-muted, #64748b);
+}
+
+.fc-chat-input:focus {
+  border-color: var(--fc-orange, #e85002);
+}
+
+.fc-chat-send-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--fc-orange, #e85002);
+  background: var(--fc-orange, #e85002);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.fc-chat-send-btn:hover:not(:disabled) {
+  background: var(--fc-orange-hover, #d14700);
+  border-color: var(--fc-orange-hover, #d14700);
+}
+
+.fc-chat-send-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (max-width: 760px) {
   .fc-right-bar.gc-rightbar-fixed {
     inset: auto 0 0;

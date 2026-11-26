@@ -26,7 +26,6 @@
       <a href="admin-reports.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Quản lý Báo cáo"><span class="fc-nav-icon" style="color:#ef4444"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span><span class="fc-nav-label">Quản lý Báo cáo</span></a>
       <!-- <div class="fc-nav-divider"></div> -->
       <a href="quick-match.html" class="fc-nav-item" title="Tìm đội nhanh"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span><span class="fc-nav-label">Tìm đội nhanh</span></a>
-      <a href="quick-match.html?view=lobby" class="fc-nav-item" title="Tạo phòng đội"><span class="fc-nav-icon"><i class="fa-solid fa-circle-plus"></i></span><span class="fc-nav-label">Tạo phòng đội</span></a>
       <a href="community.html" class="fc-nav-item" title="Bảng tin cộng đồng"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span><span class="fc-nav-label">Bảng tin</span></a>
       <a href="friends.html" class="fc-nav-item" title="Bạn bè &amp; Kết nối"><span class="fc-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span class="fc-nav-label">Bạn bè &amp; Kết nối</span></a>
       <a href="clubs.html" class="fc-nav-item is-current" title="Câu lạc bộ" aria-current="page"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path></svg></span><span class="fc-nav-label">Câu lạc bộ</span></a>
@@ -113,14 +112,76 @@
     <button type="button" class="club-modal-backdrop" data-close-club-modal aria-label="Đóng popup"></button>
     <section class="club-dialog" role="dialog" aria-modal="true" aria-labelledby="club-modal-title">
       <div class="club-dialog-header"><div><span class="clubs-eyebrow">BUILD YOUR SQUAD</span><h2 id="club-modal-title">Tạo câu lạc bộ</h2><p>Mở đội mới và tìm những đồng đội phù hợp.</p></div><button type="button" class="club-modal-close" data-close-club-modal aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></div>
-      <form id="club-create-form" class="club-create-form">
+      <form id="club-create-form" class="club-create-form" novalidate>
         <label><span>Tên câu lạc bộ <b>*</b></span><input id="club-name" maxlength="100" minlength="2" required placeholder="VD: Saigon Night Owls"></label>
-        <label><span>Tựa game <b>*</b></span><select id="club-create-game" required><option value="">Chọn game</option></select></label>
+        <div class="club-form-field">
+          <span>Tựa game <b>*</b></span>
+          <div class="club-filter-dropdown club-form-dropdown" data-club-dropdown="create-game">
+            <select id="club-create-game" class="club-native-filter" tabindex="-1" aria-hidden="true" required><option value="">Chọn game</option></select>
+            <button type="button" class="club-filter-trigger" id="club-create-game-trigger" aria-label="Chọn tựa game" aria-haspopup="listbox" aria-expanded="false">
+              <span class="club-dd-trigger-left" id="club-create-game-label">
+                <svg class="club-dd-grid-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Chọn game</span>
+              </span>
+              <svg class="club-filter-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="club-filter-menu" id="club-create-game-menu" role="listbox" aria-label="Danh sách tựa game" hidden></div>
+          </div>
+        </div>
         <label><span>Giới thiệu</span><textarea id="club-description" rows="3" maxlength="1000" placeholder="Phong cách chơi, lịch hoạt động, mục tiêu của đội..."></textarea></label>
-        <div class="club-form-columns"><label><span>Sức chứa (tối đa 100 người)</span><input id="club-max-members" type="number" min="2" max="100" value="100" required></label><label><span>Chế độ tham gia</span><select id="club-join-mode"><option value="PUBLIC">Tham gia tự do</option><option value="APPROVAL_REQUIRED">Cần phê duyệt</option></select></label></div>
+        <div class="club-form-columns">
+          <div class="club-form-field">
+            <span>Sức chứa (tối đa 100 người)</span>
+            <div class="club-capacity-box">
+              <button type="button" class="club-capacity-step" data-capacity-step="-5" aria-label="Giảm sức chứa">−</button>
+              <div class="club-capacity-input-wrap">
+                <input id="club-max-members" type="number" min="2" max="100" value="100" required>
+                <span class="club-capacity-unit">người</span>
+              </div>
+              <button type="button" class="club-capacity-step" data-capacity-step="5" aria-label="Tăng sức chứa">+</button>
+            </div>
+            <div class="club-capacity-presets" role="group" aria-label="Chọn nhanh sức chứa">
+              <button type="button" class="club-capacity-chip" data-capacity-preset="10">10</button>
+              <button type="button" class="club-capacity-chip" data-capacity-preset="25">25</button>
+              <button type="button" class="club-capacity-chip" data-capacity-preset="50">50</button>
+              <button type="button" class="club-capacity-chip active" data-capacity-preset="100">100</button>
+            </div>
+          </div>
+          <div class="club-form-field">
+            <span>Chế độ tham gia</span>
+            <div class="club-filter-dropdown club-form-dropdown" data-club-dropdown="create-join-mode">
+              <select id="club-join-mode" class="club-native-filter" tabindex="-1" aria-hidden="true"><option value="PUBLIC">Tham gia tự do</option><option value="APPROVAL_REQUIRED">Cần phê duyệt</option></select>
+              <button type="button" class="club-filter-trigger" id="club-join-mode-trigger" aria-label="Chọn chế độ tham gia" aria-haspopup="listbox" aria-expanded="false">
+                <span class="club-dd-trigger-left" id="club-join-mode-label"><span>Tham gia tự do</span></span>
+                <svg class="club-filter-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="club-filter-menu" id="club-join-mode-menu" role="listbox" aria-label="Danh sách chế độ tham gia" hidden></div>
+            </div>
+          </div>
+        </div>
         <div class="club-image-fields">
-          <label><span>Ảnh logo câu lạc bộ <small>(JPG, PNG hoặc WebP · tối đa 5 MB)</small></span><input id="club-logo-file" type="file" accept="image/jpeg,image/png,image/webp"><span class="club-image-preview" id="club-logo-preview"><i class="fa-regular fa-image"></i><span>Chưa chọn ảnh logo</span></span></label>
-          <label><span>Ảnh nền phía sau logo <small>(JPG, PNG hoặc WebP · tối đa 5 MB)</small></span><input id="club-cover-file" type="file" accept="image/jpeg,image/png,image/webp"><span class="club-image-preview club-cover-preview" id="club-cover-preview"><i class="fa-regular fa-image"></i><span>Chưa chọn ảnh nền</span></span></label>
+          <div class="club-form-field">
+            <span>Ảnh logo câu lạc bộ <small>(Tối đa 5 MB)</small></span>
+            <input id="club-logo-file" class="club-file-input-hidden" type="file" accept="image/jpeg,image/png,image/webp" tabindex="-1" aria-hidden="true">
+            <div class="club-image-preview" id="club-logo-preview" role="button" tabindex="0" data-trigger-file="club-logo-file" aria-label="Tải ảnh logo câu lạc bộ">
+              <div class="club-upload-placeholder">
+                <span class="club-upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                <strong class="club-upload-title">Tải ảnh logo lên</strong>
+                <span class="club-upload-sub">JPG, PNG, WebP · Tối đa 5 MB</span>
+              </div>
+            </div>
+          </div>
+          <div class="club-form-field">
+            <span>Ảnh nền phía sau logo <small>(Tối đa 5 MB)</small></span>
+            <input id="club-cover-file" class="club-file-input-hidden" type="file" accept="image/jpeg,image/png,image/webp" tabindex="-1" aria-hidden="true">
+            <div class="club-image-preview club-cover-preview" id="club-cover-preview" role="button" tabindex="0" data-trigger-file="club-cover-file" aria-label="Tải ảnh nền câu lạc bộ">
+              <div class="club-upload-placeholder">
+                <span class="club-upload-icon"><i class="fa-regular fa-image"></i></span>
+                <strong class="club-upload-title">Tải ảnh nền bìa lên</strong>
+                <span class="club-upload-sub">JPG, PNG, WebP · Tỉ lệ ngang 16:9</span>
+              </div>
+            </div>
+          </div>
         </div>
         <p id="club-form-message" class="club-form-message" role="status" hidden></p>
         <div class="club-form-actions"><button type="button" class="club-btn club-btn-quiet" data-close-club-modal>Huỷ</button><button type="submit" id="club-submit" class="club-btn club-btn-primary"><i class="fa-solid fa-plus"></i> Tạo câu lạc bộ</button></div>
