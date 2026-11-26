@@ -5,6 +5,9 @@
   const emptyBox = document.getElementById("feed-empty");
   const accessDenied = document.getElementById("feed-access-denied");
   const captainTools = document.getElementById("feed-captain-tools");
+  const joinRequestsPanel = document.getElementById("feed-join-requests");
+  const joinRequestsList = document.getElementById("feed-join-requests-list");
+  const joinRequestsCount = document.getElementById("feed-join-requests-count");
   const modal = document.getElementById("feed-modal");
   const form = document.getElementById("feed-post-form");
   const postType = document.getElementById("feed-post-type");
@@ -14,18 +17,110 @@
 
   const membersListEl = document.getElementById("club-members-list");
   const membersCountEl = document.getElementById("club-members-count");
+  const inviteFriendsButton = document.getElementById("btn-invite-club-friend");
+  const inviteModal = document.getElementById("club-invite-modal");
+  const inviteList = document.getElementById("club-invite-list");
+  const inviteStatus = document.getElementById("club-invite-status");
+  const inviteSearch = document.getElementById("club-invite-search");
   const memberSearchInput = document.getElementById("club-member-search-input");
   const memberPopover = document.getElementById("club-member-popover");
   const popoverAvatar = document.getElementById("club-popover-avatar");
   const popoverName = document.getElementById("club-popover-name");
   const popoverRole = document.getElementById("club-popover-role");
   const popoverProfileLink = document.getElementById("club-popover-profile-link");
+  const clubChatMessagesEl = document.getElementById("club-chat-messages");
+  const clubChatStatusEl = document.getElementById("club-chat-status");
+  const clubChatForm = document.getElementById("club-chat-form");
+  const clubChatInput = document.getElementById("club-chat-input");
+  const clubChatSendButton = document.getElementById("club-chat-send");
 
   let currentTeam = null;
   let teamDetail = null;
   let posts = [];
   let clubMembers = [];
   let activeMemberUsername = null;
+  let lastClubChatMessageId = 0;
+  let clubChatMessages = [];
+  let clubChatTimer = null;
+  let clubChatInitialized = false;
+  let invitableFriends = [];
+  const sentClubInvites = new Set();
+
+  function setClubWorkspaceTab(tab, updateUrl = true) {
+    const activeTab = tab === "chat" ? "chat" : "feed";
+    document.querySelectorAll("[data-club-tab]").forEach((button) => {
+      const selected = button.dataset.clubTab === activeTab;
+      button.classList.toggle("active", selected);
+      button.setAttribute("aria-selected", String(selected));
+    });
+    document.querySelectorAll("[data-club-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.clubPanel !== activeTab;
+    });
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      if (activeTab === "chat") url.searchParams.set("tab", "chat");
+      else url.searchParams.delete("tab");
+      window.history.replaceState({}, "", url);
+    }
+    if (activeTab === "chat") {
+      requestAnimationFrame(() => { clubChatMessagesEl.scrollTop = clubChatMessagesEl.scrollHeight; });
+      clubChatInput?.focus({ preventScroll: true });
+    }
+  }
+
+  function renderClubChatMessages() {
+    if (!clubChatMessagesEl) return;
+    if (!clubChatMessages.length) {
+      clubChatMessagesEl.innerHTML = '<div class="club-chat-empty"><i class="fa-regular fa-message"></i><strong>Chưa có tin nhắn nào</strong><span>Hãy bắt đầu cuộc trò chuyện của câu lạc bộ.</span></div>';
+      return;
+    }
+    clubChatMessagesEl.innerHTML = clubChatMessages.map((message) => {
+      const name = message.sender_name || message.sender_username || "Thành viên";
+      const avatar = getMemberAvatar(name, message.avatar);
+      const date = message.created_at ? new Date(message.created_at).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" }) : "";
+      return `<article class="club-chat-row${message.is_mine ? " is-mine" : ""}" data-chat-message="${Number(message.id)}">
+        <img class="club-chat-avatar" src="${escapeFeedHTML(avatar)}" alt="" loading="lazy">
+        <div class="club-chat-message-wrap"><div class="club-chat-meta"><strong class="club-chat-author">${escapeFeedHTML(message.is_mine ? "Bạn" : name)}</strong><time>${escapeFeedHTML(date)}</time></div><div class="club-chat-bubble">${escapeFeedHTML(message.content || "")}</div></div>
+      </article>`;
+    }).join("");
+  }
+
+  async function loadClubChatMessages(initial = false) {
+    if (!Number.isSafeInteger(teamId) || teamId <= 0) return;
+    try {
+      const params = !initial && lastClubChatMessageId > 0 ? { after_id: lastClubChatMessageId, limit: 100 } : { limit: 100 };
+      const response = await api.get(`/api/teams/${teamId}/chat/messages`, params);
+      const data = unwrapPayload(response);
+      const incoming = Array.isArray(data?.messages) ? data.messages : [];
+      const wasNearBottom = clubChatMessagesEl.scrollHeight - clubChatMessagesEl.scrollTop - clubChatMessagesEl.clientHeight < 90;
+      const knownIds = new Set(clubChatMessages.map((item) => Number(item.id)));
+      incoming.forEach((item) => {
+        const id = Number(item.id);
+        if (!knownIds.has(id)) clubChatMessages.push(item);
+        if (id > lastClubChatMessageId) lastClubChatMessageId = id;
+      });
+      clubChatMessages.sort((a, b) => Number(a.id) - Number(b.id));
+      clubChatMessages = clubChatMessages.slice(-200);
+      renderClubChatMessages();
+      if (initial || wasNearBottom) clubChatMessagesEl.scrollTop = clubChatMessagesEl.scrollHeight;
+      if (clubChatStatusEl) clubChatStatusEl.textContent = "Tin nhắn được lưu và cập nhật tự động.";
+      if (clubChatForm) clubChatForm.hidden = false;
+    } catch (error) {
+      if (clubChatStatusEl) clubChatStatusEl.textContent = error.message || "Không tải được chat. Chỉ thành viên câu lạc bộ mới có quyền truy cập.";
+      if (clubChatForm) clubChatForm.hidden = true;
+    }
+  }
+
+  function initClubChat() {
+    if (clubChatInitialized) return;
+    clubChatInitialized = true;
+    loadClubChatMessages(true);
+    clubChatTimer = window.setInterval(() => {
+      if (!document.hidden && !document.getElementById("club-chat-panel")?.hidden) {
+        loadClubChatMessages(false);
+      }
+    }, 3000);
+  }
 
   function escapeFeedHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -39,6 +134,51 @@
 
   function unwrapPayload(res) {
     return res && typeof res === "object" && res.data !== undefined ? res.data : res;
+  }
+
+  async function loadPendingJoinRequests() {
+    if (!joinRequestsPanel || !joinRequestsList || currentTeam?.role !== "captain" || teamDetail?.join_mode !== "APPROVAL_REQUIRED") return;
+    joinRequestsPanel.hidden = false;
+    joinRequestsList.innerHTML = '<p class="feed-join-requests-state"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Đang tải yêu cầu...</p>';
+    try {
+      const response = await api.get(`/api/teams/${teamId}/join-requests`);
+      const requests = unwrapPayload(response);
+      const items = Array.isArray(requests) ? requests : [];
+      joinRequestsCount.textContent = String(items.length);
+      joinRequestsList.innerHTML = items.length ? items.map((request) => `
+        <article class="feed-join-request" role="listitem" data-join-request-row="${Number(request.id)}">
+          <div class="feed-join-request-person"><span class="feed-join-request-avatar">${escapeFeedHTML(String(request.username || "G").slice(0, 1).toUpperCase())}</span><div><strong>${escapeFeedHTML(request.username || `Người chơi #${request.user_id}`)}</strong><p>${escapeFeedHTML(request.message || "Không có lời nhắn kèm theo.")}</p></div></div>
+          <div class="feed-join-request-actions"><button type="button" data-review-join="${Number(request.id)}" data-review-status="ACCEPTED" title="Duyệt thành viên" aria-label="Duyệt yêu cầu của ${escapeFeedHTML(request.username || "thành viên")}"><i class="fa-solid fa-check" aria-hidden="true"></i> Duyệt</button><button type="button" data-review-join="${Number(request.id)}" data-review-status="REJECTED" title="Từ chối yêu cầu" aria-label="Từ chối yêu cầu của ${escapeFeedHTML(request.username || "thành viên")}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
+        </article>`).join("") : '<p class="feed-join-requests-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Chưa có yêu cầu nào đang chờ duyệt.</p>';
+    } catch (error) {
+      joinRequestsCount.textContent = "!";
+      joinRequestsList.innerHTML = `<p class="feed-join-requests-state is-error">${escapeFeedHTML(error.message || "Không tải được yêu cầu tham gia.")}</p>`;
+    }
+  }
+
+  async function reviewJoinRequest(requestId, status, button) {
+    const row = button.closest("[data-join-request-row]");
+    row?.querySelectorAll("button").forEach((item) => { item.disabled = true; });
+    try {
+      await api.patch(`/api/teams/${teamId}/join-requests/${requestId}`, { status });
+      const pending = loadPendingJoinRequests();
+      if (status === "ACCEPTED") {
+        const detailResponse = await api.get(`/api/teams/${teamId}`);
+        teamDetail = unwrapPayload(detailResponse);
+        clubMembers = Array.isArray(teamDetail?.members) ? teamDetail.members : clubMembers;
+        updateClubBanner();
+        renderClubMembers();
+      }
+      await pending;
+      const notice = document.getElementById("feed-join-request-notice");
+      if (notice) notice.hidden = true;
+    } catch (error) {
+      if (row?.isConnected) {
+        row.querySelectorAll("button").forEach((item) => { item.disabled = false; });
+        const notice = document.getElementById("feed-join-request-notice");
+        if (notice) { notice.textContent = error.message || "Không thể xử lý yêu cầu."; notice.hidden = false; }
+      }
+    }
   }
 
   function resolveMediaUrl(rawUrl) {
@@ -73,6 +213,66 @@
     return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(username || "Player")}&backgroundColor=b6e3f4`;
   }
 
+  function renderInvitableFriends() {
+    if (!inviteList) return;
+    const query = String(inviteSearch?.value || "").trim().toLocaleLowerCase("vi");
+    const filtered = invitableFriends.filter((friend) => String(friend.username || "").toLocaleLowerCase("vi").includes(query));
+    if (!filtered.length) {
+      inviteList.innerHTML = `<div class="club-invite-empty"><i class="fa-solid fa-user-group" aria-hidden="true"></i><strong>${invitableFriends.length ? "Không tìm thấy bạn bè phù hợp" : "Chưa có bạn bè có thể mời"}</strong><span>${invitableFriends.length ? "Thử tìm với tên khác." : "Bạn bè đã ở trong CLB hoặc đã có lời mời đang chờ sẽ không xuất hiện tại đây."}</span></div>`;
+      return;
+    }
+    inviteList.innerHTML = filtered.map((friend) => {
+      const friendId = Number(friend.user_id);
+      const sent = sentClubInvites.has(friendId);
+      const avatar = getMemberAvatar(friend.username, friend.avatar);
+      return `<article class="club-invite-friend" role="listitem" data-invite-friend="${friendId}"><img src="${escapeFeedHTML(avatar)}" alt="" loading="lazy"><div class="club-invite-friend-meta"><strong>${escapeFeedHTML(friend.username || "Người chơi")}</strong><span>${sent ? "Đã gửi lời mời" : "Bạn bè của bạn"}</span></div><button type="button" class="club-invite-send" data-send-club-invite="${friendId}" ${sent ? "disabled" : ""}>${sent ? '<i class="fa-solid fa-check"></i> Đã gửi' : '<i class="fa-solid fa-user-plus"></i> Mời'}</button></article>`;
+    }).join("");
+  }
+
+  async function openClubInviteModal() {
+    if (!inviteModal || !teamId) return;
+    inviteModal.hidden = false;
+    document.body.classList.add("club-invite-open");
+    inviteStatus.classList.remove("is-error");
+    inviteStatus.textContent = "Đang tải bạn bè...";
+    inviteList.replaceChildren();
+    inviteSearch.value = "";
+    inviteSearch.focus();
+    try {
+      const response = await api.get("/api/team-invitations/available-friends", { team_id: teamId });
+      const data = unwrapPayload(response);
+      invitableFriends = Array.isArray(data) ? data : [];
+      inviteStatus.textContent = `${invitableFriends.length} bạn bè có thể mời`;
+      renderInvitableFriends();
+    } catch (error) {
+      inviteStatus.textContent = error.message || "Không tải được danh sách bạn bè.";
+      inviteList.replaceChildren();
+    }
+  }
+
+  function closeClubInviteModal() {
+    if (!inviteModal) return;
+    inviteModal.hidden = true;
+    document.body.classList.remove("club-invite-open");
+  }
+
+  async function sendClubInvite(friendId, button) {
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Đang gửi';
+    try {
+      await api.post("/api/team-invitations", { team_id: teamId, user_id: friendId });
+      sentClubInvites.add(friendId);
+      inviteStatus.classList.remove("is-error");
+      inviteStatus.textContent = "Đã gửi lời mời thành công.";
+      renderInvitableFriends();
+    } catch (error) {
+      button.disabled = false;
+      button.innerHTML = '<i class="fa-solid fa-user-plus" aria-hidden="true"></i> Mời';
+      inviteStatus.textContent = error.message || "Không thể gửi lời mời.";
+      inviteStatus.classList.add("is-error");
+    }
+  }
+
   function initAdminSidebarVisibility() {
     const token = localStorage.getItem("access_token");
     let role = localStorage.getItem("user_role") || "";
@@ -86,6 +286,143 @@
     document.querySelectorAll(".admin-nav-item").forEach((item) => {
       item.style.display = isAdmin ? "" : "none";
     });
+  }
+
+  function initClubRightbar() {
+    const avatarButton = document.getElementById("btn-avatar-menu");
+    const avatarMenu = document.getElementById("avatar-dropdown-menu");
+    const avatarName = document.getElementById("avatar-user-name");
+    const avatarImage = document.querySelector(".fc-self-avatar");
+    const changePasswordButton = document.getElementById("open-change-password");
+    const passwordModal = document.getElementById("change-password-modal");
+    const passwordForm = document.getElementById("change-password-form");
+    const passwordMessage = document.getElementById("change-password-message");
+    const passwordSubmit = document.getElementById("change-password-submit");
+    const savedTheme = localStorage.getItem("gc_friends_theme") || "dark";
+
+    const applyTheme = (theme) => {
+      const light = theme === "light";
+      document.body.classList.toggle("fc-light-mode", light);
+      localStorage.setItem("gc_friends_theme", light ? "light" : "dark");
+      document.querySelectorAll(".fc-theme-option").forEach((button) => {
+        const selected = button.dataset.setTheme === (light ? "light" : "dark");
+        button.classList.toggle("active", selected);
+        const check = button.querySelector(".fc-theme-check");
+        if (check) check.textContent = selected ? "✓" : "";
+      });
+    };
+
+    applyTheme(savedTheme);
+    avatarButton?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (!avatarMenu) return;
+      avatarMenu.hidden = !avatarMenu.hidden;
+      avatarButton.setAttribute("aria-expanded", String(!avatarMenu.hidden));
+    });
+    document.querySelectorAll(".fc-theme-option").forEach((button) => {
+      button.addEventListener("click", () => {
+        applyTheme(button.dataset.setTheme);
+        if (avatarMenu) avatarMenu.hidden = true;
+        avatarButton?.setAttribute("aria-expanded", "false");
+      });
+    });
+    document.addEventListener("click", (event) => {
+      if (avatarMenu && !avatarMenu.hidden && !avatarMenu.contains(event.target) && !avatarButton?.contains(event.target)) {
+        avatarMenu.hidden = true;
+        avatarButton?.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && avatarMenu) {
+        avatarMenu.hidden = true;
+        avatarButton?.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.getElementById("logout-btn")?.addEventListener("click", () => {
+      ["access_token", "refresh_token", "remember_login", "auth_provider", "user_role"].forEach((key) => localStorage.removeItem(key));
+      window.location.href = "../index.html";
+    });
+
+    if (changePasswordButton) {
+      changePasswordButton.hidden = String(localStorage.getItem("auth_provider") || "").toLowerCase() === "google";
+      const setPasswordModal = (open) => {
+        if (!passwordModal) return;
+        passwordModal.hidden = !open;
+        document.body.classList.toggle("gc-password-modal-open", open);
+        if (open) {
+          if (avatarMenu) avatarMenu.hidden = true;
+          avatarButton?.setAttribute("aria-expanded", "false");
+          window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+        } else {
+          passwordForm?.reset();
+          if (passwordMessage) {
+            passwordMessage.hidden = true;
+            passwordMessage.textContent = "";
+            passwordMessage.classList.remove("error");
+          }
+        }
+      };
+      changePasswordButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setPasswordModal(true);
+      });
+      ["close-change-password", "cancel-change-password"].forEach((id) => {
+        document.getElementById(id)?.addEventListener("click", () => setPasswordModal(false));
+      });
+      passwordModal?.querySelectorAll("[data-close-password]").forEach((element) => {
+        element.addEventListener("click", () => setPasswordModal(false));
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && passwordModal && !passwordModal.hidden) setPasswordModal(false);
+      });
+      passwordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const oldPassword = document.getElementById("old-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const showMessage = (message, isError = false) => {
+          passwordMessage.textContent = message;
+          passwordMessage.classList.toggle("error", isError);
+          passwordMessage.hidden = false;
+        };
+        if (newPassword !== confirmPassword) return showMessage("Mật khẩu xác nhận không khớp.", true);
+        if (oldPassword === newPassword) return showMessage("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+        passwordSubmit.disabled = true;
+        passwordSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Đang cập nhật...';
+        try {
+          const response = await api.put("/auth/change-password", { old_password: oldPassword, new_password: newPassword });
+          showMessage(response?.message || "Đổi mật khẩu thành công.");
+          passwordForm.reset();
+        } catch (error) {
+          showMessage(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+        } finally {
+          passwordSubmit.disabled = false;
+          passwordSubmit.innerHTML = '<i class="fa-solid fa-key" aria-hidden="true"></i> Cập nhật mật khẩu';
+        }
+      });
+    }
+
+    let fallbackName = localStorage.getItem("username") || "Game thủ";
+    try {
+      const token = localStorage.getItem("access_token") || "";
+      const payload = JSON.parse(atob((token.split(".")[1] || "").replace(/-/g, "+").replace(/_/g, "/")));
+      fallbackName = payload.username || (payload.email ? payload.email.split("@")[0] : payload.sub) || fallbackName;
+    } catch (_) {}
+    if (avatarName) avatarName.textContent = fallbackName;
+    if (avatarImage) avatarImage.alt = `Avatar của ${fallbackName}`;
+
+    if (localStorage.getItem("access_token") && typeof api !== "undefined") {
+      api.get("/user/me").then((response) => {
+        const user = unwrapPayload(response) || {};
+        const username = user.username || fallbackName;
+        if (avatarName) avatarName.textContent = username;
+        return api.get("/api/profiles/me");
+      }).then((response) => {
+        const profile = unwrapPayload(response) || {};
+        if (profile.display_name && avatarName) avatarName.textContent = profile.display_name;
+        if (profile.avatar && avatarImage) avatarImage.src = resolveMediaUrl(profile.avatar);
+      }).catch(() => {});
+    }
   }
 
   function updateClubBanner() {
@@ -347,8 +684,11 @@
 
       updateClubBanner();
       captainTools.hidden = currentTeam.role !== "captain";
+      if (inviteFriendsButton) inviteFriendsButton.hidden = !["captain", "member"].includes(currentTeam.role);
+      await loadPendingJoinRequests();
       renderFeed();
       renderClubMembers();
+      initClubChat();
 
       if (typeof window.gcRefreshSidebarClubs === "function") {
         window.gcRefreshSidebarClubs();
@@ -371,6 +711,8 @@
       if (p) p.textContent = message;
       accessDenied.hidden = false;
     }
+    if (clubChatStatusEl) clubChatStatusEl.textContent = message;
+    if (clubChatForm) clubChatForm.hidden = true;
     if (membersListEl) {
       membersListEl.innerHTML = `
         <div class="club-members-empty">
@@ -380,6 +722,36 @@
       `;
     }
   }
+
+  document.querySelectorAll("[data-club-tab]").forEach((button) => {
+    button.addEventListener("click", () => setClubWorkspaceTab(button.dataset.clubTab));
+  });
+  setClubWorkspaceTab(new URLSearchParams(window.location.search).get("tab"), false);
+
+  clubChatForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const content = (clubChatInput?.value || "").trim();
+    if (!content || !teamId) return;
+    clubChatSendButton.disabled = true;
+    try {
+      const response = await api.post(`/api/teams/${teamId}/chat/messages`, { content });
+      const message = unwrapPayload(response);
+      if (message?.id) {
+        clubChatMessages.push(message);
+        lastClubChatMessageId = Math.max(lastClubChatMessageId, Number(message.id));
+        clubChatMessages = clubChatMessages.slice(-200);
+        renderClubChatMessages();
+        clubChatMessagesEl.scrollTop = clubChatMessagesEl.scrollHeight;
+      }
+      clubChatInput.value = "";
+      clubChatStatusEl.textContent = "Đã gửi tin nhắn.";
+      clubChatInput.focus();
+    } catch (error) {
+      clubChatStatusEl.textContent = error.message || "Không gửi được tin nhắn.";
+    } finally {
+      clubChatSendButton.disabled = false;
+    }
+  });
 
   function closeFeedModal() {
     if (modal) modal.hidden = true;
@@ -466,9 +838,23 @@
     openMemberPopover(memberBtn);
   });
 
+  joinRequestsList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-review-join]");
+    if (!button) return;
+    reviewJoinRequest(Number(button.dataset.reviewJoin), button.dataset.reviewStatus, button);
+  });
+
   memberSearchInput?.addEventListener("input", () => {
     closeMemberPopover();
     renderClubMembers();
+  });
+
+  inviteFriendsButton?.addEventListener("click", openClubInviteModal);
+  inviteSearch?.addEventListener("input", renderInvitableFriends);
+  inviteModal?.querySelectorAll("[data-close-club-invite]").forEach((button) => button.addEventListener("click", closeClubInviteModal));
+  inviteList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-send-club-invite]");
+    if (button) sendClubInvite(Number(button.dataset.sendClubInvite), button);
   });
 
   document.addEventListener("click", (event) => {
@@ -485,8 +871,10 @@
     if (event.key === "Escape") {
       closeFeedModal();
       closeMemberPopover();
+      closeClubInviteModal();
     }
   });
 
+  initClubRightbar();
   loadClubWorkspace();
 })();

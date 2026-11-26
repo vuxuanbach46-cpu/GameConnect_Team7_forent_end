@@ -24,6 +24,14 @@ const GAME_IMAGE_FALLBACKS = [
 ];
 
 const $ = (id) => document.getElementById(id);
+
+// Follow the app-wide theme selected on home or another page; this page has no local toggle.
+if (localStorage.getItem("gc_theme") === "light") {
+  document.documentElement.setAttribute("data-theme", "light");
+} else {
+  document.documentElement.removeAttribute("data-theme");
+}
+
 const profileEls = {
   alert: $("profile-alert"), avatar: $("profile-avatar"), displayName: $("profile-display-name"),
   username: $("profile-username"), region: $("profile-region"), playTime: $("profile-play-time"),

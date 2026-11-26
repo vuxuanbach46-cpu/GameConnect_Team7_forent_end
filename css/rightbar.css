@@ -71,8 +71,27 @@ body.gc-rightbar-has-fixed { padding-right: 64px; }
   box-sizing: border-box;
 }
 
-.fc-right-bar.gc-rightbar-unified .fc-avatar-menu-wrapper { flex: 0 0 auto; }
-.fc-right-bar.gc-rightbar-unified .fc-self-avatar-wrap { display: block; overflow: hidden; }
+.fc-right-bar.gc-rightbar-unified .fc-avatar-menu-wrapper {
+  position: relative;
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+}
+.fc-right-bar.gc-rightbar-unified .fc-self-avatar-wrap {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--fc-border-strong, #31374a);
+  border-radius: 50%;
+  background: var(--fc-bg-surface, #161922);
+}
 .fc-right-bar.gc-rightbar-unified .fc-self-avatar { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .fc-right-bar.gc-rightbar-unified .fc-status-dot { position: absolute; right: 0; bottom: 1px; width: 9px; height: 9px; border: 2px solid var(--fc-bg-sidebar, #11131a); border-radius: 50%; background: #22c55e; }
 .fc-right-bar.gc-rightbar-unified #gc-notif-bell { display: flex; width: 40px; min-height: 40px; align-items: center; justify-content: center; flex: 0 0 auto; }
