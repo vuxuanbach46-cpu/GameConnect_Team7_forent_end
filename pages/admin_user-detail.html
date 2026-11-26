@@ -52,7 +52,7 @@
                         </div>
 
                         <div class="admin-detail-item">
-                            <span class="muted">Họ và tên</span>
+                            <span class="muted">Tên người dùng</span>
                             <strong id="detail-full-name">--</strong>
                         </div>
 
@@ -109,6 +109,10 @@
                 <option value="permanent">Vĩnh viễn</option>
             </select>
 
+            <label for="detail-lock-reason">Lý do khóa</label>
+            <textarea id="detail-lock-reason" maxlength="500" required placeholder="Nhập lý do khóa tài khoản"></textarea>
+            <p id="detail-lock-error" role="alert"></p>
+
             <div class="form-actions">
                 <button type="submit" class="btn btn-danger">
                     Xác nhận
@@ -121,7 +125,9 @@
         </form>
     </dialog>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
     <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/admin_layout.js"></script>
     <script src="../js/pages/admin_user_detail.js"></script>
     <script src="../js/pages/team-navigation.js"></script>

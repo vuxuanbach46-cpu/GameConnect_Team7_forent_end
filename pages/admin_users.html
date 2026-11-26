@@ -34,9 +34,7 @@
                             aria-label="Tìm người dùng">
                     </div>
 
-                    <p class="muted" id="demo-notice">
-                        Dữ liệu minh họa - chưa kết nối API quản trị.
-                    </p>
+                    <p class="muted">Danh sách tài khoản trong hệ thống.</p>
 
                     <!-- Bảng người dùng -->
                     <div class="table-wrap">
@@ -44,7 +42,7 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Họ và tên</th>
+                                    <th>Tên người dùng</th>
                                     <th>Email</th>
                                     <th>Trạng thái</th>
                                     <th>Thao tác</th>
@@ -93,6 +91,10 @@
                 <option value="permanent">Vĩnh viễn</option>
             </select>
 
+            <label for="lock-reason">Lý do khóa</label>
+            <textarea id="lock-reason" maxlength="500" required placeholder="Nhập lý do khóa tài khoản"></textarea>
+            <p id="lock-error" role="alert"></p>
+
             <div class="form-actions">
                 <button type="submit" class="btn btn-danger">
                     Xác nhận khóa
@@ -106,7 +108,9 @@
         </form>
     </dialog>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
     <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/admin_layout.js"></script>
     <script src="../js/pages/admin_users.js"></script>
     <script src="../js/pages/team-navigation.js"></script>

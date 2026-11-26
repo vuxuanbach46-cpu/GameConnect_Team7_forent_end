@@ -15,298 +15,79 @@
   }
 })();
 
-const usersTableBody = document.getElementById("users-table-body");
-const userSearch = document.getElementById("user-search");
-const usersMessage = document.getElementById("users-message");
-
-const prevPageBtn = document.getElementById("prev-page");
-const nextPageBtn = document.getElementById("next-page");
-const pageInfo = document.getElementById("page-info");
-
-const lockDialog = document.getElementById("lock-dialog");
-const lockForm = document.getElementById("lock-form");
-const lockDuration = document.getElementById("lock-duration");
-const lockUserLabel = document.getElementById("lock-user-label");
-const cancelLockBtn = document.getElementById("cancel-lock");
-
-const sampleUsers = [
-    {
-        id: 1,
-        full_name: "Nguyễn Văn An",
-        email: "an@example.com",
-        role: "USER",
-        created_at: "2026-10-01",
-        locked_until: null
-    },
-    {
-        id: 2,
-        full_name: "Trần Thị Bình",
-        email: "binh@example.com",
-        role: "USER",
-        created_at: "2026-10-05",
-        locked_until: null
-    },
-    {
-        id: 3,
-        full_name: "Lê Minh Châu",
-        email: "chau@example.com",
-        role: "USER",
-        created_at: "2026-10-10",
-        locked_until: null
-    },
-    {
-        id: 4,
-        full_name: "Phạm Quốc Dũng",
-        email: "dung@example.com",
-        role: "USER",
-        created_at: "2026-10-12",
-        locked_until: null
-    },
-    {
-        id: 5,
-        full_name: "Hoàng Ngọc Hà",
-        email: "ha@example.com",
-        role: "USER",
-        created_at: "2026-10-15",
-        locked_until: null
-    },
-    {
-        id: 6,
-        full_name: "Đỗ Anh Khoa",
-        email: "khoa@example.com",
-        role: "USER",
-        created_at: "2026-10-20",
-        locked_until: null
-    }
-];
-
-const STORAGE_KEY = "gameconnect_admin_demo_users";
-
-function loadDemoUsers() {
-    try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-
-        if (Array.isArray(saved)) {
-            return saved;
-        }
-    } catch (error) {
-        console.error("Lỗi đọc dữ liệu mẫu:", error);
-    }
-
-    return sampleUsers.map(user => ({ ...user }));
-}
-
-let users = loadDemoUsers();
-let currentPage = 1;
+const usersTableBody = document.getElementById('users-table-body');
+const userSearch = document.getElementById('user-search');
+const usersMessage = document.getElementById('users-message');
+const prevPageBtn = document.getElementById('prev-page');
+const nextPageBtn = document.getElementById('next-page');
+const pageInfo = document.getElementById('page-info');
+const lockDialog = document.getElementById('lock-dialog');
+const lockForm = document.getElementById('lock-form');
+const lockDuration = document.getElementById('lock-duration');
+const lockReason = document.getElementById('lock-reason');
+const lockError = document.getElementById('lock-error');
+let currentPage = 1, totalPages = 1, users = [], selectedUserId = null, requestId = 0, searchTimer;
 const pageSize = 5;
-let selectedUserId = null;
-
-function saveUsers() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-}
-
-function isLocked(user) {
-    if (!user.locked_until) return false;
-
-    if (user.locked_until === "permanent") {
-        return true;
+function isLocked(user) { return String(user.status).toUpperCase() === 'LOCKED'; }
+function showError(error) { usersMessage.textContent = error.message || 'Không thể tải danh sách người dùng.'; }
+async function loadUsers() {
+    const currentRequest = ++requestId;
+    usersMessage.textContent = 'Đang tải danh sách người dùng...';
+    prevPageBtn.disabled = nextPageBtn.disabled = true;
+    try {
+        const response = await api.get('/api/admin/users', {page: currentPage, page_size: pageSize, search: userSearch.value.trim() || undefined});
+        if (currentRequest !== requestId) return;
+        const data = response.data;
+        users = data.items;
+        totalPages = Math.max(1, data.total_pages);
+        if (currentPage > totalPages) { currentPage = totalPages; return loadUsers(); }
+        renderUsers();
+        usersMessage.textContent = `Tìm thấy ${data.total} người dùng.`;
+    } catch (error) {
+        if (currentRequest !== requestId) return;
+        usersTableBody.replaceChildren();
+        showError(error);
     }
-
-    return new Date(user.locked_until).getTime() > Date.now();
 }
-
-function getFilteredUsers() {
-    const keyword = userSearch.value.trim().toLowerCase();
-
-    return users.filter(user => {
-        const name = (user.full_name || "").toLowerCase();
-        const email = (user.email || "").toLowerCase();
-
-        return name.includes(keyword) || email.includes(keyword);
-    });
-}
-
 function renderUsers() {
-    const filteredUsers = getFilteredUsers();
-    const totalPages = Math.max(
-        1,
-        Math.ceil(filteredUsers.length / pageSize)
-    );
-
-    if (currentPage > totalPages) {
-        currentPage = totalPages;
-    }
-
-    const start = (currentPage - 1) * pageSize;
-    const pageUsers = filteredUsers.slice(start, start + pageSize);
-
     usersTableBody.replaceChildren();
-
-    if (pageUsers.length === 0) {
-        const row = document.createElement("tr");
-        const cell = document.createElement("td");
-
-        cell.colSpan = 5;
-        cell.className = "muted";
-        cell.textContent = "Không tìm thấy người dùng.";
-
-        row.appendChild(cell);
-        usersTableBody.appendChild(row);
+    if (!users.length) {
+        const row = usersTableBody.insertRow(); const cell = row.insertCell();
+        cell.colSpan = 5; cell.textContent = 'Không tìm thấy người dùng.';
     }
-
-    pageUsers.forEach(user => {
-        const row = document.createElement("tr");
-
-        const idCell = document.createElement("td");
-        idCell.textContent = user.id;
-
-        const nameCell = document.createElement("td");
-        nameCell.textContent = user.full_name;
-
-        const emailCell = document.createElement("td");
-        emailCell.textContent = user.email;
-
-        const statusCell = document.createElement("td");
-        const status = document.createElement("span");
-
+    for (const user of users) {
+        const row = usersTableBody.insertRow();
+        for (const value of [user.id, user.username, user.email]) row.insertCell().textContent = value ?? '—';
         const locked = isLocked(user);
-
-        status.className = locked
-            ? "admin-status locked"
-            : "admin-status active";
-
-        status.textContent = locked ? "Đã khóa" : "Hoạt động";
-        statusCell.appendChild(status);
-
-        const actionCell = document.createElement("td");
-        actionCell.className = "actions";
-
-        const detailLink = document.createElement("a");
-        detailLink.className = "btn btn-small";
-        detailLink.href =
-            `admin_user-detail.html?id=${encodeURIComponent(user.id)}`;
-        detailLink.textContent = "Chi tiết";
-
-        const actionButton = document.createElement("button");
-        actionButton.type = "button";
-        actionButton.className = locked
-            ? "btn btn-small"
-            : "btn btn-small btn-danger";
-
-        actionButton.textContent = locked ? "Mở khóa" : "Khóa";
-
-        actionButton.addEventListener("click", () => {
-            if (locked) {
-                unlockUser(user.id);
-            } else {
-                openLockDialog(user.id);
-            }
+        const status = document.createElement('span'); status.className = `admin-status ${locked ? 'locked' : 'active'}`;
+        status.textContent = locked ? 'Đã khóa' : 'Hoạt động'; row.insertCell().append(status);
+        const actions = row.insertCell(); actions.className = 'actions';
+        const detail = document.createElement('a'); detail.className = 'btn btn-small'; detail.href = `admin_user-detail.html?id=${encodeURIComponent(user.id)}`; detail.textContent = 'Chi tiết';
+        const action = document.createElement('button'); action.type = 'button'; action.className = locked ? 'btn btn-small' : 'btn btn-small btn-danger'; action.textContent = locked ? 'Mở khóa' : 'Khóa';
+        action.addEventListener('click', async () => {
+            if (!locked) { selectedUserId = user.id; lockForm.reset(); lockError.textContent = ''; document.getElementById('lock-user-label').textContent = `Bạn muốn khóa tài khoản ${user.username}?`; lockDialog.showModal(); return; }
+            action.disabled = true;
+            try { await api.patch(`/api/admin/users/${user.id}/unlock`, {}); await loadUsers(); }
+            catch (error) { showError(error); } finally { action.disabled = false; }
         });
-
-        actionCell.append(detailLink, actionButton);
-
-        row.append(
-            idCell,
-            nameCell,
-            emailCell,
-            statusCell,
-            actionCell
-        );
-
-        usersTableBody.appendChild(row);
-    });
-
+        actions.append(detail, action);
+    }
     pageInfo.textContent = `Trang ${currentPage}/${totalPages}`;
-
-    prevPageBtn.disabled = currentPage === 1;
-    nextPageBtn.disabled = currentPage === totalPages;
-
-    usersMessage.textContent =
-        `Tìm thấy ${filteredUsers.length} người dùng (dữ liệu mẫu).`;
+    prevPageBtn.disabled = currentPage <= 1; nextPageBtn.disabled = currentPage >= totalPages;
 }
-
-function openLockDialog(userId) {
-    const user = users.find(item => item.id === userId);
-
-    if (!user) return;
-
-    selectedUserId = userId;
-    lockDuration.value = "1";
-    lockUserLabel.textContent =
-        `Bạn muốn khóa tài khoản ${user.full_name}?`;
-
-    lockDialog.showModal();
-}
-
-function lockUser(userId, duration) {
-    const user = users.find(item => item.id === userId);
-
-    if (!user) return;
-
-    if (duration === "permanent") {
-        user.locked_until = "permanent";
-    } else {
-        const days = Number(duration);
-        const endDate = new Date();
-
-        endDate.setDate(endDate.getDate() + days);
-        user.locked_until = endDate.toISOString();
-    }
-
-    saveUsers();
-    renderUsers();
-}
-
-function unlockUser(userId) {
-    const user = users.find(item => item.id === userId);
-
-    if (!user) return;
-
-    user.locked_until = null;
-
-    saveUsers();
-    renderUsers();
-}
-
-userSearch.addEventListener("input", () => {
-    currentPage = 1;
-    renderUsers();
+userSearch.addEventListener('input', () => { clearTimeout(searchTimer); currentPage = 1; searchTimer = setTimeout(loadUsers, 300); });
+prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadUsers(); } });
+nextPageBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; loadUsers(); } });
+lockForm.addEventListener('submit', async event => {
+    event.preventDefault(); if (selectedUserId === null) return;
+    const reason = lockReason.value.trim(); if (!reason) { lockError.textContent = 'Vui lòng nhập lý do khóa.'; return; }
+    const button = lockForm.querySelector('[type="submit"]'); button.disabled = true; lockError.textContent = '';
+    try { await api.patch(`/api/admin/users/${selectedUserId}/lock`, {duration_days: lockDuration.value === 'permanent' ? null : Number(lockDuration.value), reason}); lockDialog.close(); selectedUserId = null; await loadUsers(); }
+    catch (error) { lockError.textContent = error.message || 'Không thể khóa tài khoản.'; }
+    finally { button.disabled = false; }
 });
-
-prevPageBtn.addEventListener("click", () => {
-    if (currentPage > 1) {
-        currentPage--;
-        renderUsers();
-    }
-});
-
-nextPageBtn.addEventListener("click", () => {
-    const totalPages = Math.ceil(getFilteredUsers().length / pageSize);
-
-    if (currentPage < totalPages) {
-        currentPage++;
-        renderUsers();
-    }
-});
-
-lockForm.addEventListener("submit", event => {
-    event.preventDefault();
-
-    if (selectedUserId === null) return;
-
-    lockUser(selectedUserId, lockDuration.value);
-
-    lockDialog.close();
-    selectedUserId = null;
-});
-
-cancelLockBtn.addEventListener("click", () => {
-    lockDialog.close();
-    selectedUserId = null;
-});
-
-renderUsers();
-
+document.getElementById('cancel-lock').addEventListener('click', () => { lockDialog.close(); selectedUserId = null; });
+loadUsers();
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {
   const current = location.pathname.split('/').pop();

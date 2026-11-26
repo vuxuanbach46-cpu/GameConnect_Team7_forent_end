@@ -15,151 +15,49 @@
   }
 })();
 
-const STORAGE_KEY = "gameconnect_admin_demo_users";
-
-const params = new URLSearchParams(window.location.search);
-const userId = Number(params.get("id"));
-
-const detailMessage = document.getElementById("user-detail-message");
-const lockButton = document.getElementById("detail-lock-btn");
-const unlockButton = document.getElementById("detail-unlock-btn");
-const lockDialog = document.getElementById("detail-lock-dialog");
-const lockForm = document.getElementById("detail-lock-form");
-const lockDuration = document.getElementById("detail-lock-duration");
-const cancelButton = document.getElementById("detail-cancel-lock");
-
-function loadUsers() {
-    try {
-        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return Array.isArray(data) ? data : [];
-    } catch (error) {
-        console.error("Không đọc được dữ liệu:", error);
-        return [];
-    }
-}
-
-let users = loadUsers();
-let currentUser = users.find(user => Number(user.id) === userId);
-
-function isUserLocked(user) {
-    if (!user || !user.locked_until) return false;
-
-    if (user.locked_until === "permanent") return true;
-
-    return new Date(user.locked_until).getTime() > Date.now();
-}
-
-function setText(id, value) {
-    const element = document.getElementById(id);
-
-    if (element) {
-        element.textContent = value ?? "--";
-    }
-}
-
-function formatDate(value) {
-    if (!value) return "--";
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) return "--";
-
-    return date.toLocaleDateString("vi-VN");
-}
-
+const userId = Number(new URLSearchParams(location.search).get('id'));
+const detailMessage = document.getElementById('user-detail-message');
+const lockButton = document.getElementById('detail-lock-btn');
+const unlockButton = document.getElementById('detail-unlock-btn');
+const lockDialog = document.getElementById('detail-lock-dialog');
+const lockForm = document.getElementById('detail-lock-form');
+let currentUser = null;
+function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = value ?? '—'; }
+function formatDate(value) { if (!value) return '—'; const date = new Date(value); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('vi-VN'); }
 function renderUserDetail() {
-    if (!currentUser) {
-        detailMessage.textContent =
-            "Không tìm thấy người dùng. Hãy quay lại danh sách.";
-        detailMessage.style.color = "#dc2626";
-
-        setText("detail-name", "Không tìm thấy");
-        lockButton.hidden = true;
-        unlockButton.hidden = true;
-        return;
-    }
-
-    detailMessage.textContent = "Đang hiển thị dữ liệu minh họa.";
-
-    const name = currentUser.full_name || "Chưa có tên";
-    const email = currentUser.email || "--";
-    const locked = isUserLocked(currentUser);
-
-    setText("detail-name", name);
-    setText("detail-email", email);
-    setText("detail-id", currentUser.id);
-    setText("detail-full-name", name);
-    setText("detail-email-info", email);
-    setText("detail-role", currentUser.role || "USER");
-    setText("detail-created-at", formatDate(currentUser.created_at));
-
-    setText(
-        "detail-account-status",
-        locked ? "Đã khóa" : "Hoạt động"
-    );
-
-    const avatar = document.getElementById("user-avatar");
-    avatar.textContent = name.charAt(0).toUpperCase();
-
-    const status = document.getElementById("detail-status");
-    status.className = locked
-        ? "admin-status locked"
-        : "admin-status active";
-
-    status.textContent = locked ? "Đã khóa" : "Hoạt động";
-
-    lockButton.hidden = locked;
-    unlockButton.hidden = !locked;
+    const user = currentUser; const locked = String(user.status).toUpperCase() === 'LOCKED';
+    const name = user.username || 'Chưa có tên';
+    setText('detail-name', name); setText('detail-email', user.email); setText('detail-id', user.id);
+    setText('detail-full-name', name); setText('detail-email-info', user.email); setText('detail-role', user.role);
+    setText('detail-created-at', formatDate(user.created_at)); setText('detail-account-status', locked ? 'Đã khóa' : 'Hoạt động');
+    document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+    const status = document.getElementById('detail-status'); status.className = `admin-status ${locked ? 'locked' : 'active'}`; status.textContent = locked ? 'Đã khóa' : 'Hoạt động';
+    lockButton.hidden = locked; unlockButton.hidden = !locked;
 }
-
-function saveUserChanges() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+async function loadUserDetail() {
+    lockButton.hidden = unlockButton.hidden = true;
+    if (!Number.isSafeInteger(userId) || userId <= 0) { detailMessage.textContent = 'Mã người dùng không hợp lệ.'; return; }
+    detailMessage.textContent = 'Đang tải thông tin...';
+    try { const response = await api.get(`/api/admin/users/${userId}`); currentUser = response.data; renderUserDetail(); detailMessage.textContent = ''; }
+    catch (error) { currentUser = null; setText('detail-name', 'Không tải được người dùng'); detailMessage.textContent = error.message || 'Không thể tải thông tin người dùng.'; }
 }
-
-lockButton.addEventListener("click", () => {
-    if (!currentUser) return;
-
-    lockDuration.value = "1";
-    lockDialog.showModal();
+lockButton.addEventListener('click', () => { if (!currentUser) return; lockForm.reset(); document.getElementById('detail-lock-error').textContent = ''; lockDialog.showModal(); });
+document.getElementById('detail-cancel-lock').addEventListener('click', () => lockDialog.close());
+lockForm.addEventListener('submit', async event => {
+    event.preventDefault(); if (!currentUser) return;
+    const errorBox = document.getElementById('detail-lock-error'); const reason = document.getElementById('detail-lock-reason').value.trim();
+    if (!reason) { errorBox.textContent = 'Vui lòng nhập lý do khóa.'; return; }
+    const duration = document.getElementById('detail-lock-duration').value; const submit = lockForm.querySelector('[type="submit"]'); submit.disabled = true; errorBox.textContent = '';
+    try { await api.patch(`/api/admin/users/${userId}/lock`, {duration_days: duration === 'permanent' ? null : Number(duration), reason}); lockDialog.close(); await loadUserDetail(); }
+    catch (error) { errorBox.textContent = error.message || 'Không thể khóa tài khoản.'; } finally { submit.disabled = false; }
 });
-
-cancelButton.addEventListener("click", () => {
-    lockDialog.close();
+unlockButton.addEventListener('click', async () => {
+    if (!currentUser) return; unlockButton.disabled = true;
+    try { await api.patch(`/api/admin/users/${userId}/unlock`, {}); await loadUserDetail(); }
+    catch (error) { detailMessage.textContent = error.message || 'Không thể mở khóa tài khoản.'; }
+    finally { unlockButton.disabled = false; }
 });
-
-lockForm.addEventListener("submit", event => {
-    event.preventDefault();
-
-    if (!currentUser) return;
-
-    const duration = lockDuration.value;
-
-    if (duration === "permanent") {
-        currentUser.locked_until = "permanent";
-    } else {
-        const days = Number(duration);
-        const endDate = new Date();
-
-        endDate.setDate(endDate.getDate() + days);
-        currentUser.locked_until = endDate.toISOString();
-    }
-
-    saveUserChanges();
-    lockDialog.close();
-    renderUserDetail();
-});
-
-unlockButton.addEventListener("click", () => {
-    if (!currentUser) return;
-
-    currentUser.locked_until = null;
-
-    saveUserChanges();
-    renderUserDetail();
-});
-
-renderUserDetail();
-
+loadUserDetail();
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {
   const current = location.pathname.split('/').pop();
