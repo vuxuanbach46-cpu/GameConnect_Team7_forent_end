@@ -211,9 +211,11 @@ body.community-page {
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
+  box-sizing: border-box;
   display: grid;
   place-items: center;
   border-radius: 50%;
+  overflow: hidden;
   font-size: 14px;
   font-weight: 800;
 }
@@ -221,6 +223,8 @@ body.community-page {
   display: block;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   border-radius: inherit;
   object-fit: cover;
 }
@@ -300,7 +304,7 @@ body.community-page {
 .composer-bottom, .composer-tools, .form-submit-group { display: flex; align-items: center; }
 .composer-bottom { justify-content: space-between; gap: 12px; }
 .composer-tools { gap: 8px; }
-.tool-button, #post-game, #post-visibility {
+.tool-button, #post-game, #post-visibility, .composer-select-trigger {
   min-height: 34px;
   display: inline-flex;
   align-items: center;
@@ -313,11 +317,29 @@ body.community-page {
   font-size: 13px;
 }
 .tool-button { cursor: pointer; }
-.tool-button:hover, #post-game:hover, #post-visibility:hover { color: var(--community-text); border-color: var(--community-border-strong); }
+.tool-button:hover, #post-game:hover, #post-visibility:hover, .composer-select-trigger:hover,
+.composer-select-wrap.is-open .composer-select-trigger { color: var(--community-text); border-color: var(--community-border-strong); }
 .tool-button span { color: var(--community-orange); font-size: 16px; }
 #post-game { max-width: 175px; cursor: pointer; }
 #post-game option, #post-visibility option { background: #151821; color: var(--community-text); }
 #post-visibility { max-width: 130px; cursor: pointer; }
+.composer-native-select { position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important; }
+.composer-select-wrap { position:relative;flex:0 0 auto; }
+.composer-select-trigger { width:138px;height:34px;justify-content:space-between;cursor:pointer;white-space:nowrap; }
+.composer-select-trigger-content { display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden;text-overflow:ellipsis; }
+.composer-select-trigger-content>span { overflow:hidden;text-overflow:ellipsis; }
+.composer-select-trigger .fa-chevron-down { flex:0 0 auto;font-size:10px;color:var(--community-muted);transition:transform .16s ease; }
+.composer-select-wrap.is-open .fa-chevron-down { transform:rotate(180deg); }
+.composer-select-wrap.composer-game-select .composer-select-trigger { width:166px; }
+.composer-select-menu { position:absolute;z-index:140;left:0;top:calc(100% + 6px);min-width:218px;padding:6px;border:1px solid var(--community-border-strong);border-radius:9px;background:var(--community-card);box-shadow:0 14px 32px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:2px; }
+.composer-select-menu[hidden] { display:none!important; }
+.composer-select-option { width:100%;min-height:34px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--community-text);font:500 12px Inter,sans-serif;text-align:left;cursor:pointer; }
+.composer-select-option:hover,.composer-select-option[aria-selected="true"] { border-color:var(--community-border);background:var(--community-card-hover,rgba(255,255,255,.06)); }
+.composer-select-option-left { min-width:0;display:flex;align-items:center;gap:8px; }
+.composer-select-option-left>span { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.composer-select-game-icon { width:18px;height:18px;flex:0 0 18px;border-radius:5px;object-fit:cover; }
+.composer-select-check { min-width:14px;color:var(--community-orange);font-weight:800;text-align:right; }
+.composer-visibility-icon { width:18px;flex:0 0 18px;text-align:center; }
 .form-submit-group { gap: 8px; }
 .publish-button {
   min-height: 35px;
@@ -958,6 +980,8 @@ body.community-page {
   .composer-bottom { align-items: flex-end; }
   .composer-tools { flex-wrap: wrap; }
   #post-game { max-width: 142px; }
+  .composer-select-trigger { width:126px; }
+  .composer-select-wrap.composer-game-select .composer-select-trigger { width:145px; }
   .publish-button { padding: 0 11px; }
   .feed-toolbar { align-items: flex-start; flex-direction: column; }
   .post-search-form { width: 100%; }
@@ -1510,3 +1534,20 @@ body.community-page.community-detail-page {
 body.community-page.fc-light-mode .comment-form textarea {
   background: #fff;
 }
+/* Branded confirmation dialog for deleting a community post. */
+.community-confirm-modal[hidden] { display:none!important; }
+.community-confirm-modal { position:fixed;inset:0;z-index:1600;display:grid;place-items:center;padding:18px; }
+.community-confirm-backdrop { position:absolute;inset:0;border:0;background:rgba(3,5,10,.72);backdrop-filter:blur(5px); }
+.community-confirm-dialog { position:relative;width:min(410px,100%);padding:26px;border:1px solid var(--community-border-strong);border-radius:14px;background:var(--community-card);box-shadow:0 24px 70px rgba(0,0,0,.42);text-align:center;animation:community-confirm-in .16s ease-out; }
+.community-confirm-icon { width:48px;height:48px;margin:0 auto 14px;display:grid;place-items:center;border:1px solid rgba(239,68,68,.42);border-radius:14px;background:rgba(220,38,38,.2);color:#f87171;font-size:19px; }
+.community-confirm-dialog h2 { margin:0;color:var(--community-text);font-size:19px; }
+.community-confirm-dialog p { margin:9px 0 22px;color:var(--community-muted);font-size:12px;line-height:1.6; }
+.community-confirm-actions { display:flex;justify-content:center;gap:9px; }
+.community-confirm-actions button { min-height:38px;padding:0 13px;border:1px solid var(--community-border);border-radius:7px;font:700 12px Inter,sans-serif;cursor:pointer;transition:background .15s ease,border-color .15s ease,transform .15s ease; }
+.community-confirm-cancel { background:transparent;color:var(--community-text); }
+.community-confirm-cancel:hover { background:rgba(255,255,255,.06);border-color:var(--community-border-strong); }
+.community-confirm-delete { border-color:#dc2626!important;background:#dc2626;color:#fff; }
+.community-confirm-delete:hover:not(:disabled) { background:#b91c1c;transform:translateY(-1px); }
+.community-confirm-delete:disabled { opacity:.65;cursor:wait; }
+body.community-confirm-open { overflow:hidden; }
+@keyframes community-confirm-in { from { opacity:0;transform:translateY(5px) scale(.98); } to { opacity:1;transform:translateY(0) scale(1); } }

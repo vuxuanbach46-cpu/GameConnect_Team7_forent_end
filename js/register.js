@@ -147,10 +147,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
       } catch (error) {
         console.error("Lỗi đăng ký:", error);
-        showAlert(
-          error.message || "Đăng ký thất bại, vui lòng kiểm tra lại thông tin.",
-          "error",
-        );
+        const backendMessage = error?.data?.error ?? error?.data?.detail;
+        const message = typeof backendMessage === "string" && backendMessage.trim()
+          ? backendMessage
+          : (error?.message && !/^Lỗi\s+\d+$/i.test(error.message)
+            ? error.message
+            : (Number(error?.status) === 409
+              ? "Email hoặc tên người dùng đã được sử dụng. Hãy thử thông tin khác."
+              : "Đăng ký thất bại, vui lòng kiểm tra lại thông tin."));
+        showAlert(message, "error");
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Đăng ký ngay";

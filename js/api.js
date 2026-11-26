@@ -43,6 +43,17 @@ http.interceptors.request.use((config) => {
 // Lấy câu thông báo lỗi dễ đọc từ response của FastAPI
 function getErrorMessage(data, status) {
   if (data && typeof data.detail === "string") return data.detail;
+  // Backend's shared FastAPI exception handler returns { message, error }.
+  if (data && typeof data.error === "string" && data.error.trim()) return data.error;
+  if (data && Array.isArray(data.error)) {
+    return data.error.map((e) => {
+      const field = Array.isArray(e.loc) ? e.loc[e.loc.length - 1] : "Thông tin";
+      return `${field}: ${e.msg || "không hợp lệ"}`;
+    }).join("; ");
+  }
+  if (data && typeof data.message === "string" && data.message.trim() && data.message !== "Failed") {
+    return data.message;
+  }
   // Lỗi 422 (dữ liệu không hợp lệ): detail là mảng [{ loc: [...], msg: "..." }]
   if (data && Array.isArray(data.detail)) {
     return data.detail.map((e) => `${e.loc[e.loc.length - 1]}: ${e.msg}`).join("; ");
