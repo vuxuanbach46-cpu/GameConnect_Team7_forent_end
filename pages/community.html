@@ -39,39 +39,12 @@
           </div>
         </a>
         <div class="fc-nav-divider"></div>
-        <a class="fc-nav-item" id="btn-focus-search" href="friends.html" title="Tìm kiếm người chơi">
-          <span class="fc-nav-icon" aria-hidden="true">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-          </span><span class="fc-nav-label">Tìm kiếm</span>
-        </a>
-        <a class="fc-nav-item" href="team-posts.html" title="Kênh Esport">
-          <span class="fc-nav-icon"><span class="fc-game-pill">GC</span></span><span class="fc-nav-label">Kênh Esport</span>
-        </a>
-        <div class="fc-nav-divider"></div>
         <a class="fc-nav-item" href="quick-match.html" title="Tìm đội nhanh">
           <span class="fc-nav-icon" aria-hidden="true">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
           </span><span class="fc-nav-label">Tìm đội nhanh</span>
-        </a>
-        <a class="fc-nav-item" href="home.html" title="Bảng xếp hạng">
-          <span class="fc-nav-icon" aria-hidden="true">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 20V10M12 20V4M6 20v-6"></path>
-            </svg>
-          </span><span class="fc-nav-label">Bảng xếp hạng</span>
-        </a>
-        <a class="fc-nav-item" href="profile.html" title="Thống kê cá nhân">
-          <span class="fc-nav-icon" aria-hidden="true">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-            </svg>
-          </span><span class="fc-nav-label">Thống kê</span>
         </a>
         <a href="community.html" class="fc-nav-item active" aria-current="page" title="Bảng tin cộng đồng">
           <span class="fc-nav-icon" aria-hidden="true">
@@ -95,6 +68,14 @@
             </svg>
             <span class="fc-nav-badge" id="sidebar-req-badge">10</span>
           </span><span class="fc-nav-label">Bạn bè & Kết nối</span>
+        </a>
+        <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ">
+          <span class="fc-nav-icon" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Câu lạc bộ</span>
         </a>
         <a class="fc-nav-item" href="quick-match.html?view=lobby" title="Tạo phòng đội">
           <span class="fc-nav-icon" aria-hidden="true">
@@ -381,5 +362,7 @@
   <script>
     NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
   </script>
+  <script src="../js/pages/sidebar-order.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
 </body>
 </html>
