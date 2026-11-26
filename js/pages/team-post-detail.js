@@ -264,6 +264,10 @@ function renderDetail(post) {
           <i class="fa-solid fa-lock"></i>
           <span>Đóng bài đăng</span>
         </button>
+        <button type="button" class="gc-report-btn px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-semibold flex items-center gap-2 transition" data-report-type="TEAM_POST" data-report-id="${post.id}" data-report-title="${escapeHtml(post.title)}" data-report-owner="Gamer #${post.user_id}" title="Báo cáo bài tìm đội vi phạm">
+          <i class="fa-solid fa-flag"></i>
+          <span>Báo cáo</span>
+        </button>
         <a href="team-posts.html" class="px-4 py-2.5 bg-[#181920] hover:bg-[#222430] text-zinc-400 hover:text-white rounded-xl text-xs font-semibold border border-[#242631] transition">
           ← Quay lại danh sách
         </a>

@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // index.js chỉ áp dụng cho trang landing index.html ở thư mục gốc
+  if (window.location.pathname.includes("/pages/")) {
+    return;
+  }
+
   // --- 1. BẮT VÀ LƯU TOKEN TỪ GOOGLE OAUTH REDIRECT ---
   const urlParams = new URLSearchParams(window.location.search);
   const accessToken = urlParams.get("access_token");

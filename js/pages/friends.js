@@ -314,6 +314,9 @@ function renderActionsForTab(player, tab) {
         <span>Nhắn tin</span>
         ${unreadCount > 0 ? `<span class="fc-btn-unread-badge">${unreadCount}</span>` : ""}
       </button>
+      <button class="fc-btn fc-btn-danger-ghost fc-btn-icon" data-report-type="USER" data-report-id="${player.userId || player.id}" data-report-title="Người chơi ${escapeHtml(player.name || player.username || '')}" data-report-owner="${escapeHtml(player.username || '')}" title="Báo cáo người dùng vi phạm">
+        ⚑
+      </button>
       <button class="fc-btn fc-btn-danger-ghost fc-btn-icon" data-action="unfriend" data-id="${player.id}" title="Hủy kết bạn">
         ✕
       </button>
@@ -327,6 +330,9 @@ function renderActionsForTab(player, tab) {
       </button>
       <button class="fc-btn fc-btn-danger-ghost" data-action="reject" data-id="${player.id}">
         Từ chối
+      </button>
+      <button class="fc-btn fc-btn-danger-ghost fc-btn-icon" data-report-type="USER" data-report-id="${player.userId || player.id}" data-report-title="Người chơi ${escapeHtml(player.name || player.username || '')}" data-report-owner="${escapeHtml(player.username || '')}" title="Báo cáo người dùng vi phạm">
+        ⚑
       </button>
     `;
   }
@@ -343,6 +349,9 @@ function renderActionsForTab(player, tab) {
   return `
     <button class="fc-btn fc-btn-primary" data-action="add-friend" data-id="${player.id}">
       + Kết bạn
+    </button>
+    <button class="fc-btn fc-btn-danger-ghost fc-btn-icon" data-report-type="USER" data-report-id="${player.userId || player.id}" data-report-title="Người chơi ${escapeHtml(player.name || player.username || '')}" data-report-owner="${escapeHtml(player.username || '')}" title="Báo cáo người dùng vi phạm">
+      ⚑
     </button>
     <button class="fc-btn fc-btn-danger-ghost fc-btn-icon" data-action="dismiss-suggestion" data-id="${player.id}" title="Ẩn gợi ý">
       ✕

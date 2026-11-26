@@ -93,19 +93,41 @@ const NotificationBell = (() => {
     return new Date(dateStr).toLocaleDateString("vi-VN");
   }
 
+  function _resolvePageUrl(relativePath) {
+    if (!relativePath) return "";
+    if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
+      return relativePath;
+    }
+    let clean = relativePath.replace(/^\/+/, "");
+    if (clean.startsWith("pages/")) {
+      clean = clean.replace(/^pages\//, "");
+    }
+    const inPages = window.location.pathname.includes("/pages/");
+    return (inPages ? "" : "pages/") + clean;
+  }
+
+  function _normalizeType(rawType) {
+    const t = String(rawType || "").toLowerCase().trim();
+    if (t.includes("message") || t.includes("chat")) return "new_message";
+    if (t.includes("friend_accepted") || t.includes("friend_accept")) return "friend_accepted";
+    if (t.includes("friend")) return "friend_request";
+    if (t.includes("party") || t.includes("team_invit") || t.includes("mời vào đội") || t.includes("moi_vao_doi")) return "team_invite";
+    if (t.includes("team_join") || t.includes("team_post_app") || t.includes("team")) return "team_join";
+    if (t.includes("match")) return "match";
+    if (t.includes("post") || t.includes("comment") || t.includes("like")) return "post";
+    return "system";
+  }
+
   // Lấy CSS class cho icon type
   function _getTypeClass(type) {
-    if (type === "FRIEND_REQUEST") return "type-friend_request";
-    if (type === "FRIEND_ACCEPTED") return "type-friend_accepted";
-    if (type === "MATCH_FOUND") return "type-match";
-    if (type === "NEW_MESSAGE" || type === "new_message") return "type-NEW_MESSAGE";
-    const known = ["friend_request", "friend_accepted", "team_invite", "PARTY_INVITE", "team_join", "match", "NEW_MESSAGE", "new_message", "system"];
-    return known.includes(type) ? `type-${type}` : "type-default";
+    const norm = _normalizeType(type);
+    return `type-${norm}`;
   }
 
   // Lấy icon SVG cho type
   function _getTypeIcon(type) {
-    return TYPE_ICONS[type] || DEFAULT_ICON;
+    const norm = _normalizeType(type);
+    return TYPE_ICONS[norm] || TYPE_ICONS[type] || DEFAULT_ICON;
   }
 
   // Lấy label cho type (hiện trên trang đầy đủ)
@@ -182,6 +204,7 @@ const NotificationBell = (() => {
            data-notif-type="${escapeHtml(n.type || "")}"
            data-notif-room-id="${n.room_id || ""}"
            data-notif-link="${escapeHtml(n.link || "")}"
+           data-notif-content="${escapeHtml(n.content || "")}"
            role="button" tabindex="0">
         <div class="gc-notif-icon ${_getTypeClass(n.type)}">
           ${_getTypeIcon(n.type)}
@@ -208,6 +231,7 @@ const NotificationBell = (() => {
     const type = item.dataset.notifType || "";
     const roomId = item.dataset.notifRoomId || "";
     const link = item.dataset.notifLink || "";
+    const content = item.dataset.notifContent || "";
 
     // Đánh dấu đã đọc
     if (item.classList.contains("is-unread")) {
@@ -223,9 +247,66 @@ const NotificationBell = (() => {
 
     _closeDropdown();
 
-    // 1. Lời mời vào sảnh đội (PARTY_INVITE hoặc link /api/matchmaking/accept-invite/...)
-    if (type === "PARTY_INVITE" || link.includes("/api/matchmaking/accept-invite/")) {
-      const apiPath = link.includes("/api/matchmaking/accept-invite/")
+    const norm = _normalizeType(type);
+
+    // 1. Tin nhắn 1-1 (NEW_MESSAGE hoặc link /chat/{id})
+    if (
+      norm === "new_message" ||
+      (link && link.startsWith("/chat/")) ||
+      (content && (content.includes("đã nhắn:") || content.includes("tin nhắn mới")))
+    ) {
+      const chatMatch = link ? link.match(/\/chat\/(\d+)/) : null;
+      const friendId = chatMatch ? Number(chatMatch[1]) : 0;
+      if (
+        friendId > 0 &&
+        window.location.pathname.endsWith("/friends.html") &&
+        typeof window.openChatByFriendId === "function"
+      ) {
+        await window.openChatByFriendId(friendId);
+      } else if (friendId > 0) {
+        window.location.href = _resolvePageUrl(`friends.html?tab=friends&chat=${friendId}`);
+      } else {
+        window.location.href = _resolvePageUrl("friends.html?tab=friends");
+      }
+      return;
+    }
+
+    // 2. Lời mời kết bạn đến
+    if (
+      norm === "friend_request" ||
+      (link && link.startsWith("/friends/requests")) ||
+      (content && (content.includes("lời mời kết bạn") || content.includes("gửi lời mời kết bạn")))
+    ) {
+      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
+        switchTab("received");
+        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = _resolvePageUrl("friends.html?tab=received");
+      }
+      return;
+    }
+
+    // 3. Lời mời kết bạn được chấp nhận
+    if (
+      norm === "friend_accepted" ||
+      (content && content.includes("chấp nhận lời mời kết bạn"))
+    ) {
+      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
+        switchTab("friends");
+        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = _resolvePageUrl("friends.html?tab=friends");
+      }
+      return;
+    }
+
+    // 4. Lời mời vào sảnh đội (PARTY_INVITE hoặc link /api/matchmaking/accept-invite/...)
+    if (
+      norm === "team_invite" ||
+      (link && (link.includes("accept-invite") || link.includes("matchmaking"))) ||
+      (content && (content.includes("mời bạn tham gia đội chơi") || content.includes("mời bạn tham gia sảnh")))
+    ) {
+      const apiPath = (link && link.includes("/api/matchmaking/accept-invite/"))
         ? link
         : (roomId ? `/api/matchmaking/accept-invite/${roomId}` : `/api/matchmaking/accept-notification/${id}`);
       try {
@@ -237,79 +318,90 @@ const NotificationBell = (() => {
         if (typeof qmSwitchView === "function") qmSwitchView("lobby");
         await qmLoadBackendData();
       } else {
-        window.location.href = `${_rootPath}pages/quick-match.html?view=lobby`;
+        window.location.href = _resolvePageUrl("quick-match.html?view=lobby");
       }
       return;
     }
 
-    // 2. Đã tìm thấy trận / đủ người trong phòng (MATCH_FOUND hoặc /rooms/...)
-    if (type === "MATCH_FOUND" || link.startsWith("/rooms/")) {
+    // 5. Đã tìm thấy trận / đủ người trong phòng (MATCH_FOUND hoặc /rooms/...)
+    if (
+      norm === "match" ||
+      (link && link.startsWith("/rooms/")) ||
+      (content && (content.includes("đã đủ người") || content.includes("tìm thấy phòng")))
+    ) {
       if (window.location.pathname.endsWith("/quick-match.html") && typeof qmLoadBackendData === "function") {
         if (typeof qmSwitchView === "function") qmSwitchView("lobby");
         await qmLoadBackendData();
       } else {
-        window.location.href = `${_rootPath}pages/quick-match.html?view=lobby`;
+        window.location.href = _resolvePageUrl("quick-match.html?view=lobby");
       }
       return;
     }
 
-    // 3. Lời mời kết bạn đến (FRIEND_REQUEST / friend_request / /friends/requests...)
-    if (type === "FRIEND_REQUEST" || type === "friend_request" || link.startsWith("/friends/requests")) {
-      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
-        switchTab("received");
-        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
-      } else {
-        window.location.href = `${_rootPath}pages/friends.html?tab=received`;
-      }
-      return;
-    }
-
-    // 4. Lời mời kết bạn được chấp nhận (FRIEND_ACCEPTED / friend_accepted)
-    if (type === "FRIEND_ACCEPTED" || type === "friend_accepted") {
-      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
-        switchTab("friends");
-        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
-      } else {
-        window.location.href = `${_rootPath}pages/friends.html?tab=friends`;
-      }
-      return;
-    }
-
-    // 4b. Tin nhắn mới 1-1 (NEW_MESSAGE / new_message / link /chat/{friend_id})
-    if (type === "NEW_MESSAGE" || type === "new_message" || link.startsWith("/chat/")) {
-      const chatMatch = link.match(/\/chat\/(\d+)/);
-      const friendId = chatMatch ? Number(chatMatch[1]) : 0;
-      if (
-        friendId > 0 &&
-        window.location.pathname.endsWith("/friends.html") &&
-        typeof window.openChatByFriendId === "function"
-      ) {
-        await window.openChatByFriendId(friendId);
-      } else if (friendId > 0) {
-        window.location.href = `${_rootPath}pages/friends.html?tab=friends&chat=${friendId}`;
-      } else {
-        window.location.href = `${_rootPath}pages/friends.html?tab=friends`;
-      }
-      return;
-    }
-
-    // 5. Thông báo community (like / bình luận bài viết) → mở chi tiết bài viết
-    if (type === "POST_LIKE" || type === "POST_COMMENT") {
-      const postMatch = (link || type === "POST_LIKE" || type === "POST_COMMENT") && link.match(/\/posts\/(\d+)/);
+    // 6. Thông báo community (like / bình luận bài viết) → mở chi tiết bài viết
+    if (
+      norm === "post" ||
+      (link && link.match(/\/posts\/(\d+)/)) ||
+      (content && (content.includes("bình luận") || content.includes("lượt thích")))
+    ) {
+      const postMatch = (link && link.match(/\/posts\/(\d+)/)) || (content && content.match(/#(\d+)/));
       if (postMatch) {
-        window.location.href = `${_rootPath}pages/community-detail.html?id=${postMatch[1]}#comments`;
+        window.location.href = _resolvePageUrl(`community-detail.html?id=${postMatch[1]}#comments`);
         return;
       }
+      window.location.href = _resolvePageUrl("community.html");
+      return;
     }
 
-    // 6. Các đường dẫn khác
+    // 7. Câu lạc bộ & Đội nhóm
+    const upperType = String(type || "").toUpperCase();
+    if (upperType === "TEAM_INVITATION" || (link && link.includes("team-invitations"))) {
+      window.location.href = _resolvePageUrl("team-invitations.html");
+      return;
+    }
+    if (upperType === "TEAM_JOIN_REQUEST" || (link && link.includes("team-feed"))) {
+      const teamMatch = link ? link.match(/id=(\d+)/) : null;
+      window.location.href = _resolvePageUrl(teamMatch ? `team-feed.html?id=${teamMatch[1]}` : "clubs.html");
+      return;
+    }
+    if (upperType === "TEAM_INVITATION_RESPONSE" || upperType === "TEAM_CREATED_FROM_POST") {
+      const teamMatch = link ? (link.match(/id=(\d+)/) || link.match(/\/teams\/(\d+)/)) : null;
+      window.location.href = _resolvePageUrl(teamMatch ? `team-detail.html?id=${teamMatch[1]}` : "my-team.html");
+      return;
+    }
+    if (upperType === "TEAM_JOIN_ACCEPTED") {
+      window.location.href = _resolvePageUrl("my-team.html");
+      return;
+    }
+    if (
+      upperType === "TEAM_JOIN_REJECTED" ||
+      upperType === "TEAM_MEMBER_REMOVED" ||
+      upperType === "TEAM_CAPTAIN_TRANSFERRED" ||
+      (link && link.startsWith("/teams/"))
+    ) {
+      const teamMatch = link ? link.match(/\/teams\/(\d+)/) : null;
+      window.location.href = _resolvePageUrl(teamMatch ? `team-detail.html?id=${teamMatch[1]}` : "clubs.html");
+      return;
+    }
+    if (
+      upperType.startsWith("TEAM_POST_APPLICATION") ||
+      (link && link.includes("team-post-detail"))
+    ) {
+      const postMatch = link ? link.match(/id=(\d+)/) : null;
+      window.location.href = _resolvePageUrl(postMatch ? `team-post-detail.html?id=${postMatch[1]}` : "team-posts.html");
+      return;
+    }
+
+    // 8. Báo cáo (REPORT_RESULT)
+    if (upperType === "REPORT_RESULT") {
+      alert(content || "Báo cáo của bạn đã được ban quản trị xử lý.");
+      return;
+    }
+
+    // 9. Generic link
     if (link) {
-      if (link.startsWith("http")) {
-        window.location.href = link;
-      } else {
-        const cleanLink = link.replace(/^\/+/, "");
-        window.location.href = _rootPath + cleanLink;
-      }
+      window.location.href = _resolvePageUrl(link);
+      return;
     }
   }
 
