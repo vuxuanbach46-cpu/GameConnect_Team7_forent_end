@@ -82,11 +82,15 @@ async function loadPost() {
       avatarUrl: payload.author_avatar || payload.avatar || buildCommunityAvatar(username || author),
       game: normalizeCommunityGameKey(rawGameName) || rawGameName,
       content: payload.content || payload.body || payload.title || "",
-      image: resolveCommunityMediaUrl(payload.image || payload.image_url || imageUrls[0] || ""),
+      images: (Array.isArray(payload.image_urls) ? payload.image_urls : [])
+        .map((url) => resolveCommunityMediaUrl(url))
+        .filter(Boolean),
       createdAt: payload.createdAt || payload.created_at || payload.created || new Date().toISOString(),
       likes: Number(payload.likes || payload.like_count || 0),
       comments: Number(payload.comments || payload.comment_count || 0),
       isLiked: Boolean(payload.liked_by_current_user ?? payload.is_liked),
+      userId: payload.user_id != null ? Number(payload.user_id) : null,
+      visibility: payload.visibility || "PUBLIC",
       visual: Boolean(payload.visual),
     };
   } catch (error) {
@@ -209,8 +213,16 @@ function renderPost() {
   const game = GAMES[post.game];
   const owner = isCurrentUser(post.authorId);
   const liked = post.isLiked;
-  const media = post.image
-    ? `<div class="post-media"><img src="${escapeHtml(post.image)}" alt="Ảnh bài viết của ${escapeHtml(post.author)}"></div>`
+  const visibilityLabels = {
+    PUBLIC: { text: "🌤 Mọi người", title: "Bài viết công khai - ai cũng có thể xem" },
+    FRIENDS: { text: "👥 Bạn bè", title: "Chỉ bạn bè của bạn có thể xem bài này" },
+    PRIVATE: { text: "🔒 Chỉ mình tôi", title: "Chỉ bạn có thể xem bài này" },
+  };
+  const visibilityBadge = owner && visibilityLabels[post.visibility]
+    ? `<span class="post-visibility-badge" title="${visibilityLabels[post.visibility].title}">${visibilityLabels[post.visibility].text}</span>`
+    : "";
+  const media = post.images?.length
+    ? `<div class="post-media post-media-grid ${post.images.length > 1 ? "post-media-multi" : ""}">${post.images.map((url, index) => `<img src="${escapeHtml(url)}" alt="Ảnh ${index + 1} bài viết của ${escapeHtml(post.author)}" loading="lazy">`).join("")}</div>`
     : post.visual && game
       ? `<div class="post-media post-media-art media-${game.art}"><img src="${game.image}" alt=""><span class="art-caption">GAMECONNECT · ${escapeHtml(game.label.toUpperCase())}</span></div>`
       : "";
@@ -221,7 +233,7 @@ function renderPost() {
         <div class="avatar ${owner ? "avatar-self" : ""}" aria-hidden="true" data-fallback="${escapeHtml(post.avatar)}">${avatarMarkup(post.avatarUrl, post.author)}</div>
         <div class="post-author">
           <strong>${escapeHtml(post.author)}${owner ? "" : '<span class="author-badge">✦</span>'}</strong>
-          <small>${escapeHtml(post.handle)} · ${timeAgo(post.createdAt)}</small>
+          <small>${escapeHtml(post.handle)} · ${timeAgo(post.createdAt)} ${visibilityBadge}</small>
         </div>
       </header>
       <div class="post-copy"><p>${escapeHtml(post.content)}</p>${game ? `<span class="post-game-tag">${escapeHtml(game.label)}</span>` : ""}</div>
@@ -237,7 +249,7 @@ function renderPost() {
     </article>`;
 
   attachAvatarFallbacks(wrap);
-  wrap.querySelectorAll(".post-media > img").forEach((image) => {
+  wrap.querySelectorAll(".post-media img").forEach((image) => {
     image.addEventListener("error", () => {
       const message = document.createElement("p");
       message.className = "post-image-error";
@@ -264,8 +276,16 @@ function renderPost() {
   });
 }
 
-function commentTemplate(comment) {
+function commentTemplate(comment, allComments) {
   const mine = isCurrentUser(comment.authorId);
+  // Trả lời bình luận: hiện tag @tên người được trả lời
+  let replyTag = "";
+  if (comment.parentId) {
+    const parent = (allComments || []).find((item) => item.id === comment.parentId);
+    if (parent) {
+      replyTag = `<span class="comment-reply-tag" data-author-id="${escapeHtml(parent.authorId || "")}">@${escapeHtml(parent.author || "")}</span> `;
+    }
+  }
   return `
     <article class="comment-item ${comment.parentId ? "comment-reply" : ""}" data-comment-id="${escapeHtml(comment.id)}">
       <div class="avatar comment-avatar ${mine ? "avatar-self" : ""}" aria-hidden="true" data-fallback="${escapeHtml(comment.avatar)}">${avatarMarkup(comment.avatarUrl, comment.author)}</div>
@@ -275,7 +295,7 @@ function commentTemplate(comment) {
             <strong>${escapeHtml(comment.author)}</strong>
             <span>${timeAgo(comment.createdAt)}</span>
           </div>
-          <p>${escapeHtml(comment.content)}</p>
+          <p>${replyTag}${escapeHtml(comment.content)}</p>
         </div>
         <div class="comment-actions">
           <button type="button" data-comment-action="reply" data-id="${escapeHtml(comment.id)}" data-name="${escapeHtml(comment.author)}">Trả lời</button>
@@ -299,8 +319,8 @@ function renderComments() {
   document.getElementById("comment-empty").hidden = roots.length > 0 || Boolean(commentsLoadError);
 
   document.getElementById("comment-list").innerHTML = roots.map((root) => `
-    ${commentTemplate(root)}
-    <div class="comment-replies">${comments.filter((comment) => comment.parentId === root.id).map(commentTemplate).join("")}</div>
+    ${commentTemplate(root, comments)}
+    <div class="comment-replies">${comments.filter((comment) => comment.parentId === root.id).map((comment) => commentTemplate(comment, comments)).join("")}</div>
   `).join("");
   attachAvatarFallbacks(document.getElementById("comment-list"));
 }

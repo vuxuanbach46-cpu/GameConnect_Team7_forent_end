@@ -135,6 +135,7 @@
         </a>
         <nav class="fc-tabs-nav community-tabs" role="group" aria-label="Lọc bảng tin">
           <button type="button" class="fc-tab-btn filter-button active" data-filter="all" aria-pressed="true">KHÁM PHÁ</button>
+          <button type="button" class="fc-tab-btn filter-button" data-filter="friends" aria-pressed="false">BẠN BÈ</button>
           <button type="button" class="fc-tab-btn filter-button" data-filter="mine" aria-pressed="false">BÀI CỦA TÔI</button>
         </nav>
       </header>
@@ -164,22 +165,26 @@
             </div>
             <form id="post-form">
               <label class="sr-only" for="post-content">Nội dung bài viết</label>
-              <textarea id="post-content" name="content" rows="3" maxlength="600" placeholder="Hôm nay bạn vừa có pha xử lý nào đỉnh?"></textarea>
+              <textarea id="post-content" name="content" rows="4" maxlength="2000" placeholder="Hôm nay bạn vừa có pha xử lý nào đỉnh?"></textarea>
               <div class="composer-meta">
-                <span id="char-count">0 / 600</span>
+                <span id="char-count">0 / 2000</span>
                 <span class="composer-hint">Hãy lan tỏa tinh thần fair-play nhé!</span>
               </div>
-              <div id="image-preview" class="image-preview" hidden>
-                <img id="preview-image" alt="Ảnh xem trước">
-                <button class="remove-image" id="remove-image" type="button" aria-label="Bỏ ảnh">×</button>
-              </div>
+              <div id="image-preview" class="image-preview" hidden></div>
               <div class="composer-bottom">
                 <div class="composer-tools">
                   <label class="tool-button" for="post-image">
                     <span aria-hidden="true">▧</span> Thêm ảnh
                   </label>
-                  <input id="post-image" type="file" accept="image/*" hidden>
+                  <input id="post-image" type="file" accept="image/*" multiple hidden>
+                  <span id="image-count" class="composer-hint" hidden></span>
                   <label class="sr-only" for="post-game">Gắn thẻ game</label>
+                  <label class="sr-only" for="post-visibility">Ai có thể xem bài viết</label>
+                  <select id="post-visibility" name="visibility">
+                    <option value="PUBLIC">🌤 Mọi người</option>
+                    <option value="FRIENDS">👥 Bạn bè</option>
+                    <option value="PRIVATE">🔒 Chỉ mình tôi</option>
+                  </select>
                   <select id="post-game" name="game">
                     <option value="">Chọn game</option>
                     <option value="Valorant">Valorant</option>
@@ -270,7 +275,6 @@
                 <span class="game-name"><strong>Liên Quân Mobile</strong><small>MOBA · Mobile</small></span><span class="game-arrow" aria-hidden="true">↗</span>
               </button>
             </div>
-            <button type="button" class="show-all-games" data-game-filter="">Xem tất cả bài viết <span aria-hidden="true">→</span></button>
           </section>
 
           <div class="aside-footer">

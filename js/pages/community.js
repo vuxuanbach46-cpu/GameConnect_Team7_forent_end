@@ -28,13 +28,14 @@ const contentInput = document.getElementById("post-content");
 const gameInput = document.getElementById("post-game");
 const imageInput = document.getElementById("post-image");
 const imagePreview = document.getElementById("image-preview");
-const previewImage = document.getElementById("preview-image");
+const imageCountLabel = document.getElementById("image-count");
 const composerError = document.getElementById("composer-error");
 const publishButton = document.getElementById("publish-button");
 const cancelEditButton = document.getElementById("cancel-edit");
 const loadMoreButton = document.getElementById("load-more");
 const feedStatus = document.getElementById("feed-status");
 const feedEmpty = document.getElementById("feed-empty");
+const visibilityInput = document.getElementById("post-visibility");
 const activeGameFilter = document.getElementById("active-game-filter");
 const searchForm = document.getElementById("post-search-form");
 const searchInput = document.getElementById("post-search");
@@ -42,11 +43,15 @@ const searchSummary = document.getElementById("search-summary");
 
 let activeFilter = "all";
 let activeGame = "";
-let visibleCount = 3;
+let feedSource = "all"; // "all" | "friends"
+const FEED_PAGE_SIZE = 10;
+let feedHasMore = true;
+let feedLoadingMore = false;
 let editingId = null;
-let draftImage = "";
-let selectedImageFile = null;
-let previewObjectUrl = "";
+const MAX_POST_IMAGES = 4;
+let draftImages = []; // các URL ảnh đã có của bài (từ backend hoặc đã upload)
+let selectedImageFiles = []; // File người dùng vừa chọn chưa upload
+let previewObjectUrls = [];
 let searchMode = "";
 let searchResults = [];
 let searchLoading = false;
@@ -112,7 +117,7 @@ function attachAvatarFallbacks(root) {
 
 function attachPostImageFallbacks(root) {
   attachAvatarFallbacks(root);
-  root.querySelectorAll(".post-media > img").forEach((image) => {
+  root.querySelectorAll(".post-media img").forEach((image) => {
     image.addEventListener("error", () => {
       const message = document.createElement("p");
       message.className = "post-image-error";
@@ -236,6 +241,8 @@ function normalizeApiPost(post) {
   const gameName = normalizeCommunityGameKey(rawGameName) || rawGameName;
   const content = post.content || post.body || post.title || "";
   const imageUrls = Array.isArray(post.image_urls) ? post.image_urls : [];
+  const images = imageUrls.map((url) => resolveCommunityMediaUrl(url)).filter(Boolean);
+  const image = images[0] || resolveCommunityMediaUrl(post.image || post.image_url || "");
   return {
     id: String(post.id ?? post.post_id ?? `api-${Math.random()}`),
     authorId: post.user_id != null ? String(post.user_id) : null,
@@ -247,13 +254,26 @@ function normalizeApiPost(post) {
     avatar: String(author).slice(0, 1).toUpperCase(),
     game: gameName,
     content,
-    image: resolveCommunityMediaUrl(post.image || post.image_url || imageUrls[0] || ""),
+    image,
+    images: images.length ? images : (image ? [image] : []),
     createdAt: post.createdAt || post.created_at || post.created || new Date().toISOString(),
     likes: Number(post.likes || post.like_count || 0),
     comments: Number(post.comments || post.comment_count || 0),
     isLiked: Boolean(post.liked_by_current_user ?? post.is_liked),
+    userId: post.user_id != null ? Number(post.user_id) : null,
+    visibility: post.visibility || "PUBLIC",
     visual: Boolean(post.visual),
   };
+}
+
+function selectedGameOptionValue(post) {
+  // Trả về value của option khớp game của bài viết trong select post-game
+  const wanted = normalizeCommunityGameKey(post.game) || post.game;
+  if (!wanted) return "";
+  const option = [...gameInput.options].find(
+    (item) => normalizeCommunityGameKey(item.value) === wanted || item.value === post.game,
+  );
+  return option ? option.value : "";
 }
 
 function timeAgo(value) {
@@ -268,8 +288,8 @@ function renderPost(post) {
   const owner = isCurrentUser(post.authorId);
   const game = COMMUNITY_GAMES[post.game];
   const gameTag = game ? `<span class="post-game-tag">${escapeHtml(game.label)}</span>` : "";
-  const media = post.image
-    ? `<div class="post-media"><img src="${escapeHtml(post.image)}" alt="Ảnh được chia sẻ bởi ${escapeHtml(post.author)}"></div>`
+  const media = post.images?.length
+    ? `<div class="post-media post-media-grid ${post.images.length > 1 ? "post-media-multi" : ""}">${post.images.map((url, index) => `<img src="${escapeHtml(url)}" alt="Ảnh ${index + 1} được chia sẻ bởi ${escapeHtml(post.author)}" loading="lazy">`).join("")}</div>`
     : post.visual && game
       ? `<div class="post-media post-media-art media-${game.art}" aria-label="Hình minh hoạ ${escapeHtml(game.label)}">
           <img src="${game.image}" alt="">
@@ -278,14 +298,22 @@ function renderPost(post) {
       : "";
   const liked = post.isLiked;
   const safeId = escapeHtml(post.id);
+  const visibilityLabels = {
+    PUBLIC: { text: "🌤 Mọi người", title: "Bài viết công khai - ai cũng có thể xem" },
+    FRIENDS: { text: "👥 Bạn bè", title: "Chỉ bạn bè của bạn có thể xem bài này" },
+    PRIVATE: { text: "🔒 Chỉ mình tôi", title: "Chỉ bạn có thể xem bài này" },
+  };
+  const visibilityBadge = owner && visibilityLabels[post.visibility]
+    ? `<span class="post-visibility-badge" title="${visibilityLabels[post.visibility].title}">${visibilityLabels[post.visibility].text}</span>`
+    : "";
 
   return `
     <article class="post-card" data-post-id="${safeId}">
       <header class="post-top">
         <div class="avatar ${owner ? "avatar-self" : ""}" aria-hidden="true" data-fallback="${escapeHtml(post.avatar)}">${avatarMarkup(post.avatarUrl, post.author)}</div>
         <div class="post-author">
-          <strong>${escapeHtml(post.author)}${owner ? "" : '<span class="author-badge" title="Game thủ đã xác thực">✦</span>'}</strong>
-          <small>${escapeHtml(post.handle)} · ${timeAgo(post.createdAt)}</small>
+          <strong><button type="button" class="post-author-link" data-author-id="${escapeHtml(post.userId ?? "")}" data-author-name="${escapeHtml(post.author)}">${escapeHtml(post.author)}</button>${owner ? "" : '<span class="author-badge" title="Game thủ đã xác thực">✦</span>'}</strong>
+          <small>${escapeHtml(post.handle)} · ${timeAgo(post.createdAt)} ${visibilityBadge}</small>
         </div>
         ${owner ? `<details class="post-menu">
           <summary aria-label="Tuỳ chọn bài viết">···</summary>
@@ -293,7 +321,12 @@ function renderPost(post) {
             <button type="button" data-action="edit" data-id="${safeId}">Chỉnh sửa</button>
             <button type="button" data-action="delete" data-id="${safeId}">Xoá bài viết</button>
           </div>
-        </details>` : ""}
+        </details>` : `<details class="post-menu">
+          <summary aria-label="Tuỳ chọn bài viết">···</summary>
+          <div class="post-menu-actions">
+            <button type="button" data-action="block" data-id="${safeId}" data-user-id="${escapeHtml(post.userId ?? "")}" data-user-name="${escapeHtml(post.author)}">Chặn ${escapeHtml(post.author)}</button>
+          </div>
+        </details>`}
       </header>
       <div class="post-copy"><p>${escapeHtml(post.content)}</p>${gameTag}</div>
       ${media}
@@ -366,24 +399,60 @@ function renderFeed() {
   }
 
   const posts = getAllPosts().filter((post) =>
-    (activeFilter !== "mine" || isCurrentUser(post.authorId)) &&
-    (!activeGame || post.game === activeGame),
+    activeFilter !== "mine" || isCurrentUser(post.authorId),
   );
-  const shownPosts = activeFilter === "mine" || activeGame ? posts : posts.slice(0, visibleCount);
-  feedList.innerHTML = shownPosts.map(renderPost).join("");
+  feedList.innerHTML = posts.map(renderPost).join("");
   attachPostImageFallbacks(feedList);
   feedEmpty.hidden = posts.length > 0;
+  if (posts.length === 0) {
+    feedEmpty.innerHTML = activeFilter === "friends"
+      ? `
+        <span aria-hidden="true">👥</span>
+        <strong>Chưa có bài viết từ bạn bè</strong>
+        <p>Kết bạn thêm để cập nhật tin từ đồng đội nhé.</p>`
+      : `
+        <span aria-hidden="true">⌕</span>
+        <strong>Chưa có bài viết nào</strong>
+        <p>Hãy là người đầu tiên chia sẻ khoảnh khắc của bạn.</p>`;
+  }
 
-  const canLoadMore = activeFilter === "all" && !activeGame && shownPosts.length < posts.length;
-  loadMoreButton.hidden = !canLoadMore;
-  feedStatus.textContent = !canLoadMore && shownPosts.length > 0 && activeFilter === "all" && !activeGame
+  loadMoreButton.hidden = !feedHasMore;
+  feedStatus.textContent = !feedHasMore && posts.length > 0
     ? "Bạn đã cập nhật đến bài viết mới nhất."
-    : "";
-  activeGameFilter.hidden = !activeGame;
-  activeGameFilter.innerHTML = activeGame
-    ? `Đang xem bài viết về <strong>${escapeHtml(COMMUNITY_GAMES[activeGame]?.label || activeGame)}</strong><button type="button" data-clear-game aria-label="Bỏ lọc game">Bỏ lọc ×</button>`
-    : "";
+    : feedLoadingMore
+      ? "Đang tải thêm bài viết..."
+      : "";
+  activeGameFilter.hidden = !activeGame && !viewingUser;
+  activeGameFilter.innerHTML = viewingUser
+    ? `Bài viết của <strong>${escapeHtml(viewingUser.name)}</strong><button type="button" data-clear-user aria-label="Xem tất cả">Xem tất cả ×</button>`
+    : activeGame
+      ? `Đang xem bài viết về <strong>${escapeHtml(COMMUNITY_GAMES[activeGame]?.label || activeGame)}</strong><button type="button" data-clear-game aria-label="Bỏ lọc game">Bỏ lọc ×</button>`
+      : "";
 }
+
+// ----- Bài của một người (bấm tên tác giả) -----
+let viewingUser = null; // { id, name }
+
+function openUserPosts(userId, userName) {
+  viewingUser = { id: userId, name: userName || `Game thủ #${userId}` };
+  activeFilter = "all";
+  activeGame = "";
+  if (searchMode || searchLoading || searchError) clearSearch();
+  document.querySelectorAll(".filter-button").forEach((item) => {
+    const selected = item.dataset.filter === "all";
+    item.classList.toggle("active", selected);
+    item.setAttribute("aria-pressed", String(selected));
+  });
+  loadApiPosts();
+  document.querySelector(".feed-toolbar").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+activeGameFilter.addEventListener("click", (event) => {
+  if (event.target.closest("[data-clear-user]")) {
+    viewingUser = null;
+    loadApiPosts();
+  }
+});
 
 async function searchPosts(query) {
   const keyword = query.trim();
@@ -465,29 +534,84 @@ async function loadFeaturedPosts() {
 }
 
 function updateCharCount() {
-  document.getElementById("char-count").textContent = `${contentInput.value.length} / 600`;
+  document.getElementById("char-count").textContent = `${contentInput.value.length} / 2000`;
 }
 
-function showImagePreview(source) {
-  if (previewObjectUrl) {
-    URL.revokeObjectURL(previewObjectUrl);
-    previewObjectUrl = "";
+function totalDraftImages() {
+  return draftImages.length + selectedImageFiles.length;
+}
+
+function revokePreviewObjectUrls() {
+  previewObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+  previewObjectUrls = [];
+}
+
+function updateImageCountLabel() {
+  const total = totalDraftImages();
+  imageCountLabel.hidden = total === 0 && imageInput.files.length === 0;
+  imageCountLabel.textContent = `Đã chọn ${total}/${MAX_POST_IMAGES} ảnh`;
+  imageInput.disabled = total >= MAX_POST_IMAGES;
+  const addImageButton = document.querySelector("label[for='post-image']");
+  if (addImageButton) addImageButton.classList.toggle("tool-button-disabled", total >= MAX_POST_IMAGES);
+}
+
+function renderImagePreviews() {
+  imagePreview.innerHTML = "";
+  if (totalDraftImages() === 0) {
+    imagePreview.hidden = true;
+    updateImageCountLabel();
+    return;
   }
-  if (source.startsWith("blob:")) previewObjectUrl = source;
-  if (source) previewImage.src = source;
-  else previewImage.removeAttribute("src");
-  imagePreview.hidden = !source;
+  imagePreview.hidden = false;
+  draftImages.forEach((url, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "image-preview-item";
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = `Ảnh xem trước ${index + 1}`;
+    const removeButton = document.createElement("button");
+    removeButton.className = "remove-image";
+    removeButton.type = "button";
+    removeButton.setAttribute("aria-label", `Bỏ ảnh ${index + 1}`);
+    removeButton.textContent = "×";
+    removeButton.addEventListener("click", () => {
+      draftImages.splice(index, 1);
+      renderImagePreviews();
+    });
+    wrapper.append(img, removeButton);
+    imagePreview.appendChild(wrapper);
+  });
+  selectedImageFiles.forEach((file, index) => {
+    const objectUrl = URL.createObjectURL(file);
+    previewObjectUrls.push(objectUrl);
+    const wrapper = document.createElement("div");
+    wrapper.className = "image-preview-item";
+    const img = document.createElement("img");
+    img.src = objectUrl;
+    img.alt = `Ảnh mới xem trước ${draftImages.length + index + 1}`;
+    const removeButton = document.createElement("button");
+    removeButton.className = "remove-image";
+    removeButton.type = "button";
+    removeButton.setAttribute("aria-label", `Bỏ ảnh mới ${draftImages.length + index + 1}`);
+    removeButton.textContent = "×";
+    removeButton.addEventListener("click", () => {
+      selectedImageFiles.splice(index, 1);
+      renderImagePreviews();
+    });
+    wrapper.append(img, removeButton);
+    imagePreview.appendChild(wrapper);
+  });
+  updateImageCountLabel();
 }
 
 function resetComposer() {
   editingId = null;
   postForm.reset();
-  draftImage = "";
-  selectedImageFile = null;
-  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
-  previewObjectUrl = "";
+  draftImages = [];
+  selectedImageFiles = [];
+  revokePreviewObjectUrls();
   imageInput.value = "";
-  imagePreview.hidden = true;
+  renderImagePreviews();
   composerError.hidden = true;
   cancelEditButton.hidden = true;
   publishButton.innerHTML = '<span aria-hidden="true">↗</span> Đăng bài';
@@ -503,10 +627,11 @@ function startEditing(postId) {
   }
   editingId = post.id;
   contentInput.value = post.content;
-  gameInput.value = post.game || "";
-  draftImage = post.image || "";
-  selectedImageFile = null;
-  showImagePreview(post.image || "");
+  gameInput.value = selectedGameOptionValue(post);
+  if (visibilityInput) visibilityInput.value = post.visibility || "PUBLIC";
+  draftImages = Array.isArray(post.images) ? [...post.images] : (post.image ? [post.image] : []);
+  selectedImageFiles = [];
+  renderImagePreviews();
   composerError.hidden = true;
   cancelEditButton.hidden = false;
   publishButton.innerHTML = '<span aria-hidden="true">✓</span> Lưu thay đổi';
@@ -542,32 +667,36 @@ postForm.addEventListener("submit", async (event) => {
     if (gameInput.value && !selectedGameId) {
       throw new Error("Game đã chọn chưa có trong danh mục.");
     }
-    let imageUrl = draftImage;
-    if (selectedImageFile) {
-      const formData = new FormData();
-      formData.append("file", selectedImageFile);
-      const uploadResponse = await api.upload("/posts/images", formData);
-      const uploadData = uploadResponse?.data || uploadResponse || {};
-      if (!uploadData.image_url) throw new Error("Backend không trả về đường dẫn ảnh.");
-      imageUrl = resolveCommunityMediaUrl(uploadData.image_url);
-      draftImage = imageUrl;
-      selectedImageFile = null;
-      showImagePreview(imageUrl);
+    let imageUrls = [...draftImages];
+    if (selectedImageFiles.length) {
+      for (const file of selectedImageFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const uploadResponse = await api.upload("/posts/images", formData);
+        const uploadData = uploadResponse?.data || uploadResponse || {};
+        if (!uploadData.image_url) throw new Error("Backend không trả về đường dẫn ảnh.");
+        imageUrls.push(resolveCommunityMediaUrl(uploadData.image_url));
+      }
+      draftImages = [...imageUrls];
+      selectedImageFiles = [];
+      revokePreviewObjectUrls();
+      renderImagePreviews();
     }
+    if (imageUrls.length > MAX_POST_IMAGES) throw new Error("Chỉ được đính kèm tối đa 4 ảnh.");
     if (editingId) {
       const numericId = apiPosts.find((post) => String(post.id) === String(editingId))?.numericId;
       if (!numericId) throw new Error("Chỉ có thể sửa bài viết đã lưu trên cơ sở dữ liệu.");
       await api.put(`/posts/${numericId}`, {
         content,
-        image_url: imageUrl || null,
-        image_urls: imageUrl ? [imageUrl] : [],
+        image_urls: imageUrls,
+        visibility: visibilityInput?.value || "PUBLIC",
         game_ids: selectedGameId ? [selectedGameId] : [],
       });
     } else {
       await api.post("/posts", {
         content,
-        image_url: imageUrl || null,
-        image_urls: imageUrl ? [imageUrl] : [],
+        image_urls: imageUrls,
+        visibility: visibilityInput?.value || "PUBLIC",
         game_ids: selectedGameId ? [selectedGameId] : [],
       });
     }
@@ -584,26 +713,21 @@ postForm.addEventListener("submit", async (event) => {
 });
 
 imageInput.addEventListener("change", async () => {
-  const [file] = imageInput.files;
-  if (!file) return;
+  const files = [...imageInput.files];
+  imageInput.value = ""; // cho phép chọn lại cùng file
+  if (!files.length) return;
+  const remaining = MAX_POST_IMAGES - totalDraftImages();
   try {
-    validateImageFile(file);
-    selectedImageFile = file;
-    showImagePreview(URL.createObjectURL(file));
+    if (remaining <= 0) throw new Error(`Chỉ được đính kèm tối đa ${MAX_POST_IMAGES} ảnh.`);
+    if (files.length > remaining) throw new Error(`Bạn chỉ có thể thêm ${remaining} ảnh nữa (tối đa ${MAX_POST_IMAGES} ảnh).`);
+    files.forEach(validateImageFile);
+    selectedImageFiles.push(...files);
+    renderImagePreviews();
     composerError.hidden = true;
   } catch (error) {
-    imageInput.value = "";
-    selectedImageFile = null;
     composerError.textContent = error.message;
     composerError.hidden = false;
   }
-});
-
-document.getElementById("remove-image").addEventListener("click", () => {
-  draftImage = "";
-  selectedImageFile = null;
-  showImagePreview("");
-  imageInput.value = "";
 });
 contentInput.addEventListener("input", updateCharCount);
 cancelEditButton.addEventListener("click", resetComposer);
@@ -631,12 +755,14 @@ document.querySelectorAll(".filter-button").forEach((button) => {
   button.addEventListener("click", () => {
     if (searchMode || searchLoading || searchError) clearSearch();
     activeFilter = button.dataset.filter;
+    feedSource = activeFilter === "friends" ? "friends" : "all";
+    viewingUser = null;
     document.querySelectorAll(".filter-button").forEach((item) => {
       const selected = item === button;
       item.classList.toggle("active", selected);
       item.setAttribute("aria-pressed", String(selected));
     });
-    renderFeed();
+    loadApiPosts();
   });
 });
 
@@ -644,26 +770,36 @@ document.querySelectorAll("[data-game-filter]").forEach((button) => {
   button.addEventListener("click", () => {
     if (searchMode || searchLoading || searchError) clearSearch();
     activeGame = button.dataset.gameFilter;
+    viewingUser = null;
     activeFilter = "all";
-    visibleCount = activeGame ? 3 : 100;
     document.querySelectorAll(".filter-button").forEach((item) => {
       const selected = item.dataset.filter === "all";
       item.classList.toggle("active", selected);
       item.setAttribute("aria-pressed", String(selected));
     });
-    renderFeed();
+    loadApiPosts();
     document.querySelector(".feed-toolbar").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 });
 
 activeGameFilter.addEventListener("click", (event) => {
+  if (event.target.closest("[data-clear-user]")) {
+    viewingUser = null;
+    loadApiPosts();
+    return;
+  }
   if (event.target.closest("[data-clear-game]")) {
     activeGame = "";
-    renderFeed();
+    loadApiPosts();
   }
 });
 
 feedList.addEventListener("click", (event) => {
+  const authorLink = event.target.closest(".post-author-link");
+  if (authorLink && authorLink.dataset.authorId && /^\d+$/.test(authorLink.dataset.authorId)) {
+    openUserPosts(Number(authorLink.dataset.authorId), authorLink.dataset.authorName || "");
+    return;
+  }
   const button = event.target.closest("button[data-action]");
   if (!button) return;
   const postId = button.dataset.id;
@@ -707,31 +843,59 @@ feedList.addEventListener("click", (event) => {
       }).catch((error) => showToast(error?.message || "Không thể xoá bài viết.", "error"));
     }
   }
+  if (button.dataset.action === "block") {
+    const targetUserId = button.dataset.userId;
+    const targetName = button.dataset.userName || "người này";
+    if (!targetUserId || !/^\d+$/.test(targetUserId)) {
+      showToast("Không thể xác định người dùng để chặn.", "error");
+      return;
+    }
+    if (!confirm(`Bạn có chắc muốn chặn ${targetName}? Bạn sẽ không thấy bài viết của họ nữa.`)) return;
+    api.post(`/friend-requests/blocks/${targetUserId}`, {}).then(() => {
+      showToast(`Đã chặn ${targetName}.`);
+      feedLoadError = "";
+      loadApiPosts();
+    }).catch((error) => showToast(error?.message || "Không thể chặn người dùng này.", "error"));
+    return;
+  }
   if (button.dataset.action === "save") showToast("Tính năng lưu bài viết sẽ sớm có mặt.");
 });
 
 loadMoreButton.addEventListener("click", () => {
-  visibleCount += 3;
-  renderFeed();
+  loadApiPosts({ append: true });
 });
 
-async function loadApiPosts() {
+async function loadApiPosts(options = {}) {
+  const { append = false } = options;
+  if (feedLoadingMore) return;
+  if (append && !feedHasMore) return;
+  feedLoadingMore = true;
   try {
-    const payload = await api.get("/posts", { skip: 0, limit: 100 });
-    apiPosts = extractPostList(payload).map(normalizeApiPost);
+    const skip = append ? apiPosts.length : 0;
+    const payload = await api.get("/posts", {
+      skip,
+      limit: FEED_PAGE_SIZE,
+      ...(feedSource === "friends" ? { friends_only: true } : {}),
+      ...(viewingUser ? { user_id: viewingUser.id } : {}),
+      ...(activeGame ? { game_id: COMMUNITY_GAME_IDS.get(activeGame) } : {}),
+    });
+    const items = extractPostList(payload).map(normalizeApiPost);
+    apiPosts = append ? [...apiPosts, ...items] : items;
+    feedHasMore = items.length === FEED_PAGE_SIZE;
     feedLoadError = "";
   } catch (error) {
-    apiPosts = [];
+    if (!append) apiPosts = [];
     feedLoadError = error?.message || "Backend không phản hồi.";
+  } finally {
+    feedLoadingMore = false;
   }
   renderFeed();
 }
 
 window.addEventListener("scroll", () => {
   const remaining = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
-  if (remaining < 360 && window.scrollY > 100 && !loadMoreButton.hidden) {
-    visibleCount += 3;
-    renderFeed();
+  if (remaining < 360 && window.scrollY > 100 && !searchMode && feedHasMore) {
+    loadApiPosts({ append: true });
   }
 }, { passive: true });
 

@@ -257,19 +257,31 @@ body.community-page {
   font-size: 13px;
 }
 .composer-hint { text-align: right; }
+.tool-button-disabled { opacity: .45; pointer-events: none; }
 .image-preview {
   position: relative;
   width: fit-content;
   max-width: 100%;
   margin-bottom: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-.image-preview img {
+.image-preview-item {
+  position: relative;
+  max-width: 210px;
+}
+.image-preview-item img {
   display: block;
-  max-width: 100%;
+  max-width: 210px;
   max-height: 210px;
   border: 1px solid var(--community-border);
   border-radius: 7px;
   object-fit: cover;
+}
+.image-preview-item .remove-image {
+  top: 7px;
+  right: 7px;
 }
 .remove-image {
   position: absolute;
@@ -288,7 +300,7 @@ body.community-page {
 .composer-bottom, .composer-tools, .form-submit-group { display: flex; align-items: center; }
 .composer-bottom { justify-content: space-between; gap: 12px; }
 .composer-tools { gap: 8px; }
-.tool-button, #post-game {
+.tool-button, #post-game, #post-visibility {
   min-height: 34px;
   display: inline-flex;
   align-items: center;
@@ -301,10 +313,11 @@ body.community-page {
   font-size: 13px;
 }
 .tool-button { cursor: pointer; }
-.tool-button:hover, #post-game:hover { color: var(--community-text); border-color: var(--community-border-strong); }
+.tool-button:hover, #post-game:hover, #post-visibility:hover { color: var(--community-text); border-color: var(--community-border-strong); }
 .tool-button span { color: var(--community-orange); font-size: 16px; }
 #post-game { max-width: 175px; cursor: pointer; }
-#post-game option { background: #151821; color: var(--community-text); }
+#post-game option, #post-visibility option { background: #151821; color: var(--community-text); }
+#post-visibility { max-width: 130px; cursor: pointer; }
 .form-submit-group { gap: 8px; }
 .publish-button {
   min-height: 35px;
@@ -443,6 +456,26 @@ body.community-page {
 .post-author strong { overflow: hidden; color: var(--community-text); font-size: 13.5px; text-overflow: ellipsis; white-space: nowrap; }
 .post-author small { margin-top: 4px; color: var(--community-muted); font-size: 11px; }
 .author-badge { margin-left: 4px; color: #69b8ff; font-size: 12px; }
+.post-visibility-badge {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--community-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  color: var(--community-muted);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.post-author-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.post-author-link:hover { text-decoration: underline; color: var(--community-orange); }
 .post-menu { position: relative; }
 .post-menu summary {
   width: 29px;
@@ -500,6 +533,21 @@ body.community-page {
   font-weight: 700;
 }
 .post-game-tag::before { content: "#"; color: var(--community-orange); }
+.post-media.post-media-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  place-items: stretch;
+  min-height: 0;
+}
+.post-media.post-media-grid.post-media-multi {
+  grid-template-columns: 1fr 1fr;
+}
+.post-media.post-media-grid img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+}
 .post-media {
   position: relative;
   min-height: 235px;
@@ -848,19 +896,6 @@ body.community-page {
 .game-name strong { font-size: 12px; font-weight: 600; }
 .game-name small { margin-top: 4px; color: var(--community-muted); font-size: 11px; }
 .game-arrow { color: var(--community-muted); font-size: 12px; }
-.show-all-games {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding: 12px 2px 0;
-  border: 0;
-  background: transparent;
-  color: var(--community-secondary);
-  font: inherit;
-  font-size: 10px;
-  cursor: pointer;
-}
-.show-all-games:hover { color: var(--community-text); }
 .aside-footer { padding: 5px 2px; color: var(--community-muted); }
 .aside-footer span { font-size: 9px; font-weight: 800; letter-spacing: 2px; }
 .aside-footer p { margin: 5px 0 0; font-size: 9px; }
@@ -1034,8 +1069,7 @@ body.community-page {
 .post-action,
 .post-detail-button,
 .game-name small,
-.welcome-card a,
-.show-all-games {
+.welcome-card a {
   font-size: 12.5px;
 }
 
@@ -1442,6 +1476,12 @@ body.community-page.community-detail-page {
 }
 .comment-author-line strong { color: var(--community-text); }
 .comment-author-line span { color: var(--community-muted); font-size: 10.5px; }
+.comment-reply-tag {
+  margin-right: 2px;
+  color: var(--community-orange);
+  font-weight: 700;
+  font-size: 12px;
+}
 .comment-bubble p {
   margin: 5px 0 0;
   color: var(--community-secondary);
