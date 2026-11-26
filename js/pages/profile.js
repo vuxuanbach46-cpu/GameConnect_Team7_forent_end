@@ -195,7 +195,8 @@ function renderHeroAction(profile) {
   if (status === "FRIEND") { label = "Đã là bạn bè"; disabled = true; }
   else if (status === "SENT") { label = "Đã gửi lời mời"; disabled = true; }
   else if (status === "RECEIVED") { label = "Có lời mời đang chờ"; disabled = true; }
-  profileEls.heroAction.innerHTML = `<button class="gc-btn gc-btn-primary" id="btn-profile-add-friend" type="button" ${disabled ? "disabled" : ""}><i class="fa-solid fa-user-plus"></i> ${label}</button><a class="gc-btn gc-btn-quiet" href="friends.html"><i class="fa-solid fa-user-group"></i> Bạn bè</a>`;
+  const reportBtn = targetId ? `<button class="gc-btn gc-btn-outline gc-report-btn" type="button" data-report-type="USER" data-report-id="${targetId}" data-report-title="Người chơi ${escapeHtml(profile.username || profile.display_name || '')}" data-report-owner="${escapeHtml(profile.username || '')}" title="Báo cáo người dùng vi phạm"><i class="fa-solid fa-flag text-red-400"></i> Báo cáo</button>` : "";
+  profileEls.heroAction.innerHTML = `<button class="gc-btn gc-btn-primary" id="btn-profile-add-friend" type="button" ${disabled ? "disabled" : ""}><i class="fa-solid fa-user-plus"></i> ${label}</button><a class="gc-btn gc-btn-quiet" href="friends.html"><i class="fa-solid fa-user-group"></i> Bạn bè</a>${reportBtn}`;
   const button = $("btn-profile-add-friend");
   if (button && !disabled) button.addEventListener("click", () => sendFriendRequest(Number(targetId), button));
 }

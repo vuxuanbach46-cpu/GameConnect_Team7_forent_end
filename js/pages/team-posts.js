@@ -241,7 +241,15 @@ function renderPosts(items) {
             <i class="fa-solid ${meta.icon}"></i>
             <span>${gameName}</span>
           </div>
-          ${renderStatusBadge(post.status)}
+          <div class="flex items-center gap-2">
+            ${renderStatusBadge(post.status)}
+            <button type="button" class="gc-report-btn text-zinc-500 hover:text-red-400 p-1 rounded hover:bg-red-500/10 transition" data-report-type="TEAM_POST" data-report-id="${post.id}" data-report-title="${escapeHtml(post.title)}" data-report-owner="Gamer #${post.user_id}" title="Báo cáo bài tìm đội vi phạm" onclick="event.stopPropagation();">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <line x1="4" y1="22" x2="4" y2="15"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Post Title -->

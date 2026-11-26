@@ -245,6 +245,18 @@ function renderPost() {
           </button>
           <span class="post-action"><span class="action-icon">▢</span><span id="detail-comment-count">0 bình luận</span></span>
         </div>
+        <div class="post-actions-right">
+          ${!owner ? `
+            <button type="button" class="post-action post-report gc-report-btn" data-report-type="POST" data-report-id="${escapeHtml(post.id)}" data-report-title="${escapeHtml(post.content ? post.content.slice(0, 60) : 'Bài viết')}" data-report-owner="${escapeHtml(post.author)}" title="Báo cáo bài viết vi phạm">
+              <span class="action-icon" aria-hidden="true">🚩</span><span>Báo cáo bài viết</span>
+            </button>
+            ${post.userId ? `
+              <button type="button" class="post-action post-report gc-report-btn" data-report-type="USER" data-report-id="${escapeHtml(post.userId)}" data-report-title="Tài khoản ${escapeHtml(post.author)}" data-report-owner="${escapeHtml(post.author)}" title="Báo cáo người dùng vi phạm">
+                <span class="action-icon" aria-hidden="true">🛡</span><span>Báo cáo tác giả</span>
+              </button>
+            ` : ""}
+          ` : ""}
+        </div>
       </footer>
     </article>`;
 
@@ -301,7 +313,12 @@ function commentTemplate(comment, allComments) {
           <button type="button" data-comment-action="reply" data-id="${escapeHtml(comment.id)}" data-name="${escapeHtml(comment.author)}">Trả lời</button>
           ${mine ? `
             <button type="button" data-comment-action="edit" data-id="${escapeHtml(comment.id)}">Sửa</button>
-            <button type="button" data-comment-action="delete" data-id="${escapeHtml(comment.id)}">Xoá</button>` : ""}
+            <button type="button" data-comment-action="delete" data-id="${escapeHtml(comment.id)}">Xoá</button>` : `
+            <button type="button" class="comment-report-btn gc-report-btn" data-report-type="COMMENT" data-report-id="${escapeHtml(comment.id)}" data-report-title="${escapeHtml(comment.content ? comment.content.slice(0, 50) : 'Bình luận')}" data-report-owner="${escapeHtml(comment.author)}" title="Báo cáo bình luận vi phạm">🚩 Báo cáo</button>
+            ${comment.authorId ? `
+              <button type="button" class="comment-report-btn gc-report-btn" data-report-type="USER" data-report-id="${escapeHtml(comment.authorId)}" data-report-title="Tài khoản ${escapeHtml(comment.author)}" data-report-owner="${escapeHtml(comment.author)}" title="Báo cáo người dùng">🛡 Báo cáo người dùng</button>
+            ` : ""}
+          `}
         </div>
       </div>
     </article>`;

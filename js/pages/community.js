@@ -408,6 +408,8 @@ function renderPost(post) {
           <summary aria-label="Tuỳ chọn bài viết">···</summary>
           <div class="post-menu-actions">
             <button type="button" data-action="block" data-id="${safeId}" data-user-id="${escapeHtml(post.userId ?? "")}" data-user-name="${escapeHtml(post.author)}">Chặn ${escapeHtml(post.author)}</button>
+            <button type="button" data-report-type="POST" data-report-id="${safeId}" data-report-title="${escapeHtml(post.content ? post.content.slice(0, 60) : 'Bài viết')}" data-report-owner="${escapeHtml(post.author)}">🚩 Báo cáo bài viết</button>
+            ${post.userId ? `<button type="button" data-report-type="USER" data-report-id="${escapeHtml(post.userId)}" data-report-title="Tài khoản ${escapeHtml(post.author)}" data-report-owner="${escapeHtml(post.author)}">🛡 Báo cáo người dùng</button>` : ""}
           </div>
         </details>`}
       </header>
@@ -423,6 +425,11 @@ function renderPost(post) {
           </button>
         </div>
         <div class="post-actions-right">
+          ${!owner ? `
+            <button type="button" class="post-action post-report gc-report-btn" data-report-type="POST" data-report-id="${safeId}" data-report-title="${escapeHtml(post.content ? post.content.slice(0, 60) : 'Bài viết')}" data-report-owner="${escapeHtml(post.author)}" title="Báo cáo bài viết vi phạm">
+              <span class="action-icon" aria-hidden="true">🚩</span><span>Báo cáo</span>
+            </button>
+          ` : ""}
           <button type="button" class="post-detail-button" data-action="detail" data-id="${safeId}">Xem chi tiết <span aria-hidden="true">→</span></button>
           <button type="button" class="post-action post-save" data-action="save" aria-label="Lưu bài viết">♧</button>
         </div>
