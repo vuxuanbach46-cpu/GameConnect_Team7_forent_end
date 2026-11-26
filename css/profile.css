@@ -111,6 +111,35 @@
 @keyframes pf-spin { to { transform:rotate(360deg); } }
 .profile-alert { margin:-8px 0 16px;padding:11px 13px;border:1px solid #764c2b;border-radius:8px;background:#2d2119;color:#ffc18e;font-size:12px; }
 .profile-alert.error { border-color:#713d43;background:#2a1c21;color:#ff9ca4; }
+/* Light theme for the complete player profile and its edit dialog. */
+[data-theme="light"] {
+  --pf-bg:#f2f4f8;--pf-panel:#fff;--pf-panel-2:#f7f8fb;--pf-line:#dce1ea;
+  --pf-muted:#687386;--pf-text:#202635;--pf-orange:#e96512;--pf-orange-soft:rgba(233,101,18,.1);
+}
+[data-theme="light"] .gc-profile-body { background:radial-gradient(ellipse at 82% 0%,rgba(249,115,22,.08),transparent 32%),var(--pf-bg);color:var(--pf-text); }
+[data-theme="light"] .panel-card { background:linear-gradient(145deg,#fff,#f8f9fc);box-shadow:0 12px 35px rgba(31,43,65,.08); }
+[data-theme="light"] .gc-btn-outline { color:#374151;background:#f5f6f9;border-color:#d7dce5; }
+[data-theme="light"] .gc-btn-quiet { color:#4b5565;border-color:#d7dce5; }
+[data-theme="light"] .gc-btn-outline:hover,[data-theme="light"] .gc-btn-quiet:hover { background:#eef1f6;border-color:#bcc5d3;color:#202635; }
+[data-theme="light"] .identity-meta,[data-theme="light"] .profile-about p { color:#566174; }
+[data-theme="light"] .count-pill { background:#edf0f5;color:#596579; }
+[data-theme="light"] .game-card,[data-theme="light"] .team-card { border-color:#dce1e9;background:#f7f8fb; }
+[data-theme="light"] .game-card-image,[data-theme="light"] .team-avatar { background:#e9edf4; }
+[data-theme="light"] .game-tag { background:#edf0f5;color:#566174; }
+[data-theme="light"] .icon-action { border-color:#d5dbe5;color:#566174; }
+[data-theme="light"] .game-edit-wrap select,[data-theme="light"] .field input,[data-theme="light"] .field select,[data-theme="light"] .field textarea { border-color:#d3d9e4;background:#fff;color:#263143; }
+[data-theme="light"] .game-edit-wrap select:disabled,[data-theme="light"] .field select:disabled { color:#8a94a5;background:#f0f2f6; }
+[data-theme="light"] .field>span,[data-theme="light"] .toggle-row strong { color:#414c5e; }
+[data-theme="light"] .selected-game-preview,[data-theme="light"] .loading-state,[data-theme="light"] .empty-state { border-color:#d6dce6;color:#677386; }
+[data-theme="light"] .empty-state strong { color:#465164; }
+[data-theme="light"] .gc-modal-backdrop { background:rgba(25,34,50,.38); }
+[data-theme="light"] .gc-modal-dialog { border-color:#dce1ea;background:#fff;box-shadow:0 25px 90px rgba(31,43,65,.22); }
+[data-theme="light"] .modal-close,[data-theme="light"] .avatar-editor { border-color:#dce1ea;background:#f6f7fa;color:#4b5565; }
+[data-theme="light"] .avatar-preview { border-color:#d5dbe5; }
+[data-theme="light"] .toggle-row { border-color:#e0e4eb; }
+[data-theme="light"] .profile-alert { border-color:#f2c89f;background:#fff7ed;color:#9a4c12; }
+[data-theme="light"] .profile-alert.error { border-color:#edb8bd;background:#fff1f2;color:#a12836; }
+.profile-theme-toggle { min-width:112px; }
 /* Modal */
 .gc-modal[hidden],.add-game-form[hidden] { display:none; }
 .gc-modal { position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px; }

@@ -35,7 +35,89 @@ const cancelEditButton = document.getElementById("cancel-edit");
 const loadMoreButton = document.getElementById("load-more");
 const feedStatus = document.getElementById("feed-status");
 const feedEmpty = document.getElementById("feed-empty");
+const deletePostModal = document.getElementById("delete-post-modal");
+const confirmDeletePostButton = document.getElementById("confirm-delete-post");
 const visibilityInput = document.getElementById("post-visibility");
+const COMPOSER_GAME_ICONS = {
+  Valorant: "../assets/images/games/valorant.png",
+  "Liên Minh Huyền Thoại": "../assets/images/games/lol.png",
+  CS2: "../assets/images/games/cs2.png",
+  "Liên Quân Mobile": "../assets/images/games/aov.png",
+  TFT: "../assets/images/games/tft.png",
+};
+const COMPOSER_VISIBILITY = {
+  PUBLIC: { icon: "☀️", label: "Mọi người" },
+  FRIENDS: { icon: "👥", label: "Bạn bè" },
+  PRIVATE: { icon: "🔒", label: "Chỉ mình tôi" },
+};
+
+function renderComposerSelect(select, kind) {
+  const wrap = document.querySelector(`[data-composer-select="${kind}"]`);
+  const label = document.getElementById(`post-${kind}-label`);
+  const menu = document.getElementById(`post-${kind}-menu`);
+  const trigger = document.getElementById(`post-${kind}-trigger`);
+  if (!select || !wrap || !label || !menu || !trigger) return;
+
+  const options = [...select.options];
+  const selected = options.find((option) => option.value === select.value) || options[0];
+  const visibility = kind === "visibility" ? COMPOSER_VISIBILITY[selected.value] : null;
+  const gameIcon = kind === "game" ? COMPOSER_GAME_ICONS[selected.value] : null;
+  label.innerHTML = visibility
+    ? `<span class="composer-visibility-icon" aria-hidden="true">${visibility.icon}</span><span>${escapeHtml(visibility.label)}</span>`
+    : (gameIcon
+      ? `<img class="composer-select-game-icon" src="${gameIcon}" alt=""><span>${escapeHtml(selected.textContent.trim())}</span>`
+      : `<i class="fa-solid fa-gamepad" aria-hidden="true"></i><span>${escapeHtml(selected.textContent.trim())}</span>`);
+  menu.innerHTML = options.map((option) => {
+    const isSelected = option.value === select.value;
+    const optionVisibility = kind === "visibility" ? COMPOSER_VISIBILITY[option.value] : null;
+    const optionIcon = kind === "game" ? COMPOSER_GAME_ICONS[option.value] : null;
+    const icon = optionVisibility
+      ? `<span class="composer-visibility-icon" aria-hidden="true">${optionVisibility.icon}</span>`
+      : (optionIcon
+        ? `<img class="composer-select-game-icon" src="${optionIcon}" alt="">`
+        : `<i class="fa-solid fa-gamepad" aria-hidden="true"></i>`);
+    return `<button type="button" class="composer-select-option" role="option" aria-selected="${isSelected}" data-value="${escapeHtml(option.value)}"><span class="composer-select-option-left">${icon}<span>${escapeHtml(optionVisibility?.label || option.textContent.trim())}</span></span><span class="composer-select-check">${isSelected ? "✓" : ""}</span></button>`;
+  }).join("");
+}
+
+function closeComposerSelects(except = null) {
+  document.querySelectorAll(".composer-select-wrap.is-open").forEach((wrap) => {
+    if (wrap === except) return;
+    wrap.classList.remove("is-open");
+    wrap.querySelector(".composer-select-menu").hidden = true;
+    wrap.querySelector(".composer-select-trigger").setAttribute("aria-expanded", "false");
+  });
+}
+
+[[visibilityInput, "visibility"], [gameInput, "game"]].forEach(([select, kind]) => {
+  if (!select) return;
+  renderComposerSelect(select, kind);
+  select.addEventListener("change", () => renderComposerSelect(select, kind));
+  const wrap = document.querySelector(`[data-composer-select="${kind}"]`);
+  const trigger = document.getElementById(`post-${kind}-trigger`);
+  const menu = document.getElementById(`post-${kind}-menu`);
+  trigger?.addEventListener("click", () => {
+    const opening = !wrap.classList.contains("is-open");
+    closeComposerSelects(wrap);
+    wrap.classList.toggle("is-open", opening);
+    menu.hidden = !opening;
+    trigger.setAttribute("aria-expanded", String(opening));
+  });
+  menu?.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-value]");
+    if (!option) return;
+    select.value = option.dataset.value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    closeComposerSelects();
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".composer-select-wrap")) closeComposerSelects();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeComposerSelects();
+});
 const activeGameFilter = document.getElementById("active-game-filter");
 const searchForm = document.getElementById("post-search-form");
 const searchInput = document.getElementById("post-search");
@@ -58,6 +140,7 @@ let searchLoading = false;
 let searchError = "";
 let apiPosts = [];
 let feedLoadError = "";
+let pendingDeletePost = null;
 
 function getCurrentUserId() {
   try {
@@ -607,6 +690,8 @@ function renderImagePreviews() {
 function resetComposer() {
   editingId = null;
   postForm.reset();
+  renderComposerSelect(visibilityInput, "visibility");
+  renderComposerSelect(gameInput, "game");
   draftImages = [];
   selectedImageFiles = [];
   revokePreviewObjectUrls();
@@ -619,6 +704,46 @@ function resetComposer() {
   updateCharCount();
 }
 
+function openDeletePostDialog(post) {
+  pendingDeletePost = post;
+  deletePostModal.hidden = false;
+  document.body.classList.add("community-confirm-open");
+  confirmDeletePostButton.disabled = false;
+  confirmDeletePostButton.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Xóa bài viết';
+  confirmDeletePostButton.focus();
+}
+
+function closeDeletePostDialog() {
+  deletePostModal.hidden = true;
+  document.body.classList.remove("community-confirm-open");
+  pendingDeletePost = null;
+}
+
+deletePostModal.querySelectorAll("[data-close-delete-post]").forEach((button) => {
+  button.addEventListener("click", closeDeletePostDialog);
+});
+confirmDeletePostButton.addEventListener("click", async () => {
+  const post = pendingDeletePost;
+  if (!post?.numericId || confirmDeletePostButton.disabled) return;
+  confirmDeletePostButton.disabled = true;
+  confirmDeletePostButton.textContent = "Đang xóa...";
+  try {
+    await api.delete(`/posts/${post.numericId}`);
+    if (editingId === post.id) resetComposer();
+    closeDeletePostDialog();
+    await loadApiPosts();
+    showToast("Đã xóa bài viết.");
+  } catch (error) {
+    showToast(error?.message || "Không thể xóa bài viết.", "error");
+    confirmDeletePostButton.disabled = false;
+    confirmDeletePostButton.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Xóa bài viết';
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !deletePostModal.hidden) closeDeletePostDialog();
+});
+
 function startEditing(postId) {
   const post = apiPosts.find((item) => item.id === postId);
   if (!post) {
@@ -629,6 +754,8 @@ function startEditing(postId) {
   contentInput.value = post.content;
   gameInput.value = selectedGameOptionValue(post);
   if (visibilityInput) visibilityInput.value = post.visibility || "PUBLIC";
+  renderComposerSelect(gameInput, "game");
+  renderComposerSelect(visibilityInput, "visibility");
   draftImages = Array.isArray(post.images) ? [...post.images] : (post.image ? [post.image] : []);
   selectedImageFiles = [];
   renderImagePreviews();
@@ -834,14 +961,8 @@ feedList.addEventListener("click", (event) => {
       showToast("Không tìm thấy bài viết để xoá.", "error");
       return;
     }
-    if (!confirm("Bạn có chắc muốn xoá bài viết này?")) return;
-    if (post.numericId) {
-      api.delete(`/posts/${post.numericId}`).then(async () => {
-        if (editingId === postId) resetComposer();
-        await loadApiPosts();
-        showToast("Đã xoá bài viết.");
-      }).catch((error) => showToast(error?.message || "Không thể xoá bài viết.", "error"));
-    }
+    openDeletePostDialog(post);
+    return;
   }
   if (button.dataset.action === "block") {
     const targetUserId = button.dataset.userId;
@@ -956,6 +1077,75 @@ if (logoutButton) {
     localStorage.removeItem("token");
     localStorage.removeItem("user_role");
     window.location.replace("login.html");
+  });
+}
+
+const changePasswordMenuButton = document.getElementById("open-change-password");
+const communityPasswordModal = document.getElementById("change-password-modal");
+const communityPasswordForm = document.getElementById("change-password-form");
+const communityPasswordMessage = document.getElementById("change-password-message");
+const communityPasswordSubmit = document.getElementById("change-password-submit");
+if (changePasswordMenuButton) {
+  changePasswordMenuButton.hidden = String(localStorage.getItem("auth_provider") || "").toLowerCase() === "google";
+
+  const setCommunityPasswordModal = (open) => {
+    if (!communityPasswordModal) return;
+    communityPasswordModal.hidden = !open;
+    document.body.classList.toggle("gc-password-modal-open", open);
+    if (open) {
+      avatarDropdownMenu.hidden = true;
+      avatarMenuButton.setAttribute("aria-expanded", "false");
+      window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+    } else {
+      communityPasswordForm?.reset();
+      if (communityPasswordMessage) {
+        communityPasswordMessage.hidden = true;
+        communityPasswordMessage.textContent = "";
+        communityPasswordMessage.classList.remove("error");
+      }
+    }
+  };
+
+  changePasswordMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setCommunityPasswordModal(true);
+  });
+  ["close-change-password", "cancel-change-password"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", () => setCommunityPasswordModal(false));
+  });
+  communityPasswordModal?.querySelectorAll("[data-close-password]").forEach((element) => {
+    element.addEventListener("click", () => setCommunityPasswordModal(false));
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && communityPasswordModal && !communityPasswordModal.hidden) {
+      setCommunityPasswordModal(false);
+    }
+  });
+  communityPasswordForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const oldPassword = document.getElementById("old-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    const showMessage = (message, isError = false) => {
+      communityPasswordMessage.textContent = message;
+      communityPasswordMessage.classList.toggle("error", isError);
+      communityPasswordMessage.hidden = false;
+    };
+    if (newPassword !== confirmPassword) return showMessage("Mật khẩu xác nhận không khớp.", true);
+    if (oldPassword === newPassword) return showMessage("Mật khẩu mới cần khác mật khẩu hiện tại.", true);
+
+    communityPasswordSubmit.disabled = true;
+    communityPasswordSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Đang cập nhật...';
+    try {
+      const response = await api.put("/auth/change-password", { old_password: oldPassword, new_password: newPassword });
+      showMessage(response?.message || "Đổi mật khẩu thành công.");
+      communityPasswordForm.reset();
+    } catch (error) {
+      showMessage(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+    } finally {
+      communityPasswordSubmit.disabled = false;
+      communityPasswordSubmit.innerHTML = '<i class="fa-solid fa-key" aria-hidden="true"></i> Cập nhật mật khẩu';
+    }
   });
 }
 

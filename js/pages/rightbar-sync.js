@@ -82,6 +82,13 @@
       bell.id = "gc-notif-bell";
       bell.dataset.gcBellFallback = "true";
     }
+    // Keep the notification icon visible if NotificationBell has not rendered yet
+    // (for example, when auth initialization is delayed or the module exits early).
+    if (!bell.querySelector(".gc-notif-bell-btn") && !bell.querySelector(":scope > a")) {
+      const fallback = createLink("notifications.html", "Thông báo", ICONS.bell);
+      fallback.dataset.gcBellFallback = "true";
+      bell.append(fallback);
+    }
     bell.dataset.gcRightTool = "notifications";
 
     let invite = bar.querySelector('[data-gc-right-tool="invite"]')

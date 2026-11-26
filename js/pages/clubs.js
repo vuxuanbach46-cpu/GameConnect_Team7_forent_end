@@ -15,6 +15,7 @@ const clubEls = {
   createModal: document.getElementById("club-modal"),
   detailModal: document.getElementById("club-detail-modal"),
   detailContent: document.getElementById("club-detail-content"),
+  deleteModal: document.getElementById("club-delete-modal"),
   createForm: document.getElementById("club-create-form"),
   createMessage: document.getElementById("club-form-message"),
   createButton: document.getElementById("club-submit"),
@@ -28,6 +29,8 @@ let clubsSearchTimer = null;
 let clubsGames = [];
 let clubsMine = new Map();
 const clubsPending = new Set();
+let pendingClubDeleteId = null;
+let pendingClubMemberAction = null;
 
 function clubUnwrap(response) {
   return response?.data !== undefined ? response.data : response;
@@ -272,7 +275,10 @@ async function loadMyClubs() {
   clubsMine.clear();
   const response = await api.get("/api/teams/me");
   const myTeams = clubList(response, "teams");
-  myTeams.forEach((team) => clubsMine.set(Number(team.id), team));
+  myTeams.forEach((team) => clubsMine.set(Number(team.id), {
+    ...team,
+    is_captain: Boolean(team.is_captain || String(team.role || "").toLowerCase() === "captain"),
+  }));
   if (typeof window.gcRefreshSidebarClubs === "function") {
     window.gcRefreshSidebarClubs(myTeams);
   }
@@ -316,7 +322,7 @@ async function loadClubs() {
 
 function setClubModal(modal, open) {
   modal.hidden = !open;
-  document.body.classList.toggle("club-modal-open", open);
+  document.body.classList.toggle("club-modal-open", Boolean(document.querySelector(".club-modal:not([hidden])")));
   if (open && modal === clubEls.createModal) setTimeout(() => document.getElementById("club-name").focus(), 30);
   if (!open && modal === clubEls.createModal) {
     closeClubFilterDropdowns();
@@ -358,10 +364,11 @@ async function openClubDetails(teamId) {
     const logoMarkup = logo ? `<img src="${clubEscape(logo)}" alt="Logo ${clubEscape(team.name)}">` : clubEscape(clubInitials(team.name));
     const mine = clubsMine.get(Number(team.id));
     const isCaptain = Boolean(mine?.is_captain);
+    const needsApproval = team.join_mode === "APPROVAL_REQUIRED";
     const memberRows = members.length ? members.map((member) => {
       const captain = member.role === "CAPTAIN";
       const manageActions = isCaptain && !captain
-        ? `<span class="club-member-actions"><button type="button" data-transfer-captain="${Number(team.id)}" data-member-id="${Number(member.user_id)}">Chuyển trưởng</button><button type="button" data-remove-member="${Number(team.id)}" data-member-id="${Number(member.user_id)}">Xóa</button></span>`
+        ? `<span class="club-member-actions"><button type="button" data-transfer-captain="${Number(team.id)}" data-member-id="${Number(member.user_id)}" data-member-name="${clubEscape(member.username || `Người chơi #${member.user_id}`)}">Chuyển trưởng</button><button type="button" data-remove-member="${Number(team.id)}" data-member-id="${Number(member.user_id)}" data-member-name="${clubEscape(member.username || `Người chơi #${member.user_id}`)}">Xóa</button></span>`
         : `<span>${captain ? "Đội trưởng" : "Thành viên"}</span>`;
       return `<div class="club-member-row"><span>${clubEscape(member.username || `Người chơi #${member.user_id}`)}</span>${manageActions}</div>`;
     }).join("") : `<div class="club-member-row"><span>Chưa có dữ liệu thành viên</span></div>`;
@@ -369,7 +376,7 @@ async function openClubDetails(teamId) {
     if (clubsMine.has(Number(team.id))) {
       const feedLink = `<a href="team-feed.html?id=${Number(team.id)}" class="club-btn club-btn-primary"><i class="fa-solid fa-bullhorn"></i> Bảng tin CLB</a>`;
       const secondaryManage = isCaptain
-        ? `<button type="button" class="club-btn club-btn-quiet" data-edit-team="${Number(team.id)}"><i class="fa-solid fa-pen"></i> Chỉnh sửa</button>`
+        ? `<button type="button" class="club-btn club-btn-quiet" data-edit-team="${Number(team.id)}"><i class="fa-solid fa-pen"></i> Chỉnh sửa</button><button type="button" class="club-btn club-btn-danger club-btn-delete-inline" data-delete-team="${Number(team.id)}"><i class="fa-solid fa-trash-can"></i> Xóa CLB</button>`
         : `<button type="button" class="club-btn club-btn-quiet" data-leave-team="${Number(team.id)}"><i class="fa-solid fa-right-from-bracket"></i> Rời CLB</button>`;
       primaryAction = `${secondaryManage}${feedLink}`;
     } else if (joinRequest?.status === "PENDING") {
@@ -380,11 +387,50 @@ async function openClubDetails(teamId) {
     clubEls.detailContent.innerHTML = `<div class="club-dialog-header"><div><span class="clubs-eyebrow">CLUB PROFILE · ${game}</span></div><button type="button" class="club-modal-close" data-close-detail aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="club-detail-hero"><div class="club-logo">${logoMarkup}</div><div><h2 id="club-detail-title">${clubEscape(team.name)}</h2><p>${Number(team.total_members ?? members.length)} / ${clubEscape(team.max_members)} thành viên · ${team.join_mode === "APPROVAL_REQUIRED" ? "Cần phê duyệt" : "Tham gia tự do"}</p></div></div>
       <p class="club-detail-description">${clubEscape(team.description || "Câu lạc bộ chưa thêm phần giới thiệu.")}</p>
+      ${isCaptain && needsApproval ? `<section class="club-join-requests" aria-labelledby="club-requests-title"><div class="club-requests-heading"><h3 id="club-requests-title">Yêu cầu tham gia</h3><span class="club-requests-count" data-pending-count>…</span></div><div class="club-requests-list" data-pending-requests><p class="club-requests-state"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải yêu cầu...</p></div></section>` : ""}
       <div class="club-detail-members"><h3>Thành viên câu lạc bộ</h3>${memberRows}</div>
       ${isCaptain ? `<form class="club-edit-form" data-edit-form="${Number(team.id)}" hidden><label><span>Tên câu lạc bộ</span><input name="name" value="${clubEscape(team.name)}" minlength="2" maxlength="100" required></label><label><span>Tựa game</span><select name="main_game_id" required>${clubsGames.map((item) => `<option value="${Number(item.id ?? item.game_id)}" ${Number(item.id ?? item.game_id) === Number(team.main_game_id) ? "selected" : ""}>${clubEscape(item.name ?? item.title)}</option>`).join("")}</select></label><label><span>Giới thiệu</span><textarea name="description" rows="3" maxlength="1000">${clubEscape(team.description || "")}</textarea></label><div class="club-form-columns"><label><span>Sức chứa (tối đa 100 người)</span><input name="max_members" type="number" min="2" max="100" value="${Number(team.max_members)}" required></label><label><span>Chế độ tham gia</span><select name="join_mode"><option value="PUBLIC" ${team.join_mode === "PUBLIC" ? "selected" : ""}>Tham gia tự do</option><option value="APPROVAL_REQUIRED" ${team.join_mode === "APPROVAL_REQUIRED" ? "selected" : ""}>Cần phê duyệt</option></select></label></div><label><span>Đường dẫn logo</span><input name="logo_url" type="url" maxlength="500" value="${clubEscape(team.logo_url || "")}"></label><p class="club-form-message" data-edit-message hidden></p><div class="club-form-actions"><button type="button" class="club-btn club-btn-quiet" data-cancel-edit>Hủy sửa</button><button type="submit" class="club-btn club-btn-primary">Lưu thay đổi</button></div></form>` : ""}
       <div class="club-form-actions"><button type="button" class="club-btn club-btn-quiet" data-close-detail>Đóng</button>${primaryAction}</div>`;
+    if (isCaptain && needsApproval) loadPendingClubRequests(Number(team.id));
   } catch (error) {
     clubEls.detailContent.innerHTML = `<div class="club-dialog-header"><h2>Không tải được chi tiết</h2><button type="button" class="club-modal-close" data-close-detail aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></div><p class="club-form-message">${clubEscape(error.message)}</p>`;
+  }
+}
+
+async function loadPendingClubRequests(teamId) {
+  const list = clubEls.detailContent.querySelector("[data-pending-requests]");
+  const count = clubEls.detailContent.querySelector("[data-pending-count]");
+  if (!list || !count) return;
+  try {
+    const response = await api.get(`/api/teams/${teamId}/join-requests`);
+    const requests = clubList(response, "requests");
+    count.textContent = String(requests.length);
+    list.innerHTML = requests.length ? requests.map((request) => `
+      <article class="club-join-request" data-request-row="${Number(request.id)}">
+        <div class="club-join-request-copy"><strong>${clubEscape(request.username || `Người chơi #${request.user_id}`)}</strong><span>${clubEscape(request.message || "Chưa thêm lời nhắn.")}</span></div>
+        <div class="club-join-request-actions"><button type="button" class="club-request-approve" data-review-request="${Number(request.id)}" data-team-id="${teamId}" data-review-status="ACCEPTED" aria-label="Duyệt yêu cầu của ${clubEscape(request.username || "thành viên")}" title="Duyệt"><i class="fa-solid fa-check"></i></button><button type="button" class="club-request-reject" data-review-request="${Number(request.id)}" data-team-id="${teamId}" data-review-status="REJECTED" aria-label="Từ chối yêu cầu của ${clubEscape(request.username || "thành viên")}" title="Từ chối"><i class="fa-solid fa-xmark"></i></button></div>
+      </article>`).join("") : `<p class="club-requests-state">Hiện chưa có yêu cầu chờ duyệt.</p>`;
+  } catch (error) {
+    count.textContent = "!";
+    list.innerHTML = `<p class="club-requests-state is-error">${clubEscape(error.message || "Không tải được yêu cầu tham gia.")}</p>`;
+  }
+}
+
+async function reviewClubJoinRequest(teamId, requestId, status, button) {
+  button.disabled = true;
+  const row = button.closest("[data-request-row]");
+  row?.querySelectorAll("button").forEach((item) => { item.disabled = true; });
+  try {
+    const response = await api.patch(`/api/teams/${teamId}/join-requests/${requestId}`, { status });
+    const result = clubUnwrap(response);
+    await Promise.all([loadMyClubs(), loadClubs()]);
+    await openClubDetails(teamId);
+    setClubDetailNotice(result?.message || (status === "ACCEPTED" ? "Đã duyệt thành viên." : "Đã từ chối yêu cầu."));
+  } catch (error) {
+    if (row?.isConnected) {
+      row.querySelectorAll("button").forEach((item) => { item.disabled = false; });
+      setClubDetailNotice(error.message || "Không thể xử lý yêu cầu tham gia.", true);
+    }
   }
 }
 
@@ -446,33 +492,95 @@ async function leaveClub(teamId, button) {
   }
 }
 
-async function transferClubCaptain(teamId, userId, button) {
-  if (!window.confirm("Chuyển quyền đội trưởng cho thành viên này?")) return;
-  button.disabled = true;
+function requestDeleteClub(teamId) {
+  const team = clubsMine.get(Number(teamId));
+  if (!team || !(team.is_captain || String(team.role || "").toLowerCase() === "captain")) return;
+  pendingClubDeleteId = Number(teamId);
+  document.getElementById("club-delete-name").textContent = team.name || `#${teamId}`;
+  const message = document.getElementById("club-delete-message");
+  message.hidden = true;
+  message.textContent = "";
+  const confirm = document.getElementById("club-delete-confirm");
+  confirm.disabled = false;
+  confirm.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Xóa câu lạc bộ';
+  setClubModal(clubEls.detailModal, false);
+  setClubModal(clubEls.deleteModal, true);
+  confirm.focus();
+}
+
+async function deleteClub() {
+  const teamId = pendingClubDeleteId;
+  const confirm = document.getElementById("club-delete-confirm");
+  const message = document.getElementById("club-delete-message");
+  if (!teamId || confirm.disabled) return;
+  confirm.disabled = true;
+  confirm.textContent = "Đang xóa...";
   try {
-    await api.patch(`/api/teams/${teamId}/transfer-captain`, { new_captain_id: userId });
-    await loadMyClubs();
-    await loadClubs();
-    await openClubDetails(teamId);
-    setClubDetailNotice("Đã chuyển quyền đội trưởng.");
+    await api.delete(`/api/teams/${teamId}`);
+    clubsMine.delete(teamId);
+    clubsPending.delete(teamId);
+    setClubModal(clubEls.deleteModal, false);
+    pendingClubDeleteId = null;
+    clubsPage = 1;
+    await Promise.all([loadMyClubs(), loadClubs()]);
+    setClubFeedback("Đã xóa câu lạc bộ.", "success");
   } catch (error) {
-    setClubDetailNotice(error.message || "Không chuyển được quyền đội trưởng.", true);
-    button.disabled = false;
+    message.textContent = error.message || "Không thể xóa câu lạc bộ.";
+    message.hidden = false;
+    confirm.disabled = false;
+    confirm.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i> Xóa câu lạc bộ';
   }
 }
 
-async function removeClubMember(teamId, userId, button) {
-  if (!window.confirm("Xóa thành viên này khỏi câu lạc bộ?")) return;
-  button.disabled = true;
+function openClubMemberAction(type, teamId, userId, memberName) {
+  pendingClubMemberAction = { type, teamId, userId, memberName };
+  const isTransfer = type === "transfer";
+  const icon = document.getElementById("club-member-action-icon");
+  const confirm = document.getElementById("club-member-action-confirm");
+  const message = document.getElementById("club-member-action-message");
+  icon.className = `club-member-action-icon ${isTransfer ? "is-transfer" : "is-remove"}`;
+  icon.innerHTML = `<i class="fa-solid ${isTransfer ? "fa-crown" : "fa-user-minus"}" aria-hidden="true"></i>`;
+  document.getElementById("club-member-action-eyebrow").textContent = isTransfer ? "CHUYỂN QUYỀN ĐỘI TRƯỞNG" : "XÓA THÀNH VIÊN";
+  document.getElementById("club-member-action-title").textContent = isTransfer ? "Chuyển quyền đội trưởng?" : "Xóa thành viên khỏi CLB?";
+  document.getElementById("club-member-action-description").innerHTML = isTransfer
+    ? `Bạn sẽ chuyển quyền đội trưởng cho <strong>${clubEscape(memberName)}</strong>. Tài khoản của bạn sẽ trở thành thành viên thường.`
+    : `Bạn có chắc muốn xóa <strong>${clubEscape(memberName)}</strong> khỏi câu lạc bộ? Người này có thể gửi yêu cầu tham gia lại.`;
+  confirm.className = `club-btn ${isTransfer ? "club-btn-primary" : "club-btn-danger"}`;
+  confirm.innerHTML = isTransfer
+    ? '<i class="fa-solid fa-crown" aria-hidden="true"></i> Chuyển đội trưởng'
+    : '<i class="fa-solid fa-user-minus" aria-hidden="true"></i> Xóa thành viên';
+  confirm.disabled = false;
+  message.hidden = true;
+  message.textContent = "";
+  setClubModal(document.getElementById("club-member-action-modal"), true);
+  confirm.focus();
+}
+
+async function confirmClubMemberAction() {
+  const action = pendingClubMemberAction;
+  const confirm = document.getElementById("club-member-action-confirm");
+  const message = document.getElementById("club-member-action-message");
+  if (!action || confirm.disabled) return;
+  confirm.disabled = true;
+  confirm.textContent = action.type === "transfer" ? "Đang chuyển quyền..." : "Đang xóa...";
   try {
-    await api.delete(`/api/teams/${teamId}/members/${userId}`);
-    await loadMyClubs();
-    await loadClubs();
-    await openClubDetails(teamId);
-    setClubDetailNotice("Đã xóa thành viên khỏi câu lạc bộ.");
+    if (action.type === "transfer") {
+      await api.patch(`/api/teams/${action.teamId}/transfer-captain`, { new_captain_id: action.userId });
+    } else {
+      await api.delete(`/api/teams/${action.teamId}/members/${action.userId}`);
+    }
+    setClubModal(document.getElementById("club-member-action-modal"), false);
+    pendingClubMemberAction = null;
+    await Promise.all([loadMyClubs(), loadClubs()]);
+    await openClubDetails(action.teamId);
+    setClubDetailNotice(action.type === "transfer" ? `Đã chuyển quyền đội trưởng cho ${action.memberName}.` : `Đã xóa ${action.memberName} khỏi câu lạc bộ.`);
   } catch (error) {
-    setClubDetailNotice(error.message || "Không xóa được thành viên.", true);
-    button.disabled = false;
+    message.textContent = error.message || "Không thể hoàn tất thao tác.";
+    message.hidden = false;
+    confirm.disabled = false;
+    confirm.innerHTML = action.type === "transfer"
+      ? '<i class="fa-solid fa-crown" aria-hidden="true"></i> Chuyển đội trưởng'
+      : '<i class="fa-solid fa-user-minus" aria-hidden="true"></i> Xóa thành viên';
   }
 }
 
@@ -563,6 +671,16 @@ function bindClubEvents() {
   }));
   document.querySelectorAll("[data-close-club-modal]").forEach((button) => button.addEventListener("click", () => setClubModal(clubEls.createModal, false)));
   document.querySelectorAll("[data-close-detail]").forEach((button) => button.addEventListener("click", () => setClubModal(clubEls.detailModal, false)));
+  document.querySelectorAll("[data-cancel-delete-club]").forEach((button) => button.addEventListener("click", () => {
+    pendingClubDeleteId = null;
+    setClubModal(clubEls.deleteModal, false);
+  }));
+  document.getElementById("club-delete-confirm").addEventListener("click", deleteClub);
+  document.querySelectorAll("[data-cancel-member-action]").forEach((button) => button.addEventListener("click", () => {
+    pendingClubMemberAction = null;
+    setClubModal(document.getElementById("club-member-action-modal"), false);
+  }));
+  document.getElementById("club-member-action-confirm").addEventListener("click", confirmClubMemberAction);
   clubEls.search.addEventListener("input", () => {
     clearTimeout(clubsSearchTimer);
     clubsSearchTimer = setTimeout(() => { clubsPage = 1; loadClubs(); }, 300);
@@ -600,14 +718,18 @@ function bindClubEvents() {
     const leaveButton = event.target.closest("[data-leave-team]");
     const transferButton = event.target.closest("[data-transfer-captain]");
     const removeButton = event.target.closest("[data-remove-member]");
+    const deleteButton = event.target.closest("[data-delete-team]");
+    const reviewButton = event.target.closest("[data-review-request]");
     if (closeButton) setClubModal(clubEls.detailModal, false);
     if (joinButton) joinClub(Number(joinButton.dataset.detailJoin), joinButton);
     if (cancelEditButton) clubEls.detailContent.querySelector("[data-edit-form]").hidden = true;
     if (editButton) clubEls.detailContent.querySelector("[data-edit-form]").hidden = false;
     if (cancelRequestButton) cancelClubRequest(Number(cancelRequestButton.dataset.cancelRequest), cancelRequestButton);
     if (leaveButton) leaveClub(Number(leaveButton.dataset.leaveTeam), leaveButton);
-    if (transferButton) transferClubCaptain(Number(transferButton.dataset.transferCaptain), Number(transferButton.dataset.memberId), transferButton);
-    if (removeButton) removeClubMember(Number(removeButton.dataset.removeMember), Number(removeButton.dataset.memberId), removeButton);
+    if (transferButton) openClubMemberAction("transfer", Number(transferButton.dataset.transferCaptain), Number(transferButton.dataset.memberId), transferButton.dataset.memberName || "thành viên này");
+    if (removeButton) openClubMemberAction("remove", Number(removeButton.dataset.removeMember), Number(removeButton.dataset.memberId), removeButton.dataset.memberName || "thành viên này");
+    if (deleteButton) requestDeleteClub(Number(deleteButton.dataset.deleteTeam));
+    if (reviewButton) reviewClubJoinRequest(Number(reviewButton.dataset.teamId), Number(reviewButton.dataset.reviewRequest), reviewButton.dataset.reviewStatus, reviewButton);
   });
   clubEls.detailContent.addEventListener("submit", async (event) => {
     const form = event.target.closest("[data-edit-form]");

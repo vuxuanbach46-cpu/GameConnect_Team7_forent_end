@@ -15,7 +15,6 @@ const MENU = [
   { href: "pages/team-posts.html", label: "🎮 Tìm đồng đội" },
   { href: "pages/admin-dashboard.html", label: "📊 Dashboard Thống kê", adminOnly: true },
   { href: "pages/admin-reports.html", label: "🛡️ Quản lý Báo cáo", adminOnly: true },
-  { href: "pages/my-team.html", label: "🎮 Đội của tôi" },
 ];
 
 function checkIsAdmin() {

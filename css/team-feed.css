@@ -110,6 +110,40 @@ body.gc-club-feed-body {
   border-radius: 6px;
 }
 
+.club-workspace-tabs { display:flex; gap:8px; margin:0 0 18px; padding:4px; width:max-content; border:1px solid var(--cf-border); border-radius:11px; background:var(--cf-panel-bg); }
+.club-workspace-tab { display:inline-flex; align-items:center; gap:8px; min-height:38px; padding:0 14px; border:0; border-radius:8px; background:transparent; color:var(--cf-text-secondary); font:700 12px Inter,sans-serif; cursor:pointer; }
+.club-workspace-tab:hover,.club-workspace-tab.active { background:var(--cf-surface-elevated); color:var(--cf-text); }
+.club-workspace-tab.active { box-shadow:inset 0 -2px var(--cf-orange); }
+.club-workspace-tab span { padding:3px 7px; border-radius:20px; background:rgba(56,189,248,.12); color:#38bdf8; font-size:9px; }
+[data-club-panel][hidden] { display:none!important; }
+.club-chat-panel { display:flex; flex-direction:column; min-height:440px; overflow:hidden; border:1px solid var(--cf-border); border-radius:14px; background:var(--cf-panel-bg); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+.club-chat-heading { display:flex; align-items:center; gap:12px; padding:17px 20px; border-bottom:1px solid var(--cf-border); }
+.club-chat-heading-icon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:rgba(232,80,2,.12); color:var(--cf-orange); font-size:17px; }
+.club-chat-heading h2 { margin:0 0 4px; color:var(--cf-text); font-size:15px; font-weight:800; }
+.club-chat-heading p { margin:0; color:var(--cf-text-muted); font-size:11px; }
+.club-chat-private { display:inline-flex; align-items:center; gap:6px; margin-left:auto; padding:6px 9px; border:1px solid var(--cf-border); border-radius:30px; color:var(--cf-text-secondary); font-size:10px; white-space:nowrap; }
+.club-chat-private i { color:var(--cf-green); }
+.club-chat-status { min-height:25px; padding:7px 18px 0; color:var(--cf-text-muted); font-size:10px; }
+.club-chat-messages { display:flex; flex:1; flex-direction:column; gap:13px; min-height:260px; max-height:min(58vh,620px); overflow-y:auto; padding:14px 20px 20px; scrollbar-width:thin; }
+.club-chat-empty { display:grid; flex:1; place-content:center; justify-items:center; gap:9px; min-height:230px; color:var(--cf-text-muted); text-align:center; font-size:12px; }
+.club-chat-empty i { color:var(--cf-orange); font-size:24px; }
+.club-chat-row { display:flex; align-items:flex-end; gap:9px; max-width:82%; }
+.club-chat-row.is-mine { align-self:flex-end; flex-direction:row-reverse; }
+.club-chat-avatar { width:30px; height:30px; flex:0 0 30px; border-radius:50%; object-fit:cover; background:var(--cf-surface); }
+.club-chat-message-wrap { min-width:0; }
+.club-chat-meta { display:flex; align-items:center; gap:8px; margin:0 0 5px 3px; color:var(--cf-text-muted); font-size:9px; }
+.club-chat-row.is-mine .club-chat-meta { justify-content:flex-end; margin-right:3px; }
+.club-chat-author { color:var(--cf-text-secondary); font-weight:800; }
+.club-chat-bubble { width:fit-content; max-width:100%; padding:10px 13px; border:1px solid var(--cf-border); border-radius:12px 12px 12px 3px; background:var(--cf-surface); color:var(--cf-text); font-size:12px; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+.club-chat-row.is-mine .club-chat-bubble { margin-left:auto; border-color:rgba(232,80,2,.25); border-radius:12px 12px 3px 12px; background:rgba(232,80,2,.14); }
+.club-chat-compose { display:grid; gap:9px; padding:13px 16px; border-top:1px solid var(--cf-border); background:var(--cf-bg); }
+.club-chat-compose textarea { width:100%; min-height:44px; max-height:120px; resize:vertical; padding:12px 13px; border:1px solid var(--cf-border-strong); border-radius:10px; outline:0; background:var(--cf-panel-bg); color:var(--cf-text); font:500 12px/1.5 Inter,sans-serif; }
+.club-chat-compose textarea:focus { border-color:var(--cf-orange); box-shadow:0 0 0 3px rgba(232,80,2,.1); }
+.club-chat-compose-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--cf-text-muted); font-size:10px; }
+.club-chat-compose-footer button { display:inline-flex; align-items:center; gap:8px; min-height:35px; padding:0 14px; border:0; border-radius:8px; background:var(--cf-orange); color:#fff; font:800 11px Inter,sans-serif; cursor:pointer; }
+.club-chat-compose-footer button:hover { background:var(--cf-orange-hover); }
+.club-chat-compose-footer button:disabled { opacity:.55; cursor:wait; }
+
 .club-feed-topbar {
   display: flex;
   align-items: center;
@@ -291,6 +325,36 @@ body.gc-club-feed-body {
   border-radius: 12px;
   padding: 18px 22px;
   margin-bottom: 22px;
+}
+
+/* Captain-only approval queue for clubs that require approval to join. */
+.feed-join-requests { margin:0 0 18px;padding:16px 18px;border:1px solid rgba(245,158,11,.35);border-radius:12px;background:linear-gradient(115deg,rgba(245,158,11,.075),var(--cf-surface) 48%); }
+.feed-join-requests[hidden] { display:none!important; }
+.feed-join-requests-heading { display:flex;align-items:center;gap:12px;margin-bottom:12px; }
+.feed-join-requests-icon { width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border:1px solid rgba(245,158,11,.3);border-radius:10px;background:rgba(245,158,11,.12);color:var(--cf-gold-bright); }
+.feed-join-requests-heading h2 { margin:0;color:var(--cf-text);font-size:14px;font-weight:750; }
+.feed-join-requests-heading p { margin:4px 0 0;color:var(--cf-text-secondary);font-size:11px; }
+.feed-join-requests-count { min-width:25px;height:25px;margin-left:auto;display:grid;place-items:center;border:1px solid rgba(245,158,11,.28);border-radius:999px;background:rgba(245,158,11,.12);color:#fbbf24;font-size:11px;font-weight:800; }
+.feed-join-requests-list { display:grid;gap:7px; }
+.feed-join-requests-state { margin:0;padding:8px 2px;color:var(--cf-text-secondary);font-size:11px; }
+.feed-join-requests-state.is-error,.feed-join-request-notice { color:#fca5a5; }
+.feed-join-request-notice { margin:10px 0 0;font-size:11px; }
+.feed-join-request { min-width:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid var(--cf-border);border-radius:9px;background:var(--cf-panel-bg); }
+.feed-join-request-person { min-width:0;display:flex;align-items:center;gap:10px; }
+.feed-join-request-avatar { width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border:1px solid var(--cf-border);border-radius:50%;background:var(--cf-surface);color:var(--cf-text);font-size:12px;font-weight:800; }
+.feed-join-request-person>div { min-width:0; }
+.feed-join-request-person strong { display:block;overflow:hidden;color:var(--cf-text);font-size:12px;text-overflow:ellipsis;white-space:nowrap; }
+.feed-join-request-person p { margin:4px 0 0;overflow:hidden;color:var(--cf-text-secondary);font-size:10px;text-overflow:ellipsis;white-space:nowrap; }
+.feed-join-request-actions { display:flex;flex:0 0 auto;gap:6px; }
+.feed-join-request-actions button { min-height:31px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border:1px solid var(--cf-border);border-radius:7px;background:var(--cf-surface);color:var(--cf-text-secondary);font:700 10px Inter,sans-serif;cursor:pointer; }
+.feed-join-request-actions button:disabled { opacity:.5;cursor:wait; }
+.feed-join-request-actions button:first-child:hover:not(:disabled) { border-color:#168858;background:rgba(22,136,88,.14);color:#55d6a0; }
+.feed-join-request-actions button:last-child:hover:not(:disabled) { border-color:#c43d3d;background:rgba(196,61,61,.14);color:#ff8585; }
+
+@media (max-width:640px) {
+  .feed-join-requests { padding:13px; }
+  .feed-join-request { align-items:flex-start;flex-direction:column; }
+  .feed-join-request-actions { width:100%;justify-content:flex-end; }
 }
 
 .feed-captain-left {
@@ -688,6 +752,39 @@ body.gc-club-feed-body {
   align-items: center;
   justify-content: center;
 }
+
+.club-invite-trigger { min-height:27px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 8px;border:1px solid rgba(232,80,2,.45);border-radius:6px;background:rgba(232,80,2,.12);color:#ff9b62;font:700 10px Inter,sans-serif;white-space:nowrap;cursor:pointer; }
+.club-invite-trigger:hover { border-color:var(--cf-orange);background:rgba(232,80,2,.2);color:var(--cf-text); }
+.club-invite-trigger[hidden] { display:none!important; }
+
+.club-invite-modal[hidden] { display:none!important; }
+.club-invite-modal { position:fixed;inset:0;z-index:900;display:grid;place-items:center;padding:18px; }
+.club-invite-backdrop { position:absolute;inset:0;border:0;background:rgba(3,5,10,.72);backdrop-filter:blur(5px); }
+.club-invite-dialog { position:relative;width:min(470px,100%);max-height:min(680px,90vh);display:flex;flex-direction:column;padding:21px;border:1px solid var(--cf-border-strong);border-radius:14px;background:var(--cf-panel-bg);box-shadow:0 25px 80px rgba(0,0,0,.42); }
+.club-invite-heading { display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px; }
+.club-invite-heading h2 { margin:5px 0;color:var(--cf-text);font-size:18px; }
+.club-invite-heading p { margin:0;color:var(--cf-text-secondary);font-size:11px; }
+.club-invite-kicker { color:var(--cf-orange);font-size:9px;font-weight:800;letter-spacing:1.4px; }
+.club-invite-close { width:31px;height:31px;flex:0 0 31px;border:1px solid var(--cf-border);border-radius:7px;background:var(--cf-surface);color:var(--cf-text-secondary);cursor:pointer; }
+.club-invite-search { height:38px;display:flex;align-items:center;gap:9px;padding:0 11px;border:1px solid var(--cf-border);border-radius:8px;background:var(--cf-surface);color:var(--cf-text-muted); }
+.club-invite-search:focus-within { border-color:var(--cf-orange); }
+.club-invite-search input { width:100%;border:0;outline:0;background:transparent;color:var(--cf-text);font:500 12px Inter,sans-serif; }
+.club-invite-search input::placeholder { color:var(--cf-text-muted); }
+.club-invite-status { min-height:30px;padding:10px 1px 5px;color:var(--cf-text-secondary);font-size:10px; }
+.club-invite-status.is-error { color:#fca5a5; }
+.club-invite-list { min-height:80px;overflow:auto;display:grid;align-content:start;gap:6px; }
+.club-invite-friend { display:flex;align-items:center;gap:10px;padding:9px;border:1px solid var(--cf-border);border-radius:9px;background:var(--cf-surface); }
+.club-invite-friend>img { width:36px;height:36px;flex:0 0 36px;border:1px solid var(--cf-border);border-radius:50%;object-fit:cover;background:var(--cf-panel-bg); }
+.club-invite-friend-meta { min-width:0;flex:1;display:grid;gap:4px; }
+.club-invite-friend-meta strong { overflow:hidden;color:var(--cf-text);font-size:11px;text-overflow:ellipsis;white-space:nowrap; }
+.club-invite-friend-meta span { color:var(--cf-text-muted);font-size:9px; }
+.club-invite-send { min-height:30px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border:1px solid var(--cf-orange);border-radius:7px;background:var(--cf-orange);color:white;font:700 10px Inter,sans-serif;white-space:nowrap;cursor:pointer; }
+.club-invite-send:disabled { border-color:var(--cf-border);background:var(--cf-surface-hover);color:var(--cf-green);cursor:default; }
+.club-invite-empty { min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:18px;text-align:center;color:var(--cf-text-secondary); }
+.club-invite-empty>i { margin-bottom:3px;color:var(--cf-text-muted);font-size:21px; }
+.club-invite-empty strong { color:var(--cf-text);font-size:12px; }
+.club-invite-empty span { max-width:280px;font-size:10px;line-height:1.5; }
+body.club-invite-open { overflow:hidden; }
 
 .club-members-search {
   display: flex;
@@ -1175,4 +1272,14 @@ body.gc-club-feed-body {
     height: auto;
     width: 100%;
   }
+  .club-workspace-tabs { width:100%; }
+  .club-workspace-tab { flex:1; justify-content:center; padding:0 8px; }
+  .club-chat-heading { padding:14px; }
+  .club-chat-heading p { max-width:210px; }
+  .club-chat-private { padding:5px 7px; font-size:9px; }
+  .club-chat-messages { min-height:260px; max-height:52vh; padding:12px; }
+  .club-chat-row { max-width:94%; }
+  .club-chat-compose { padding:10px; }
+  .club-chat-compose-footer { align-items:flex-start; flex-direction:column; }
+  .club-chat-compose-footer button { align-self:flex-end; }
 }

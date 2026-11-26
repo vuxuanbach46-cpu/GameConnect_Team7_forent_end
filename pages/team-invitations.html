@@ -8,13 +8,26 @@
   <link rel="stylesheet" href="../css/index.css">
   <link rel="stylesheet" href="../css/my-team.css">
   <link rel="stylesheet" href="../css/team-navigation.css">
+  <link rel="stylesheet" href="../css/team-invitations.css">
 </head>
 <body class="gc-team-page" data-root="../">
   <header id="app-header"></header>
-  <main class="container my-teams-page">
-    <div class="my-teams-heading"><div><h1>Lời mời vào đội</h1><p>Xem và phản hồi lời mời từ đội trưởng.</p></div><a class="my-teams-secondary" href="friends.html">Bạn bè</a></div>
-    <p id="invitation-message" role="status">Đang tải lời mời...</p>
-    <div id="invitation-list" class="my-teams-grid"></div>
+  <main class="container gc-invitations-page">
+    <a class="gc-invitations-back" href="my-team.html"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Đội của tôi</a>
+    <section class="gc-invitations-hero">
+      <div class="gc-invitations-hero-icon"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></div>
+      <div class="gc-invitations-heading">
+        <span class="gc-invitations-eyebrow">KẾT NỐI ĐỒNG ĐỘI</span>
+        <h1>Lời mời vào đội</h1>
+        <p>Những lời mời tham gia đội đang chờ bạn phản hồi.</p>
+      </div>
+      <a class="gc-invitations-friends" href="friends.html"><i class="fa-solid fa-user-group" aria-hidden="true"></i> Bạn bè</a>
+    </section>
+    <section class="gc-invitations-content" aria-labelledby="invitation-section-title">
+      <div class="gc-invitations-section-heading"><div><span class="gc-invitations-eyebrow">HỘP THƯ CỦA BẠN</span><h2 id="invitation-section-title">Đang chờ phản hồi</h2></div><span id="invitation-count" class="gc-invitations-count">— lời mời</span></div>
+      <p id="invitation-message" class="gc-invitations-message" role="status" aria-live="polite">Đang tải lời mời...</p>
+      <div id="invitation-list" class="gc-invitations-list"></div>
+    </section>
   </main>
   <footer id="app-footer"></footer>
   <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>

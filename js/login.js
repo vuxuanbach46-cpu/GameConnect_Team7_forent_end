@@ -140,10 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
       } catch (error) {
         console.error("Lỗi đăng nhập:", error);
-        showAlert(
-          error.message || "Tên đăng nhập hoặc mật khẩu không chính xác.",
-          "error",
-        );
+        const backendMessage = error?.data?.detail;
+        const message = typeof backendMessage === "string"
+          ? backendMessage
+          : (error?.message && !/^Lỗi\s+\d+$/i.test(error.message)
+            ? error.message
+            : (Number(error?.status) === 401
+              ? "Không tìm thấy tài khoản hoặc mật khẩu không chính xác. Hãy kiểm tra lại email/tên đăng nhập và mật khẩu, hoặc đăng ký tài khoản mới."
+              : "Đăng nhập chưa thành công. Vui lòng thử lại."));
+        showAlert(message, "error");
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Đăng nhập";

@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../css/home.css">
   <link rel="stylesheet" href="../css/notifications.css">
   <link rel="stylesheet" href="../css/team-feed.css">
+  <link rel="stylesheet" href="../css/rightbar.css" data-gc-rightbar-css="true">
 </head>
 
 <body class="gc-club-feed-body" data-root="../">
@@ -59,14 +60,6 @@
       <a href="friends.html" class="fc-nav-item" title="Bạn bè &amp; Kết nối">
         <span class="fc-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
         <span class="fc-nav-label">Bạn bè &amp; Kết nối</span>
-      </a>
-      <a href="teams.html" class="fc-nav-item" title="Danh sách đội">
-        <span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
-        <span class="fc-nav-label">Danh sách đội</span>
-      </a>
-      <a href="my-team.html" class="fc-nav-item" title="Đội của tôi">
-        <span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
-        <span class="fc-nav-label">Đội của tôi</span>
       </a>
       <div class="fc-nav-divider fc-clubs-divider"></div>
       <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ">
@@ -126,6 +119,22 @@
         </div>
       </section>
 
+      <nav class="club-workspace-tabs" role="tablist" aria-label="Khu vực câu lạc bộ">
+        <button type="button" class="club-workspace-tab" data-club-tab="feed" role="tab"><i class="fa-solid fa-bullhorn"></i> Bảng tin</button>
+        <button type="button" class="club-workspace-tab" data-club-tab="chat" role="tab"><i class="fa-solid fa-comments"></i> Chat chung <span>Thành viên</span></button>
+      </nav>
+
+      <div id="club-feed-panel" data-club-panel="feed">
+      <section id="feed-join-requests" class="feed-join-requests" aria-labelledby="feed-join-requests-title" hidden>
+        <div class="feed-join-requests-heading">
+          <div class="feed-join-requests-icon"><i class="fa-solid fa-user-clock" aria-hidden="true"></i></div>
+          <div><h2 id="feed-join-requests-title">Yêu cầu tham gia</h2><p>Chỉ đội trưởng mới có thể duyệt thành viên vào câu lạc bộ.</p></div>
+          <span id="feed-join-requests-count" class="feed-join-requests-count">0</span>
+        </div>
+        <div id="feed-join-requests-list" class="feed-join-requests-list" role="list"></div>
+        <p id="feed-join-request-notice" class="feed-join-request-notice" role="status" hidden></p>
+      </section>
+
       <!-- Khu vực Đội trưởng đăng bài thông báo (chỉ hiển thị khi là Đội trưởng) -->
       <section id="feed-captain-tools" class="feed-captain-tools" hidden>
         <div class="feed-captain-left">
@@ -176,6 +185,21 @@
           <a href="clubs.html" class="feed-primary">Quay lại Khám phá Câu lạc bộ</a>
         </div>
       </section>
+      </div>
+
+      <section id="club-chat-panel" class="club-chat-panel" data-club-panel="chat" role="tabpanel" hidden>
+        <header class="club-chat-heading">
+          <div class="club-chat-heading-icon"><i class="fa-solid fa-comments"></i></div>
+          <div><h2>Chat chung câu lạc bộ</h2><p>Trao đổi riêng với các thành viên trong câu lạc bộ này.</p></div>
+          <span class="club-chat-private"><i class="fa-solid fa-lock"></i> Riêng tư</span>
+        </header>
+        <div id="club-chat-status" class="club-chat-status" role="status">Đang tải tin nhắn...</div>
+        <div id="club-chat-messages" class="club-chat-messages" role="log" aria-live="polite" aria-label="Tin nhắn câu lạc bộ"></div>
+        <form id="club-chat-form" class="club-chat-compose" autocomplete="off">
+          <textarea id="club-chat-input" rows="1" maxlength="2000" placeholder="Nhắn tin cho câu lạc bộ..." aria-label="Nội dung tin nhắn" required></textarea>
+          <div class="club-chat-compose-footer"><span>Tin nhắn chỉ thành viên CLB mới xem được.</span><button id="club-chat-send" type="submit"><i class="fa-solid fa-paper-plane"></i><span>Gửi</span></button></div>
+        </form>
+      </section>
     </div>
   </main>
 
@@ -185,6 +209,7 @@
       <div class="club-members-title-row">
         <span class="club-members-title">THÀNH VIÊN CLB</span>
         <span class="club-members-count" id="club-members-count">0</span>
+        <button type="button" id="btn-invite-club-friend" class="club-invite-trigger" title="Mời bạn bè vào câu lạc bộ" aria-label="Mời bạn bè vào câu lạc bộ" hidden><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Mời</button>
       </div>
       <label class="club-members-search">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -213,6 +238,16 @@
       </a>
     </div>
   </aside>
+
+  <div id="club-invite-modal" class="club-invite-modal" hidden>
+    <button type="button" class="club-invite-backdrop" data-close-club-invite aria-label="Đóng hộp mời bạn bè"></button>
+    <section class="club-invite-dialog" role="dialog" aria-modal="true" aria-labelledby="club-invite-title">
+      <header class="club-invite-heading"><div><span class="club-invite-kicker">MỞ RỘNG ĐỘI HÌNH</span><h2 id="club-invite-title">Mời bạn bè vào CLB</h2><p>Chọn bạn bè để gửi lời mời tham gia câu lạc bộ.</p></div><button type="button" class="club-invite-close" data-close-club-invite aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></header>
+      <label class="club-invite-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="club-invite-search" type="search" placeholder="Tìm bạn bè..." autocomplete="off"></label>
+      <div id="club-invite-status" class="club-invite-status" role="status">Đang tải bạn bè...</div>
+      <div id="club-invite-list" class="club-invite-list" role="list"></div>
+    </section>
+  </div>
 
   <!-- Thanh Taskbar bên phải -->
   <aside class="fc-right-bar" aria-label="Thanh công cụ nhanh và tài khoản">
@@ -247,6 +282,10 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           <span>Đăng xuất</span>
         </button>
+        <button type="button" id="open-change-password" class="fc-avatar-password-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>Đổi mật khẩu</span>
+        </button>
       </div>
     </div>
     <a href="quick-match.html" class="fc-right-icon-btn" title="Tìm đội nhanh (VS)" style="font-weight:800;font-size:12px">VS</a>
@@ -263,6 +302,23 @@
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </a>
   </aside>
+
+  <div id="change-password-modal" class="gc-password-modal" hidden>
+    <button type="button" class="gc-password-backdrop" data-close-password aria-label="Đóng popup"></button>
+    <section class="gc-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+      <div class="gc-password-heading">
+        <div><span class="gc-password-kicker">ACCOUNT SECURITY</span><h2 id="change-password-title">Đổi mật khẩu</h2><p>Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p></div>
+        <button type="button" id="close-change-password" class="gc-password-close" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="change-password-form" class="gc-password-form">
+        <label><span>Mật khẩu hiện tại</span><input id="old-password" type="password" autocomplete="current-password" maxlength="128" required></label>
+        <label><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required><small>Tối thiểu 6 ký tự.</small></label>
+        <label><span>Xác nhận mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required></label>
+        <p id="change-password-message" class="gc-password-message" role="status" hidden></p>
+        <div class="gc-password-actions"><button type="button" id="cancel-change-password" class="gc-password-cancel">Huỷ</button><button type="submit" id="change-password-submit" class="gc-password-submit"><i class="fa-solid fa-key" aria-hidden="true"></i> Cập nhật mật khẩu</button></div>
+      </form>
+    </section>
+  </div>
 
   <!-- Modal Đội trưởng đăng bài thông báo -->
   <div id="feed-modal" class="feed-modal-overlay" hidden>
@@ -313,6 +369,7 @@
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/notifications.js"></script>
+  <script>NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });</script>
   <script src="../js/pages/sidebar-order.js"></script>
   <script src="../js/pages/rightbar-sync.js"></script>
   <script src="../js/pages/team-feed.js"></script>

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../css/home.css">
   <link rel="stylesheet" href="../css/notifications.css">
   <link rel="stylesheet" href="../css/clubs.css">
+  <link rel="stylesheet" href="../css/rightbar.css" data-gc-rightbar-css="true">
 </head>
 <body class="gc-clubs-body">
   <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
@@ -29,8 +30,6 @@
       <a href="community.html" class="fc-nav-item" title="Bảng tin cộng đồng"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span><span class="fc-nav-label">Bảng tin</span></a>
       <a href="friends.html" class="fc-nav-item" title="Bạn bè &amp; Kết nối"><span class="fc-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span class="fc-nav-label">Bạn bè &amp; Kết nối</span></a>
       <a href="clubs.html" class="fc-nav-item is-current" title="Câu lạc bộ" aria-current="page"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path></svg></span><span class="fc-nav-label">Câu lạc bộ</span></a>
-      <a href="teams.html" class="fc-nav-item" title="Danh sách đội"><span class="fc-nav-icon"><i class="fa-solid fa-people-group"></i></span><span class="fc-nav-label">Danh sách đội</span></a>
-      <a href="my-team.html" class="fc-nav-item" title="Đội của tôi"><span class="fc-nav-icon"><i class="fa-solid fa-shield-halved"></i></span><span class="fc-nav-label">Đội của tôi</span></a>
       <a href="quick-match.html?view=rooms" class="fc-nav-item" title="Tìm phòng"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></span><span class="fc-nav-label">Tìm phòng</span></a>
     </div>
     <div class="fc-bar-group clubs-sidebar-bottom"><a href="#" class="fc-nav-item" title="Cửa hàng vật phẩm"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span><span class="fc-nav-label">Cửa hàng vật phẩm</span></a></div>
@@ -193,6 +192,36 @@
     <button type="button" class="club-modal-backdrop" data-close-detail aria-label="Đóng popup"></button>
     <section class="club-dialog club-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="club-detail-title">
       <div id="club-detail-content"></div>
+    </section>
+  </div>
+
+  <div id="club-delete-modal" class="club-modal club-delete-modal" hidden>
+    <button type="button" class="club-modal-backdrop" data-cancel-delete-club aria-label="Đóng xác nhận"></button>
+    <section class="club-dialog club-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="club-delete-title" aria-describedby="club-delete-description">
+      <div class="club-delete-icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <span class="clubs-eyebrow">XÓA CÂU LẠC BỘ</span>
+      <h2 id="club-delete-title">Bạn chắc chắn chứ?</h2>
+      <p id="club-delete-description">Câu lạc bộ <strong id="club-delete-name"></strong> cùng thành viên, bài đăng và tin nhắn chat sẽ bị xóa vĩnh viễn.</p>
+      <div class="club-form-actions club-delete-actions">
+        <button type="button" class="club-btn club-btn-quiet" data-cancel-delete-club>Giữ lại câu lạc bộ</button>
+        <button type="button" id="club-delete-confirm" class="club-btn club-btn-danger"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> Xóa câu lạc bộ</button>
+      </div>
+      <p id="club-delete-message" class="club-form-message" role="status" hidden></p>
+    </section>
+  </div>
+
+  <div id="club-member-action-modal" class="club-modal club-member-action-modal" hidden>
+    <button type="button" class="club-modal-backdrop" data-cancel-member-action aria-label="Đóng xác nhận"></button>
+    <section class="club-dialog club-member-action-dialog" role="dialog" aria-modal="true" aria-labelledby="club-member-action-title" aria-describedby="club-member-action-description">
+      <div id="club-member-action-icon" class="club-member-action-icon" aria-hidden="true"><i class="fa-solid fa-crown"></i></div>
+      <span id="club-member-action-eyebrow" class="clubs-eyebrow">QUẢN LÝ THÀNH VIÊN</span>
+      <h2 id="club-member-action-title">Xác nhận thao tác</h2>
+      <p id="club-member-action-description">Bạn muốn tiếp tục?</p>
+      <div class="club-form-actions club-member-action-buttons">
+        <button type="button" class="club-btn club-btn-quiet" data-cancel-member-action>Hủy</button>
+        <button type="button" id="club-member-action-confirm" class="club-btn"><i class="fa-solid fa-check" aria-hidden="true"></i> Xác nhận</button>
+      </div>
+      <p id="club-member-action-message" class="club-form-message" role="status" hidden></p>
     </section>
   </div>
 

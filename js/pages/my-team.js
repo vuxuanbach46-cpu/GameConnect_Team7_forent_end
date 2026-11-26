@@ -104,8 +104,6 @@ loadMyTeams();
     ['community.html', '▤', 'Cộng đồng'],
     ['friends.html', '♙', 'Bạn bè'],
     ['team-posts.html', '⌕', 'Tìm đồng đội'],
-    ['teams.html', '◈', 'Danh sách đội'],
-    ['my-team.html', '♜', 'Đội của tôi'],
   ];
   if (isAdmin) {
     links.push(['admin-dashboard.html', '📊', 'Dashboard Admin']);
