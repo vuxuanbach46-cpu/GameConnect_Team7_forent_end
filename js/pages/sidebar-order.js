@@ -202,7 +202,13 @@
     const group = sidebar.querySelector(".fc-bar-group");
     if (!group) return;
     const brand = group.querySelector(".fc-brand-link");
-    sidebar.querySelectorAll('a.fc-nav-item[href="teams.html"],a.fc-nav-item[href="my-team.html"]').forEach((link) => link.remove());
+    sidebar.querySelectorAll('a.fc-nav-item[href="teams.html"],a.fc-nav-item[href="my-team.html"],a.fc-nav-item[href="items.html"],a.fc-nav-item[title*="Cửa hàng"]').forEach((link) => {
+      const parentGroup = link.closest(".fc-bar-group");
+      link.remove();
+      if (parentGroup && parentGroup !== group && parentGroup.children.length === 0) {
+        parentGroup.remove();
+      }
+    });
     let cursor = brand;
     if (brand?.nextElementSibling?.classList.contains("fc-nav-divider")) cursor = brand.nextElementSibling;
     if (!cursor) return;

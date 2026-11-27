@@ -19,7 +19,6 @@
         <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path></svg></span><span class="fc-nav-label">Câu lạc bộ</span></a>
         <div class="fc-sidebar-my-clubs" data-sidebar-my-clubs="true" hidden></div>
       </div>
-      <div class="fc-bar-group"><a href="#" class="fc-nav-item" title="Cửa hàng vật phẩm"><span class="fc-nav-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span><span class="fc-nav-label">Cửa hàng vật phẩm</span></a></div>
     </aside>`;
 
   const old = document.querySelector(".gc-team-nav");
