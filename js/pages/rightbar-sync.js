@@ -378,6 +378,14 @@
     try {
       const meRes = await api.get("/user/me");
       const meData = meRes?.data || meRes || {};
+      if (meData.role) {
+        const roleUpper = String(meData.role).toUpperCase();
+        localStorage.setItem("user_role", roleUpper);
+        const isAdminNow = roleUpper === "ADMIN";
+        document.querySelectorAll(".admin-nav-item").forEach((el) => {
+          el.style.display = isAdminNow ? "" : "none";
+        });
+      }
       const username = meData.username || fallbackName;
       let displayName = meData.display_name || username || "Game thủ";
       let avatarUrl = meData.avatar

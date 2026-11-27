@@ -162,6 +162,42 @@
 
   window.gcRefreshSidebarClubs = fetchAndRenderSidebarMyClubs;
 
+  function isSidebarAdminUser() {
+    const token = localStorage.getItem("access_token");
+    if (!token) return false;
+    const storedRole = String(localStorage.getItem("user_role") || "").toUpperCase();
+    if (storedRole === "ADMIN") return true;
+    let role = storedRole;
+    try {
+      const base64Url = token.split(".")[1] || "";
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(atob(base64));
+      if (payload?.role) role = payload.role;
+    } catch (_) {}
+    return String(role).toUpperCase() === "ADMIN";
+  }
+
+  const ADMIN_ENTRIES = [
+    {
+      href: "admin-dashboard.html",
+      label: "Dashboard Thống Kê",
+      color: "#f59e0b",
+      icon: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+    },
+    {
+      href: "admin-reports.html",
+      label: "Quản lý Báo cáo",
+      color: "#ef4444",
+      icon: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+    },
+    {
+      href: "admin_users.html",
+      label: "Quản lý Người dùng",
+      color: "#38bdf8",
+      icon: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><circle cx="18" cy="16" r="3"></circle><path d="M18 11.5v1.5m0 6v1.5m4.5-4.5h-1.5m-6 0h-1.5"></path></svg>',
+    },
+  ];
+
   function normalizeSidebar(sidebar) {
     const group = sidebar.querySelector(".fc-bar-group");
     if (!group) return;
@@ -171,9 +207,27 @@
     if (brand?.nextElementSibling?.classList.contains("fc-nav-divider")) cursor = brand.nextElementSibling;
     if (!cursor) return;
 
-    // Giữ các mục Admin (.admin-nav-item) ngay dưới vạch ngăn cách đầu tiên nếu có
-    sidebar.querySelectorAll("a.admin-nav-item").forEach((adminLink) => {
-      adminLink.remove();
+    const isAdmin = isSidebarAdminUser();
+    const currentFile = (window.location.pathname.split("/").pop() || "").toLowerCase();
+    const activeAdminHref = currentFile === "admin_user-detail.html" ? "admin_users.html" : currentFile;
+
+    // Chuẩn hóa 3 mục Admin (.admin-nav-item): chỉ hiển thị khi đăng nhập bằng tài khoản ADMIN
+    ADMIN_ENTRIES.forEach((adm) => {
+      let adminLink = sidebar.querySelector(`a.admin-nav-item[href="${adm.href}"]`);
+      if (!adminLink) {
+        adminLink = document.createElement("a");
+        adminLink.href = adm.href;
+        adminLink.className = "fc-nav-item admin-nav-item";
+        adminLink.title = adm.label;
+        adminLink.innerHTML = `<span class="fc-nav-icon" style="color:${adm.color}">${adm.icon}</span><span class="fc-nav-label">${adm.label}</span>`;
+      } else {
+        adminLink.remove();
+      }
+      if (activeAdminHref === adm.href) {
+        adminLink.classList.add("active");
+        adminLink.setAttribute("aria-current", "page");
+      }
+      adminLink.style.display = isAdmin ? "" : "none";
       cursor.after(adminLink);
       cursor = adminLink;
     });
