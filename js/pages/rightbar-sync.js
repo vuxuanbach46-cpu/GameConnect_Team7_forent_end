@@ -8,29 +8,43 @@
   };
 
   function addStyles() {
-    if (document.querySelector('link[data-gc-rightbar-css]')) return;
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "../css/rightbar.css";
-    link.dataset.gcRightbarCss = "true";
-    document.head.append(link);
+    if (!document.querySelector('link[data-gc-rightbar-css], link[href*="rightbar.css"]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "../css/rightbar.css";
+      link.dataset.gcRightbarCss = "true";
+      document.head.append(link);
+    }
+    if (!document.querySelector('link[href*="notifications.css"]')) {
+      const notifLink = document.createElement("link");
+      notifLink.rel = "stylesheet";
+      notifLink.href = "../css/notifications.css";
+      notifLink.dataset.gcNotifCss = "true";
+      document.head.append(notifLink);
+    }
   }
 
-  function createAvatar() {
+  function createAvatar(oldWrapper = null) {
     const wrapper = document.createElement("div");
     wrapper.className = "fc-avatar-menu-wrapper";
     wrapper.dataset.gcRightTool = "avatar";
 
-    // Tạo button avatar giống trang home (thay vì link trực tiếp sang profile)
+    const oldImg = oldWrapper?.querySelector(".fc-self-avatar");
+    const oldName = oldWrapper?.querySelector("#avatar-user-name, .fc-avatar-dropdown-header strong");
+    const initialSrc = oldImg?.getAttribute("src") || "https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4";
+    const initialAlt = oldImg?.getAttribute("alt") || "Avatar của bạn";
+    const initialName = (oldName && oldName.textContent && oldName.textContent.trim()) ? oldName.textContent.trim() : "Đang tải...";
+
+    // Tạo button avatar chuẩn như trang home.html
     const isGoogleAuth = localStorage.getItem("auth_provider") === "google";
     wrapper.innerHTML = `
-      <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Tài khoản, giao diện Sáng / Tối &amp; Đăng xuất">
-        <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4" alt="Avatar của bạn" class="fc-self-avatar">
+      <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Tài khoản, giao diện Sáng / Tối &amp; Đăng xuất" aria-haspopup="true" aria-expanded="false">
+        <img src="${initialSrc}" alt="${initialAlt}" class="fc-self-avatar">
         <span class="fc-status-dot"></span>
       </button>
       <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
         <div class="fc-avatar-dropdown-header">
-          <strong id="avatar-user-name">Đang tải...</strong>
+          <strong id="avatar-user-name">${initialName}</strong>
           <span>● Đang trực tuyến</span>
         </div>
         <div class="fc-avatar-dropdown-divider"></div>
@@ -92,6 +106,45 @@
     return node;
   }
 
+  function ensureNotificationBellReady(bellEl) {
+    if (!bellEl) return;
+    if (typeof window.escapeHtml !== "function") {
+      window.escapeHtml = function escapeHtmlFallback(val) {
+        const div = document.createElement("div");
+        div.textContent = val ?? "";
+        return div.innerHTML;
+      };
+    }
+
+    const mountBell = () => {
+      if (typeof window.NotificationBell === "undefined" || typeof window.NotificationBell.init !== "function") {
+        return false;
+      }
+      if (!bellEl.querySelector("#gc-bell-btn")) {
+        bellEl.innerHTML = "";
+        delete bellEl.dataset.gcBellFallback;
+        window.NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+      } else if (typeof window.NotificationBell.refreshBadge === "function") {
+        window.NotificationBell.refreshBadge();
+      }
+      return true;
+    };
+
+    if (mountBell()) return;
+
+    const existingScript = document.querySelector('script[src*="notifications.js"]');
+    if (existingScript) {
+      existingScript.addEventListener("load", () => mountBell(), { once: true });
+      setTimeout(() => mountBell(), 120);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "../js/notifications.js";
+    script.addEventListener("load", () => mountBell(), { once: true });
+    document.body.appendChild(script);
+  }
+
   function ensureToolbar() {
     let bar = document.querySelector("aside.fc-right-bar");
     if (!bar) {
@@ -104,33 +157,22 @@
     bar.classList.add("gc-rightbar-unified");
     addStyles();
 
-    let avatar = bar.querySelector(":scope > .fc-avatar-menu-wrapper");
-    if (!avatar) avatar = createAvatar();
+    // Luôn tạo node Avatar mới để gỡ bỏ mọi event listener trùng lặp từ script riêng của từng trang
+    const oldAvatar = bar.querySelector(".fc-avatar-menu-wrapper");
+    const avatar = createAvatar(oldAvatar);
     avatar.dataset.gcRightTool = "avatar";
 
     let vs = bar.querySelector('[data-gc-right-tool="vs"]')
       || bar.querySelector(".community-vs")
-      || Array.from(bar.children).find((child) => child.matches("a,button") && (child.href?.includes("quick-match.html") || child.textContent.trim() === "VS"));
-    if (!vs) vs = createLink("quick-match.html", "Đấu nhanh VS", "VS");
-    vs = asLink(vs, "quick-match.html", "Đấu nhanh VS", "VS");
+      || Array.from(bar.querySelectorAll("a,button")).find((child) => child.href?.includes("quick-match.html") || child.textContent.trim() === "VS");
+    if (!vs) vs = createLink("quick-match.html", "Tìm đội nhanh (VS)", "VS");
+    vs = asLink(vs, "quick-match.html", "Tìm đội nhanh (VS)", "VS");
     vs.dataset.gcRightTool = "vs";
 
-    let bell = bar.querySelector(":scope > #gc-notif-bell");
+    let bell = bar.querySelector("#gc-notif-bell") || document.getElementById("gc-notif-bell");
     if (!bell) {
-      // Tạo container div cho chuông thông báo (tránh lồng <a> trong <a>)
       bell = document.createElement("div");
       bell.id = "gc-notif-bell";
-      bell.dataset.gcBellFallback = "true";
-      const bellLink = createLink("notifications.html", "Thông báo", ICONS.bell);
-      bellLink.dataset.gcBellFallback = "true";
-      bell.append(bellLink);
-    }
-    // Keep the notification icon visible if NotificationBell has not rendered yet
-    // (for example, when auth initialization is delayed or the module exits early).
-    if (!bell.querySelector(".gc-notif-bell-btn") && !bell.querySelector(":scope > a")) {
-      const fallback = createLink("notifications.html", "Thông báo", ICONS.bell);
-      fallback.dataset.gcBellFallback = "true";
-      bell.append(fallback);
     }
     bell.dataset.gcRightTool = "notifications";
 
@@ -146,13 +188,7 @@
       || bar.querySelector('a[href="friends.html"]')
       || bar.querySelector('button[data-quick-tab="friends"]');
     if (!friendList) friendList = createLink("friends.html", "Danh sách bạn bè", ICONS.friends);
-    if (friendList.tagName === "A") {
-      friendList = asLink(friendList, "friends.html", "Danh sách bạn bè", ICONS.friends);
-    } else {
-      friendList.title = "Danh sách bạn bè";
-      friendList.setAttribute("aria-label", "Danh sách bạn bè");
-      friendList.innerHTML = ICONS.friends;
-    }
+    friendList = asLink(friendList, "friends.html", "Danh sách bạn bè", ICONS.friends);
     friendList.dataset.gcRightTool = "friends";
 
     let create = bar.querySelector('[data-gc-right-tool="create"]')
@@ -172,46 +208,68 @@
     chatList.dataset.gcRightTool = "chat-list";
 
     const common = [avatar, vs, bell, invite, friendList, create, chatList];
-    // Keep the rail identical on every page while preserving the friend chat heads list below "+".
+    // Giữ thanh Taskbar phải giống hệt trang Home trên tất cả các trang
     bar.replaceChildren(...common);
 
-    // Khởi tạo menu avatar dropdown (đồng bộ với trang home)
+    // Khởi tạo chuông thông báo (có badge số thông báo chưa đọc & dropdown khi ấn vào)
+    ensureNotificationBellReady(bell);
+
+    // Khởi tạo menu avatar dropdown (đồng bộ chuẩn với trang Home)
     initAvatarMenu();
   }
 
-  // ==================== AVATAR DROPDOWN MENU (ĐỒNG BỘ VỚI HOME) ====================
-  function initAvatarMenu() {
-    // Trang home đã tự quản lý menu avatar, không cần khởi tạo lại
-    const isHomePage = location.pathname.split("/").pop() === "home.html";
-    if (isHomePage) return;
+  let _avatarDocListenersBound = false;
 
+  // ==================== AVATAR DROPDOWN MENU (CHUẨN TRANG HOME TRÊN MỌI TRANG) ====================
+  function initAvatarMenu() {
     const avatarBtn = document.getElementById("btn-avatar-menu");
     const avatarDropdown = document.getElementById("avatar-dropdown-menu");
     if (!avatarBtn || !avatarDropdown) return;
 
-    // Nếu đã khởi tạo rồi thì bỏ qua
-    if (avatarBtn.dataset.gcMenuInit) return;
+    if (avatarBtn.dataset.gcMenuInit === "true") return;
     avatarBtn.dataset.gcMenuInit = "true";
 
-    // Toggle menu khi nhấn avatar
+    // Toggle menu khi nhấn avatar (đóng dropdown thông báo nếu đang mở)
     avatarBtn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      avatarDropdown.hidden = !avatarDropdown.hidden;
+      const willOpen = avatarDropdown.hidden;
+      if (willOpen) {
+        const notifDd = document.getElementById("gc-notif-dropdown");
+        const notifOverlay = document.getElementById("gc-notif-overlay");
+        const notifBtn = document.getElementById("gc-bell-btn");
+        if (notifDd) notifDd.hidden = true;
+        if (notifOverlay) notifOverlay.hidden = true;
+        if (notifBtn) notifBtn.classList.remove("is-open");
+      }
+      avatarDropdown.hidden = !willOpen;
+      avatarBtn.setAttribute("aria-expanded", String(willOpen));
     });
 
-    // Đóng menu khi nhấn ra ngoài
-    document.addEventListener("click", (e) => {
-      if (!avatarDropdown.hidden && !avatarDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
-        avatarDropdown.hidden = true;
-      }
-    });
+    if (!_avatarDocListenersBound) {
+      _avatarDocListenersBound = true;
 
-    // Đóng menu khi nhấn Escape
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !avatarDropdown.hidden) {
-        avatarDropdown.hidden = true;
-      }
-    });
+      // Đóng menu khi nhấn ra ngoài
+      document.addEventListener("click", (e) => {
+        const currentBtn = document.getElementById("btn-avatar-menu");
+        const currentMenu = document.getElementById("avatar-dropdown-menu");
+        if (!currentMenu || currentMenu.hidden) return;
+        if (!currentMenu.contains(e.target) && (!currentBtn || !currentBtn.contains(e.target))) {
+          currentMenu.hidden = true;
+          currentBtn?.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      // Đóng menu khi nhấn Escape
+      document.addEventListener("keydown", (e) => {
+        const currentBtn = document.getElementById("btn-avatar-menu");
+        const currentMenu = document.getElementById("avatar-dropdown-menu");
+        if (e.key === "Escape" && currentMenu && !currentMenu.hidden) {
+          currentMenu.hidden = true;
+          currentBtn?.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
 
     // Chuyển đổi giao diện sáng/tối
     function applyTheme(theme) {
@@ -236,18 +294,20 @@
     const savedTheme = localStorage.getItem("gc_friends_theme") || "dark";
     applyTheme(savedTheme);
 
-    document.querySelectorAll(".fc-theme-option").forEach((opt) => {
+    avatarDropdown.querySelectorAll(".fc-theme-option").forEach((opt) => {
       opt.addEventListener("click", (e) => {
         e.stopPropagation();
         applyTheme(opt.dataset.setTheme);
         avatarDropdown.hidden = true;
+        avatarBtn.setAttribute("aria-expanded", "false");
       });
     });
 
     // Đăng xuất
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
+      logoutBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("remember_login");
@@ -257,10 +317,10 @@
       });
     }
 
-    // Tải thông tin user (tên + avatar) từ API
+    // Tải thông tin user (tên + avatar) chuẩn như trang Home
     loadRightbarUserInfo();
 
-    // Đổi mật khẩu - tạo modal nếu chưa có
+    // Đổi mật khẩu - tạo/gắn modal đổi mật khẩu
     initChangePasswordModal();
   }
 
@@ -282,27 +342,57 @@
 
   async function loadRightbarUserInfo() {
     const token = localStorage.getItem("access_token");
-    if (!token || typeof api === "undefined") return;
+    if (!token) return;
 
-    const nameEl = document.getElementById("avatar-user-name");
-    const avatarImg = document.querySelector(".fc-self-avatar");
+    const getNameEl = () =>
+      document.getElementById("avatar-user-name") ||
+      document.querySelector("#avatar-dropdown-menu .fc-avatar-dropdown-header strong");
+    const getAvatarImg = () => document.querySelector(".fc-self-avatar");
+
+    let fallbackName = localStorage.getItem("username") || "Game thủ";
+    try {
+      const base64Url = token.split(".")[1] || "";
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(atob(base64));
+      if (payload.username) {
+        fallbackName = payload.username;
+      } else if (payload.email && typeof payload.email === "string") {
+        fallbackName = payload.email.split("@")[0] || fallbackName;
+      } else if (payload.sub) {
+        fallbackName = `User #${payload.sub}`;
+      }
+    } catch (_) {}
+
+    const initialNameEl = getNameEl();
+    const initialAvatarImg = getAvatarImg();
+    if (initialNameEl && (!initialNameEl.textContent || initialNameEl.textContent.trim() === "Đang tải...")) {
+      initialNameEl.textContent = fallbackName;
+    }
+    if (initialAvatarImg && (!initialAvatarImg.src || initialAvatarImg.src.includes("seed=User"))) {
+      initialAvatarImg.src = buildDiceBearAvatar(fallbackName);
+      initialAvatarImg.alt = fallbackName;
+    }
+
+    if (typeof api === "undefined") return;
 
     try {
-      const meRes = await api.get("/auth/me");
+      const meRes = await api.get("/user/me");
       const meData = meRes?.data || meRes || {};
-      const username = meData.username || "";
+      const username = meData.username || fallbackName;
       let displayName = meData.display_name || username || "Game thủ";
       let avatarUrl = meData.avatar
         ? resolveAvatarUrl(meData.avatar, username)
         : buildDiceBearAvatar(username);
 
       try {
-        const profRes = await api.get("/profiles/me");
+        const profRes = await api.get("/api/profiles/me");
         const prof = profRes?.data || profRes || {};
         if (prof.display_name) displayName = prof.display_name;
         if (prof.avatar) avatarUrl = resolveAvatarUrl(prof.avatar, username);
       } catch (_) {}
 
+      const nameEl = getNameEl();
+      const avatarImg = getAvatarImg();
       if (nameEl) nameEl.textContent = displayName;
       if (avatarImg) {
         avatarImg.src = avatarUrl;
@@ -315,7 +405,7 @@
     const openBtn = document.getElementById("open-change-password");
     if (!openBtn) return;
 
-    // Nếu trang chưa có modal đổi mật khẩu, tạo nó
+    // Nếu trang chưa có modal đổi mật khẩu, tạo nó; nếu đã có, clone để gỡ bỏ listener trùng lặp
     let modal = document.getElementById("change-password-modal");
     if (!modal) {
       modal = document.createElement("div");
@@ -338,7 +428,12 @@
           </form>
         </section>`;
       document.body.append(modal);
+    } else if (modal.dataset.gcPwdModalInit !== "true") {
+      const cloned = modal.cloneNode(true);
+      modal.replaceWith(cloned);
+      modal = cloned;
     }
+    modal.dataset.gcPwdModalInit = "true";
 
     const passwordForm = document.getElementById("change-password-form");
     const passwordMessage = document.getElementById("change-password-message");
