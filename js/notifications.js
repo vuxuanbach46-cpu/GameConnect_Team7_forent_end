@@ -29,6 +29,17 @@ const NotificationBell = (() => {
   let _pollTimer = null;
   let _isOpen = false;
   let _unreadCount = 0;
+  let _escBound = false;
+
+  function _escape(val) {
+    if (typeof escapeHtml === "function") return escapeHtml(val);
+    return String(val ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   // ---- Icon SVG cho từng loại thông báo ----
   const TYPE_ICONS = {
@@ -63,18 +74,45 @@ const NotificationBell = (() => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  // Gọi API dùng axios (đã cấu hình sẵn)
+  // Gọi API dùng axios / api helper (hoặc fetch fallback)
   async function _apiGet(path, params = {}) {
-    const res = await http.get(path, {
-      params,
-      headers: _authHeaders(),
+    if (typeof http !== "undefined") {
+      const res = await http.get(path, {
+        params,
+        headers: _authHeaders(),
+      });
+      return res.data;
+    }
+    if (typeof api !== "undefined" && typeof api.get === "function") {
+      return await api.get(path, params);
+    }
+    const base = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+      ? CONFIG.API_BASE_URL.replace(/\/$/, "")
+      : "http://127.0.0.1:8000";
+    const url = new URL(`${base}${path.startsWith("/") ? path : `/${path}`}`);
+    Object.entries(params || {}).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
     });
-    return res.data;
+    const res = await fetch(url.toString(), { headers: _authHeaders() });
+    return await res.json();
   }
 
   async function _apiPatch(path) {
-    const res = await http.patch(path, {}, { headers: _authHeaders() });
-    return res.data;
+    if (typeof http !== "undefined") {
+      const res = await http.patch(path, {}, { headers: _authHeaders() });
+      return res.data;
+    }
+    if (typeof api !== "undefined" && typeof api.patch === "function") {
+      return await api.patch(path, {});
+    }
+    const base = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+      ? CONFIG.API_BASE_URL.replace(/\/$/, "")
+      : "http://127.0.0.1:8000";
+    const res = await fetch(`${base}${path.startsWith("/") ? path : `/${path}`}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ..._authHeaders() },
+    });
+    return await res.json();
   }
 
   // Tính khoảng thời gian dạng "5 phút trước", "2 giờ trước"
@@ -201,16 +239,16 @@ const NotificationBell = (() => {
     listEl.innerHTML = notifications.map((n) => `
       <div class="gc-notif-item ${n.is_read ? "" : "is-unread"}"
            data-notif-id="${n.id}"
-           data-notif-type="${escapeHtml(n.type || "")}"
+           data-notif-type="${_escape(n.type || "")}"
            data-notif-room-id="${n.room_id || ""}"
-           data-notif-link="${escapeHtml(n.link || "")}"
-           data-notif-content="${escapeHtml(n.content || "")}"
+           data-notif-link="${_escape(n.link || "")}"
+           data-notif-content="${_escape(n.content || "")}"
            role="button" tabindex="0">
         <div class="gc-notif-icon ${_getTypeClass(n.type)}">
           ${_getTypeIcon(n.type)}
         </div>
         <div class="gc-notif-body">
-          <div class="gc-notif-content">${escapeHtml(n.content)}</div>
+          <div class="gc-notif-content">${_escape(n.content)}</div>
           <div class="gc-notif-time">${_timeAgo(n.created_at)}</div>
         </div>
         <div class="gc-notif-unread-dot"></div>
@@ -416,6 +454,10 @@ const NotificationBell = (() => {
 
   async function _openDropdown() {
     _isOpen = true;
+    const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+    if (avatarDropdown && !avatarDropdown.hidden) {
+      avatarDropdown.hidden = true;
+    }
     const dd = document.getElementById("gc-notif-dropdown");
     const overlay = document.getElementById("gc-notif-overlay");
     const btn = document.getElementById("gc-bell-btn");
@@ -542,6 +584,8 @@ const NotificationBell = (() => {
     // Chỉ render chuông nếu đã đăng nhập
     if (!_isLoggedIn()) return;
 
+    _stopPolling();
+    _isOpen = false;
     _renderBell(container);
 
     // Gắn sự kiện
@@ -549,14 +593,22 @@ const NotificationBell = (() => {
     const overlay = document.getElementById("gc-notif-overlay");
     const markAllBtn = document.getElementById("gc-mark-all-read");
 
-    if (bellBtn) bellBtn.addEventListener("click", _toggleDropdown);
+    if (bellBtn) {
+      bellBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        _toggleDropdown();
+      });
+    }
     if (overlay) overlay.addEventListener("click", _closeDropdown);
     if (markAllBtn) markAllBtn.addEventListener("click", _markAllRead);
 
     // Esc đóng dropdown
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && _isOpen) _closeDropdown();
-    });
+    if (!_escBound) {
+      _escBound = true;
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && _isOpen) _closeDropdown();
+      });
+    }
 
     // Bắt đầu polling
     _startPolling();
