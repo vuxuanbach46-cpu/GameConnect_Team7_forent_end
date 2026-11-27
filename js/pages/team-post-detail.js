@@ -105,6 +105,7 @@ function renderStatusBadge(status) {
 }
 
 function renderDetail(post) {
+  const isOwner = currentUserId && (post.user_id === currentUserId);
   const game = getGameById(post.game_id);
   const meta = GAME_META[post.game_id] || { icon: "fa-gamepad", color: "from-zinc-700/30 to-zinc-900/10", border: "border-zinc-700/30", text: "text-zinc-400", name: game?.name || `Game #${post.game_id}` };
   const gameName = game ? escapeHtml(game.name) : meta.name;
@@ -125,6 +126,10 @@ function renderDetail(post) {
 
   // Applications Table (nếu có quyền xem)
   const apps = post.applications || [];
+  const acceptedApps = apps.filter((a) => a.status === "ACCEPTED");
+  const isFull = post.status === "FULL" || (acceptedApps.length >= post.needed_players);
+  const canCreateTeam = isOwner && isFull;
+
   const appsSection = apps.length > 0 ? `
     <div class="bg-[#181920] border border-[#242631] rounded-2xl p-6 mt-6 shadow-xl">
       <div class="flex items-center justify-between mb-4">
@@ -258,6 +263,10 @@ function renderDetail(post) {
         <button id="btn-close-post" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
           <i class="fa-solid fa-lock"></i>
           <span>Đóng bài đăng</span>
+        </button>
+        <button type="button" class="gc-report-btn px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-semibold flex items-center gap-2 transition" data-report-type="TEAM_POST" data-report-id="${post.id}" data-report-title="${escapeHtml(post.title)}" data-report-owner="Gamer #${post.user_id}" title="Báo cáo bài tìm đội vi phạm">
+          <i class="fa-solid fa-flag"></i>
+          <span>Báo cáo</span>
         </button>
         <a href="team-posts.html" class="px-4 py-2.5 bg-[#181920] hover:bg-[#222430] text-zinc-400 hover:text-white rounded-xl text-xs font-semibold border border-[#242631] transition">
           ← Quay lại danh sách
@@ -440,6 +449,7 @@ function showGamerToast(message, type = "success") {
 // 8. Khởi tạo
 (async function init() {
   if (!postId) return;
+  await loadCurrentUser();
   await loadGamesCatalog();
   await loadDetail();
 })();

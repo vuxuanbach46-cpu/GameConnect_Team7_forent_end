@@ -10,6 +10,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/index.css">
   <style>
+    [hidden], #form-error.hidden { display: none !important; }
+    .sidebar-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 8px; color: #a1a1aa; font-size: 13px; font-weight: 600; text-decoration: none; transition: background .15s, color .15s; }
+    .sidebar-item:hover { background: #20222d; color: #fff; }
+    .sidebar-item.active { background: #28211e; color: #fb923c; }
+    .sidebar-item.justify-between { justify-content: space-between; }
+    .top-tab { color: #a1a1aa; font-size: 12px; font-weight: 700; white-space: nowrap; text-decoration: none; }
+    .top-tab:hover, .top-tab.active { color: #fb923c; }
+
+
     /* Custom style bổ sung cho trang tìm đồng đội */
     .btn-orange {
       background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
@@ -79,25 +88,12 @@
 
       <!-- Menu chính -->
       <div class="p-3 space-y-1">
-        <a href="../index.html" class="sidebar-item">
-          <i class="fa-solid fa-house w-4 text-center"></i>
-          <span>Khám phá Hub</span>
-        </a>
-        <a href="team-posts.html" class="sidebar-item active">
-          <i class="fa-solid fa-play w-4 text-center text-orange-500"></i>
-          <span class="text-white font-semibold">Tìm đồng đội</span>
-        </a>
-        <a href="community.html" class="sidebar-item">
-          <i class="fa-solid fa-bolt w-4 text-center"></i>
-          <span>Bảng tin</span>
-        </a>
-        <a href="friends.html" class="sidebar-item justify-between">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-user-group w-4 text-center"></i>
-            <span>Bạn bè & Kết nối</span>
-          </div>
-          <span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-500/20 text-orange-400">20</span>
-        </a>
+        <a href="quick-match.html" class="sidebar-item"><i class="fa-solid fa-play w-4 text-center"></i><span>Tìm đội nhanh</span></a>
+        <a href="community.html" class="sidebar-item"><i class="fa-solid fa-bars w-4 text-center"></i><span>Bảng tin</span></a>
+        <a href="friends.html" class="sidebar-item"><i class="fa-solid fa-user-group w-4 text-center"></i><span>Bạn bè &amp; Kết nối</span></a>
+        <a href="clubs.html" class="sidebar-item"><svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path></svg><span>Câu lạc bộ</span></a>
+        <a href="quick-match.html?view=rooms" class="sidebar-item"><i class="fa-regular fa-compass w-4 text-center"></i><span>Tìm phòng</span></a>
+        <a href="team-posts.html" class="sidebar-item active"><i class="fa-solid fa-magnifying-glass w-4 text-center text-orange-500"></i><span class="text-white font-semibold">Tìm đồng đội</span></a>
 
         <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-600">Thao tác nhanh</div>
 
@@ -110,6 +106,7 @@
 
     <!-- Bottom Sidebar -->
     <div class="p-3 border-t border-[#242631]">
+      <a href="#" class="sidebar-item text-xs text-zinc-400 hover:text-white"><i class="fa-solid fa-bag-shopping w-4 text-center"></i><span>Cửa hàng vật phẩm</span></a>
       <a href="../index.html" class="sidebar-item text-xs text-zinc-400 hover:text-white">
         <i class="fa-solid fa-arrow-left w-4 text-center"></i>
         <span>Về trang chủ</span>
@@ -447,7 +444,8 @@
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
+  <script src="../js/components/report-modal.js"></script>
   <script src="../js/pages/team-posts.js"></script>
-  <script src="../js/index.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
 </body>
 </html>

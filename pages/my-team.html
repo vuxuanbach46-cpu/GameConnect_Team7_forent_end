@@ -8,6 +8,7 @@
     <link rel="icon" href="../assets/images/logo.svg">
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/my-team.css">
+  <link rel="stylesheet" href="../css/team-navigation.css">
 </head>
 
 <body class="gc-team-page" data-root="../">
@@ -19,7 +20,7 @@
                 <h1>🎮 Đội của tôi</h1>
                 <p>Quản lý các đội bạn đang tham gia và theo dõi hoạt động của đội.</p>
             </div>
-            <a href="teams.html" class="my-teams-explore">Khám phá đội</a>
+            <div><a href="team-invitations.html" class="my-teams-secondary">Lời mời vào đội</a> <a href="teams.html" class="my-teams-explore">Khám phá đội</a></div>
         </div>
 
         <div class="my-teams-summary">
@@ -46,6 +47,7 @@
             </select>
         </div>
 
+        <p id="my-teams-status" role="status"></p>
         <div id="my-teams-list" class="my-teams-grid"></div>
 
         <div id="my-teams-empty" class="my-teams-empty" hidden>
@@ -56,9 +58,13 @@
 
     <footer id="app-footer"></footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
     <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/layout.js"></script>
     <script src="../js/pages/my-team.js"></script>
+    <script src="../js/pages/team-navigation.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
 </body>
 
 </html>

@@ -8,6 +8,7 @@
     <link rel="icon" href="../assets/images/logo.svg">
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/teams.css">
+  <link rel="stylesheet" href="../css/team-navigation.css">
 </head>
 
 <body class="gc-team-page" data-root="../">
@@ -72,61 +73,62 @@
             </div>
         </section>
 
-        <section class="card create-team-section" id="create-team-section" hidden>
-            <div class="list-header">
-                <h2>Tạo đội mới</h2>
-                <button type="button" class="btn" id="close-create-form">
-                    Đóng
-                </button>
+        <section class="card create-team-section" id="create-team-section" aria-labelledby="create-team-title" hidden>
+            <div class="create-team-header">
+                <div class="create-team-heading">
+                    <span class="create-team-icon" aria-hidden="true">✦</span>
+                    <div>
+                        <span class="create-team-eyebrow">KHÔNG GIAN ĐỘI</span>
+                        <h2 id="create-team-title">Tạo đội mới</h2>
+                        <p>Tạo một nơi để cùng đồng đội kết nối và chơi game.</p>
+                    </div>
+                </div>
+                <button type="button" class="create-team-close" id="close-create-form" aria-label="Đóng biểu mẫu tạo đội">×</button>
             </div>
 
             <form id="create-team-form">
-                <label for="team-name">Tên đội *</label>
-                <input type="text" id="team-name" name="name" maxlength="100" placeholder="Nhập tên đội" required>
-
-                <label for="team-game">Trò chơi *</label>
-                <select id="team-game" name="main_game_id" required>
-                    <option value="">Chọn trò chơi</option>
-                </select>
-
-                <label for="team-description">Mô tả đội</label>
-                <textarea id="team-description" name="description" rows="3"
-                    placeholder="Giới thiệu về đội..."></textarea>
-
-                <label for="team-max-members">Số thành viên tối đa *</label>
-                <input type="number" id="team-max-members" name="max_members" min="2" value="5" required>
-
-                <label for="team-join-mode">Hình thức tham gia</label>
-                <select id="team-join-mode" name="join_mode">
-                    <option value="PUBLIC">Công khai</option>
-                    <option value="APPROVAL_REQUIRED">Cần phê duyệt</option>
-                </select>
-
-                <label for="team-logo">Logo đội</label>
-                <input type="file" id="team-logo" name="logo" accept="image/png,image/jpeg,image/webp">
-
-                <p class="muted">
-                    Chấp nhận JPG, PNG, WEBP. Dung lượng tối đa 2MB.
-                </p>
-
-                <div id="logo-preview-container" class="logo-preview" hidden>
-                    <img id="logo-preview" alt="Logo đội xem trước">
+                <div class="create-team-fields">
+                    <div class="create-team-field">
+                        <label for="team-name">Tên đội <span aria-hidden="true">*</span></label>
+                        <input type="text" id="team-name" name="name" maxlength="100" placeholder="VD: GameConnect Warriors" required>
+                    </div>
+                    <div class="create-team-field">
+                        <label for="team-game">Trò chơi <span aria-hidden="true">*</span></label>
+                        <select id="team-game" name="main_game_id" required>
+                            <option value="">Chọn trò chơi</option>
+                        </select>
+                    </div>
+                    <div class="create-team-field create-team-field--full">
+                        <label for="team-description">Giới thiệu đội <span class="create-team-optional">Không bắt buộc</span></label>
+                        <textarea id="team-description" name="description" rows="3" placeholder="Giới thiệu ngắn về đội và những người bạn đang tìm..."></textarea>
+                    </div>
+                    <div class="create-team-field">
+                        <label for="team-max-members">Số thành viên tối đa <span aria-hidden="true">*</span></label>
+                        <input type="number" id="team-max-members" name="max_members" min="2" max="100" value="5" required>
+                    </div>
+                    <div class="create-team-field">
+                        <label for="team-join-mode">Hình thức tham gia</label>
+                        <select id="team-join-mode" name="join_mode">
+                            <option value="PUBLIC">Công khai</option>
+                            <option value="APPROVAL_REQUIRED">Cần phê duyệt</option>
+                        </select>
+                    </div>
+                    <div class="create-team-field create-team-field--full create-team-logo-field">
+                        <label for="team-logo">Logo đội <span class="create-team-optional">Không bắt buộc</span></label>
+                        <input type="file" id="team-logo" name="logo" accept="image/png,image/jpeg,image/webp" aria-describedby="team-logo-help">
+                        <p id="team-logo-help" class="create-team-hint">JPG, PNG hoặc WEBP, tối đa 2 MB. Logo hiện chỉ xem trước; hãy bỏ trống để tạo đội.</p>
+                        <div id="logo-preview-container" class="logo-preview" hidden>
+                            <img id="logo-preview" alt="Logo đội xem trước">
+                        </div>
+                    </div>
                 </div>
-
-                <p class="muted">
-                    Logo hiện chỉ được xem trước. Cần API upload ảnh để lưu lên server.
-                </p>
-
                 <p id="create-team-message" role="status"></p>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" id="submit-team">
-                        Tạo đội
-                    </button>
-
-                    <button type="reset" class="btn">
-                        Nhập lại
-                    </button>
+                <div class="create-team-actions">
+                    <span>Các mục có <b>*</b> là bắt buộc</span>
+                    <div>
+                        <button type="reset" class="btn">Nhập lại</button>
+                        <button type="submit" class="btn btn-primary" id="submit-team">Tạo đội</button>
+                    </div>
                 </div>
             </form>
         </section>
@@ -140,6 +142,8 @@
     <script src="../js/utils.js"></script>
     <script src="../js/layout.js"></script>
     <script src="../js/pages/teams.js"></script>
+    <script src="../js/pages/team-navigation.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
 </body>
 
 </html>

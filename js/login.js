@@ -1,8 +1,22 @@
+
 document.addEventListener("DOMContentLoaded", () => {
+  function getPostLoginDestination() {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (!next) return "home.html";
+    const target = new URL(next, window.location.href);
+    if (
+      target.origin !== window.location.origin ||
+      !["community.html", "community-detail.html"].includes(target.pathname.split("/").pop())
+    ) {
+      return "home.html";
+    }
+    return `${target.pathname}${target.search}${target.hash}`;
+  }
+
   // --- 0. NẾU ĐÃ ĐĂNG NHẬP -> CHUYỂN HƯỚNG VÀO FILE HOME ---
   const existingToken = localStorage.getItem("access_token");
   if (existingToken) {
-    window.location.href = "home.html";
+    window.location.href = getPostLoginDestination();
     return;
   }
 
@@ -43,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePwdBtn = document.getElementById("toggle-pwd");
   const passwordInput = document.getElementById("password");
   const googleBtn = document.getElementById("google-login-btn");
+  const rememberLogin = document.getElementById("remember-login");
+  if (rememberLogin) rememberLogin.checked = localStorage.getItem("remember_login") === "true";
 
   // Ẩn/hiện mật khẩu
   if (togglePwdBtn && passwordInput) {
@@ -92,6 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const accessToken = responseData.access_token;
         const refreshToken = responseData.refresh_token;
         let role = responseData.role;
+        const shouldRemember = Boolean(rememberLogin?.checked);
+        localStorage.setItem("auth_provider", "password");
 
         if (accessToken) {
           localStorage.setItem("access_token", accessToken);
@@ -104,8 +122,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        if (refreshToken) {
+        if (shouldRemember && refreshToken) {
           localStorage.setItem("refresh_token", refreshToken);
+          localStorage.setItem("remember_login", "true");
+        } else {
+          localStorage.removeItem("refresh_token");
+          localStorage.setItem("remember_login", "false");
         }
 
         if (role) {
@@ -114,14 +136,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Chuyển hướng người dùng vào file home sau khi đăng nhập thành công
         setTimeout(() => {
-          window.location.href = "home.html";
+          window.location.href = getPostLoginDestination();
         }, 800);
       } catch (error) {
         console.error("Lỗi đăng nhập:", error);
-        showAlert(
-          error.message || "Tên đăng nhập hoặc mật khẩu không chính xác.",
-          "error",
-        );
+        const backendMessage = error?.data?.detail;
+        const message = typeof backendMessage === "string"
+          ? backendMessage
+          : (error?.message && !/^Lỗi\s+\d+$/i.test(error.message)
+            ? error.message
+            : (Number(error?.status) === 401
+              ? "Không tìm thấy tài khoản hoặc mật khẩu không chính xác. Hãy kiểm tra lại email/tên đăng nhập và mật khẩu, hoặc đăng ký tài khoản mới."
+              : "Đăng nhập chưa thành công. Vui lòng thử lại."));
+        showAlert(message, "error");
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Đăng nhập";
@@ -132,10 +159,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Nút Google OAuth Login
   if (googleBtn) {
     googleBtn.addEventListener("click", () => {
+      localStorage.setItem("remember_login", String(Boolean(rememberLogin?.checked)));
+      localStorage.setItem("auth_provider", "google_pending");
       const baseUrl = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
         ? CONFIG.API_BASE_URL
         : "http://127.0.0.1:8000";
-      window.location.href = `${baseUrl}/auth/google/login`;
+      const loginUrl = new URL("/auth/google/login", baseUrl);
+      loginUrl.searchParams.set("redirect_to", new URL(getPostLoginDestination(), window.location.href).href);
+      window.location.href = loginUrl.href;
     });
   }
 });

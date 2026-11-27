@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101116">
+  <title>Hồ sơ người chơi | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body data-root="../" class="gc-profile-body">
+  <main class="profile-page">
+    <div class="profile-page-heading">
+
+    <!-- Cụm nút Back và tiêu đề -->
+    <div class="profile-heading-main">
+
+        <button type="button"
+                class="gc-btn-back"
+                onclick="if (history.length > 1) history.back(); else location.href = 'index.html';"
+                aria-label="Quay lại">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="profile-heading-text">
+            <p class="eyebrow">GAMING IDENTITY</p>
+            <h1>Hồ sơ người chơi</h1>
+            <p class="heading-description">
+                Thông tin cá nhân, tựa game yêu thích và đội bạn đang đồng hành.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Các nút chức năng -->
+    <div class="heading-actions">
+        <a class="gc-btn gc-btn-quiet" href="friends.html">
+            <i class="fa-solid fa-user-group"></i> Bạn bè
+        </a>
+
+        <button id="btn-edit-profile"
+                class="gc-btn gc-btn-primary"
+                type="button">
+            <i class="fa-solid fa-pen"></i> Sửa hồ sơ
+        </button>
+    </div>
+
+</div>
+
+    <div id="profile-alert" class="profile-alert" role="status" hidden></div>
+
+    <section class="profile-hero panel-card" aria-label="Thông tin người chơi">
+      <div class="profile-cover"><span class="cover-grid"></span><span class="cover-glow"></span><span class="cover-label">GAMECONNECT / PLAYER CARD</span></div>
+      <div class="profile-identity">
+        <div id="profile-avatar" class="profile-avatar profile-avatar-placeholder" aria-label="Ảnh đại diện">GC</div>
+        <div class="identity-copy">
+          <div class="identity-name-line">
+            <h2 id="profile-display-name">Đang tải hồ sơ...</h2>
+            <span id="profile-status" class="status-chip"><span></span> PLAYER</span>
+          </div>
+          <p id="profile-username" class="profile-username">@...</p>
+          <div class="identity-meta">
+            <span id="profile-region"><i class="fa-solid fa-location-dot"></i> Chưa cập nhật khu vực</span>
+            <span id="profile-play-time"><i class="fa-regular fa-clock"></i> Chưa cập nhật giờ chơi</span>
+            <span id="profile-mic"><i class="fa-solid fa-microphone"></i> Chưa cập nhật mic</span>
+          </div>
+        </div>
+        <div class="profile-hero-action" id="profile-hero-action"></div>
+      </div>
+      <div class="profile-about">
+        <div class="section-kicker">ABOUT PLAYER</div>
+        <p id="profile-bio">Người chơi chưa cập nhật phần giới thiệu.</p>
+      </div>
+    </section>
+
+    <div class="profile-content-grid">
+      <section class="panel-card games-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">YOUR LOADOUT</p>
+            <h2>Game yêu thích <span id="games-count" class="count-pill">0/5</span></h2>
+          </div>
+          <button id="btn-add-game-toggle" class="gc-btn gc-btn-outline" type="button"><i class="fa-solid fa-plus"></i> Thêm game</button>
+        </div>
+
+        <form id="add-game-form" class="add-game-form" hidden>
+          <div class="add-game-title"><i class="fa-solid fa-gamepad"></i><span>Thêm game vào hồ sơ</span></div>
+          <div class="game-form-grid">
+            <label class="field game-picker-field">
+              <span>Danh mục game</span>
+              <select id="new-game-id" required>
+                <option value="">Đang tải danh mục...</option>
+              </select>
+              <small>Chọn game để tải ảnh, rank và vai trò tương ứng.</small>
+            </label>
+            <div class="selected-game-preview" id="selected-game-preview">
+              <div class="game-preview-placeholder"><i class="fa-solid fa-gamepad"></i></div>
+              <div><strong>Chưa chọn game</strong><small>Ảnh game xem trước</small></div>
+            </div>
+            <label class="field">
+              <span>Rank</span>
+              <select id="new-rank-id" disabled><option value="">Chọn game trước</option></select>
+            </label>
+            <label class="field">
+              <span>Vai trò</span>
+              <select id="new-role-id" disabled><option value="">Chọn game trước</option></select>
+            </label>
+            <label class="field field-wide">
+              <span>ID trong game <small>(không bắt buộc)</small></span>
+              <input id="new-in-game-id" type="text" maxlength="150" placeholder="VD: Player#VN1">
+            </label>
+          </div>
+          <div class="form-footer">
+            <p id="add-game-error" class="inline-error" hidden></p>
+            <div><button id="btn-cancel-add-game" class="gc-btn gc-btn-quiet" type="button">Huỷ</button><button id="btn-save-new-game" class="gc-btn gc-btn-primary" type="submit">Lưu game</button></div>
+          </div>
+        </form>
+
+        <div id="profile-games-list" class="profile-games-list">
+          <div class="loading-state"><span class="loading-spinner"></span> Đang tải danh sách game...</div>
+        </div>
+      </section>
+
+      <aside class="profile-side-column">
+        <section class="panel-card teams-panel">
+          <div class="panel-heading">
+            <div><p class="section-kicker">SQUAD & COMMUNITY</p><h2>Đội đang tham gia</h2></div>
+            <a class="text-link" href="quick-match.html" title="Tìm đồng đội">Tìm đội <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+          </div>
+          <div id="profile-teams-list" class="profile-teams-list">
+            <div class="loading-state"><span class="loading-spinner"></span> Đang tải đội...</div>
+          </div>
+        </section>
+
+        <section class="panel-card profile-tip-card">
+          <div class="tip-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div><strong>Hồ sơ đáng tin cậy</strong><p>Cập nhật game, rank và vai trò để đồng đội dễ dàng tìm thấy bạn.</p></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div id="edit-profile-modal" class="gc-modal" hidden>
+    <div class="gc-modal-backdrop" data-close-edit></div>
+    <section class="gc-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title">
+      <div class="modal-heading">
+        <div><p class="section-kicker">PLAYER SETTINGS</p><h2 id="edit-profile-title">Chỉnh sửa hồ sơ</h2></div>
+        <button id="btn-close-edit" class="modal-close" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="edit-profile-form" novalidate>
+        <div class="avatar-editor">
+          <div id="avatar-preview" class="avatar-preview profile-avatar-placeholder">GC</div>
+          <div class="avatar-editor-copy"><strong>Ảnh đại diện</strong><p>PNG, JPG hoặc WEBP · tối đa 5 MB</p><label class="gc-btn gc-btn-outline upload-label" for="avatar-file"><i class="fa-solid fa-camera"></i> Chọn ảnh</label><input id="avatar-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></div>
+          <button id="btn-remove-avatar-preview" class="remove-avatar-btn" type="button">Bỏ ảnh mới</button>
+        </div>
+        <div class="edit-form-grid">
+          <label class="field field-wide"><span>Tên hiển thị</span><input id="edit-display-name" name="display_name" type="text" maxlength="100" required placeholder="Tên game thủ của bạn"></label>
+          <label class="field field-wide"><span>Giới thiệu</span><textarea id="edit-bio" name="bio" rows="4" maxlength="500" placeholder="Chia sẻ phong cách chơi, mục tiêu hoặc điều bạn đang tìm kiếm..."></textarea><small class="field-hint">Tối đa 500 ký tự.</small></label>
+          <label class="field"><span>Khu vực</span><select id="edit-region" name="region"><option value="">Chưa chọn</option><option value="VN">Việt Nam (VN)</option><option value="SEA">Đông Nam Á (SEA)</option><option value="NA">Bắc Mỹ (NA)</option><option value="EU">Châu Âu (EU)</option></select></label>
+          <label class="field"><span>Thời gian thường chơi</span><input id="edit-play-time" name="play_time" type="text" maxlength="100" placeholder="VD: 20:00 - 23:00"></label>
+        </div>
+        <div class="toggle-fields">
+          <label class="toggle-row"><span><strong>Có microphone</strong><small>Cho đồng đội biết bạn có thể giao tiếp bằng giọng nói.</small></span><input id="edit-has-mic" name="has_mic" type="checkbox"><i></i></label>
+          <label class="toggle-row"><span><strong>Hồ sơ công khai</strong><small>Cho phép người chơi khác xem hồ sơ của bạn.</small></span><input id="edit-is-public" name="is_public" type="checkbox"><i></i></label>
+        </div>
+        <p id="edit-profile-error" class="inline-error" hidden></p>
+        <div class="modal-actions"><button id="btn-cancel-edit" class="gc-btn gc-btn-quiet" type="button">Huỷ</button><button id="btn-save-profile" class="gc-btn gc-btn-primary" type="submit"><i class="fa-solid fa-check"></i> Lưu thay đổi</button></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- <footer id="app-footer"></footer> -->
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/components/report-modal.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
+  <script src="../js/pages/profile.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
+</body>
+</html>

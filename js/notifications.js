@@ -29,15 +29,31 @@ const NotificationBell = (() => {
   let _pollTimer = null;
   let _isOpen = false;
   let _unreadCount = 0;
+  let _escBound = false;
+
+  function _escape(val) {
+    if (typeof escapeHtml === "function") return escapeHtml(val);
+    return String(val ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   // ---- Icon SVG cho từng loại thông báo ----
   const TYPE_ICONS = {
     friend_request: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>',
+    FRIEND_REQUEST: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>',
     friend_accepted: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
+    FRIEND_ACCEPTED: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
     team_invite: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     PARTY_INVITE: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     team_join: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
     match: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    MATCH_FOUND: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    NEW_MESSAGE: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    new_message: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
     system: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
   };
 
@@ -58,18 +74,45 @@ const NotificationBell = (() => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  // Gọi API dùng axios (đã cấu hình sẵn)
+  // Gọi API dùng axios / api helper (hoặc fetch fallback)
   async function _apiGet(path, params = {}) {
-    const res = await http.get(path, {
-      params,
-      headers: _authHeaders(),
+    if (typeof http !== "undefined") {
+      const res = await http.get(path, {
+        params,
+        headers: _authHeaders(),
+      });
+      return res.data;
+    }
+    if (typeof api !== "undefined" && typeof api.get === "function") {
+      return await api.get(path, params);
+    }
+    const base = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+      ? CONFIG.API_BASE_URL.replace(/\/$/, "")
+      : "http://127.0.0.1:8000";
+    const url = new URL(`${base}${path.startsWith("/") ? path : `/${path}`}`);
+    Object.entries(params || {}).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
     });
-    return res.data;
+    const res = await fetch(url.toString(), { headers: _authHeaders() });
+    return await res.json();
   }
 
   async function _apiPatch(path) {
-    const res = await http.patch(path, {}, { headers: _authHeaders() });
-    return res.data;
+    if (typeof http !== "undefined") {
+      const res = await http.patch(path, {}, { headers: _authHeaders() });
+      return res.data;
+    }
+    if (typeof api !== "undefined" && typeof api.patch === "function") {
+      return await api.patch(path, {});
+    }
+    const base = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+      ? CONFIG.API_BASE_URL.replace(/\/$/, "")
+      : "http://127.0.0.1:8000";
+    const res = await fetch(`${base}${path.startsWith("/") ? path : `/${path}`}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ..._authHeaders() },
+    });
+    return await res.json();
   }
 
   // Tính khoảng thời gian dạng "5 phút trước", "2 giờ trước"
@@ -88,15 +131,41 @@ const NotificationBell = (() => {
     return new Date(dateStr).toLocaleDateString("vi-VN");
   }
 
+  function _resolvePageUrl(relativePath) {
+    if (!relativePath) return "";
+    if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
+      return relativePath;
+    }
+    let clean = relativePath.replace(/^\/+/, "");
+    if (clean.startsWith("pages/")) {
+      clean = clean.replace(/^pages\//, "");
+    }
+    const inPages = window.location.pathname.includes("/pages/");
+    return (inPages ? "" : "pages/") + clean;
+  }
+
+  function _normalizeType(rawType) {
+    const t = String(rawType || "").toLowerCase().trim();
+    if (t.includes("message") || t.includes("chat")) return "new_message";
+    if (t.includes("friend_accepted") || t.includes("friend_accept")) return "friend_accepted";
+    if (t.includes("friend")) return "friend_request";
+    if (t.includes("party") || t.includes("team_invit") || t.includes("mời vào đội") || t.includes("moi_vao_doi")) return "team_invite";
+    if (t.includes("team_join") || t.includes("team_post_app") || t.includes("team")) return "team_join";
+    if (t.includes("match")) return "match";
+    if (t.includes("post") || t.includes("comment") || t.includes("like")) return "post";
+    return "system";
+  }
+
   // Lấy CSS class cho icon type
   function _getTypeClass(type) {
-    const known = ["friend_request", "friend_accepted", "team_invite", "PARTY_INVITE", "team_join", "match", "system"];
-    return known.includes(type) ? `type-${type}` : "type-default";
+    const norm = _normalizeType(type);
+    return `type-${norm}`;
   }
 
   // Lấy icon SVG cho type
   function _getTypeIcon(type) {
-    return TYPE_ICONS[type] || DEFAULT_ICON;
+    const norm = _normalizeType(type);
+    return TYPE_ICONS[norm] || TYPE_ICONS[type] || DEFAULT_ICON;
   }
 
   // Lấy label cho type (hiện trên trang đầy đủ)
@@ -108,6 +177,8 @@ const NotificationBell = (() => {
       PARTY_INVITE: "Mời vào đội",
       team_join: "Xin gia nhập đội",
       match: "Trận đấu",
+      NEW_MESSAGE: "Tin nhắn mới",
+      new_message: "Tin nhắn mới",
       system: "Hệ thống",
     };
     return labels[type] || type;
@@ -168,13 +239,16 @@ const NotificationBell = (() => {
     listEl.innerHTML = notifications.map((n) => `
       <div class="gc-notif-item ${n.is_read ? "" : "is-unread"}"
            data-notif-id="${n.id}"
-           data-notif-link="${escapeHtml(n.link || "")}"
+           data-notif-type="${_escape(n.type || "")}"
+           data-notif-room-id="${n.room_id || ""}"
+           data-notif-link="${_escape(n.link || "")}"
+           data-notif-content="${_escape(n.content || "")}"
            role="button" tabindex="0">
         <div class="gc-notif-icon ${_getTypeClass(n.type)}">
           ${_getTypeIcon(n.type)}
         </div>
         <div class="gc-notif-body">
-          <div class="gc-notif-content">${escapeHtml(n.content)}</div>
+          <div class="gc-notif-content">${_escape(n.content)}</div>
           <div class="gc-notif-time">${_timeAgo(n.created_at)}</div>
         </div>
         <div class="gc-notif-unread-dot"></div>
@@ -189,10 +263,13 @@ const NotificationBell = (() => {
 
   // ---- SỰ KIỆN ----
 
-  // Click vào thông báo: đánh dấu đã đọc + navigate
+  // Click vào thông báo: đánh dấu đã đọc + xử lý lời mời đội / kết bạn / điều hướng
   async function _onItemClick(item) {
     const id = item.dataset.notifId;
-    const link = item.dataset.notifLink;
+    const type = item.dataset.notifType || "";
+    const roomId = item.dataset.notifRoomId || "";
+    const link = item.dataset.notifLink || "";
+    const content = item.dataset.notifContent || "";
 
     // Đánh dấu đã đọc
     if (item.classList.contains("is-unread")) {
@@ -206,18 +283,164 @@ const NotificationBell = (() => {
       }
     }
 
-    // Điều hướng
-    if (link) {
-      // Nếu link bắt đầu bằng http → mở trực tiếp
-      // Nếu link là đường dẫn tương đối → nối với rootPath
-      if (link.startsWith("http")) {
-        window.location.href = link;
+    _closeDropdown();
+
+    const norm = _normalizeType(type);
+
+    // 1. Tin nhắn 1-1 (NEW_MESSAGE hoặc link /chat/{id})
+    if (
+      norm === "new_message" ||
+      (link && link.startsWith("/chat/")) ||
+      (content && (content.includes("đã nhắn:") || content.includes("tin nhắn mới")))
+    ) {
+      const chatMatch = link ? link.match(/\/chat\/(\d+)/) : null;
+      const friendId = chatMatch ? Number(chatMatch[1]) : 0;
+      if (
+        friendId > 0 &&
+        window.location.pathname.endsWith("/friends.html") &&
+        typeof window.openChatByFriendId === "function"
+      ) {
+        await window.openChatByFriendId(friendId);
+      } else if (friendId > 0) {
+        window.location.href = _resolvePageUrl(`friends.html?tab=friends&chat=${friendId}`);
       } else {
-        window.location.href = _rootPath + link;
+        window.location.href = _resolvePageUrl("friends.html?tab=friends");
       }
+      return;
     }
 
-    _closeDropdown();
+    // 2. Lời mời kết bạn đến
+    if (
+      norm === "friend_request" ||
+      (link && link.startsWith("/friends/requests")) ||
+      (content && (content.includes("lời mời kết bạn") || content.includes("gửi lời mời kết bạn")))
+    ) {
+      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
+        switchTab("received");
+        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = _resolvePageUrl("friends.html?tab=received");
+      }
+      return;
+    }
+
+    // 3. Lời mời kết bạn được chấp nhận
+    if (
+      norm === "friend_accepted" ||
+      (content && content.includes("chấp nhận lời mời kết bạn"))
+    ) {
+      if (window.location.pathname.endsWith("/friends.html") && typeof switchTab === "function") {
+        switchTab("friends");
+        if (typeof loadAllFriendsData === "function") loadAllFriendsData();
+      } else {
+        window.location.href = _resolvePageUrl("friends.html?tab=friends");
+      }
+      return;
+    }
+
+    // 4. Lời mời vào sảnh đội (PARTY_INVITE hoặc link /api/matchmaking/accept-invite/...)
+    if (
+      norm === "team_invite" ||
+      (link && (link.includes("accept-invite") || link.includes("matchmaking"))) ||
+      (content && (content.includes("mời bạn tham gia đội chơi") || content.includes("mời bạn tham gia sảnh")))
+    ) {
+      const apiPath = (link && link.includes("/api/matchmaking/accept-invite/"))
+        ? link
+        : (roomId ? `/api/matchmaking/accept-invite/${roomId}` : `/api/matchmaking/accept-notification/${id}`);
+      try {
+        await http.post(apiPath, {}, { headers: _authHeaders() });
+      } catch (err) {
+        console.warn("Không thể nhận lời mời sảnh đội:", err);
+      }
+      if (window.location.pathname.endsWith("/quick-match.html") && typeof qmLoadBackendData === "function") {
+        if (typeof qmSwitchView === "function") qmSwitchView("lobby");
+        await qmLoadBackendData();
+      } else {
+        window.location.href = _resolvePageUrl("quick-match.html?view=lobby");
+      }
+      return;
+    }
+
+    // 5. Đã tìm thấy trận / đủ người trong phòng (MATCH_FOUND hoặc /rooms/...)
+    if (
+      norm === "match" ||
+      (link && link.startsWith("/rooms/")) ||
+      (content && (content.includes("đã đủ người") || content.includes("tìm thấy phòng")))
+    ) {
+      if (window.location.pathname.endsWith("/quick-match.html") && typeof qmLoadBackendData === "function") {
+        if (typeof qmSwitchView === "function") qmSwitchView("lobby");
+        await qmLoadBackendData();
+      } else {
+        window.location.href = _resolvePageUrl("quick-match.html?view=lobby");
+      }
+      return;
+    }
+
+    // 6. Thông báo community (like / bình luận bài viết) → mở chi tiết bài viết
+    if (
+      norm === "post" ||
+      (link && link.match(/\/posts\/(\d+)/)) ||
+      (content && (content.includes("bình luận") || content.includes("lượt thích")))
+    ) {
+      const postMatch = (link && link.match(/\/posts\/(\d+)/)) || (content && content.match(/#(\d+)/));
+      if (postMatch) {
+        window.location.href = _resolvePageUrl(`community-detail.html?id=${postMatch[1]}#comments`);
+        return;
+      }
+      window.location.href = _resolvePageUrl("community.html");
+      return;
+    }
+
+    // 7. Câu lạc bộ & Đội nhóm
+    const upperType = String(type || "").toUpperCase();
+    if (upperType === "TEAM_INVITATION" || (link && link.includes("team-invitations"))) {
+      window.location.href = _resolvePageUrl("team-invitations.html");
+      return;
+    }
+    if (upperType === "TEAM_JOIN_REQUEST" || (link && link.includes("team-feed"))) {
+      const teamMatch = link ? link.match(/id=(\d+)/) : null;
+      window.location.href = _resolvePageUrl(teamMatch ? `team-feed.html?id=${teamMatch[1]}` : "clubs.html");
+      return;
+    }
+    if (upperType === "TEAM_INVITATION_RESPONSE" || upperType === "TEAM_CREATED_FROM_POST") {
+      const teamMatch = link ? (link.match(/id=(\d+)/) || link.match(/\/teams\/(\d+)/)) : null;
+      window.location.href = _resolvePageUrl(teamMatch ? `team-detail.html?id=${teamMatch[1]}` : "my-team.html");
+      return;
+    }
+    if (upperType === "TEAM_JOIN_ACCEPTED") {
+      window.location.href = _resolvePageUrl("my-team.html");
+      return;
+    }
+    if (
+      upperType === "TEAM_JOIN_REJECTED" ||
+      upperType === "TEAM_MEMBER_REMOVED" ||
+      upperType === "TEAM_CAPTAIN_TRANSFERRED" ||
+      (link && link.startsWith("/teams/"))
+    ) {
+      const teamMatch = link ? link.match(/\/teams\/(\d+)/) : null;
+      window.location.href = _resolvePageUrl(teamMatch ? `team-detail.html?id=${teamMatch[1]}` : "clubs.html");
+      return;
+    }
+    if (
+      upperType.startsWith("TEAM_POST_APPLICATION") ||
+      (link && link.includes("team-post-detail"))
+    ) {
+      const postMatch = link ? link.match(/id=(\d+)/) : null;
+      window.location.href = _resolvePageUrl(postMatch ? `team-post-detail.html?id=${postMatch[1]}` : "team-posts.html");
+      return;
+    }
+
+    // 8. Báo cáo (REPORT_RESULT)
+    if (upperType === "REPORT_RESULT") {
+      alert(content || "Báo cáo của bạn đã được ban quản trị xử lý.");
+      return;
+    }
+
+    // 9. Generic link
+    if (link) {
+      window.location.href = _resolvePageUrl(link);
+      return;
+    }
   }
 
   // Toggle dropdown
@@ -231,6 +454,10 @@ const NotificationBell = (() => {
 
   async function _openDropdown() {
     _isOpen = true;
+    const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+    if (avatarDropdown && !avatarDropdown.hidden) {
+      avatarDropdown.hidden = true;
+    }
     const dd = document.getElementById("gc-notif-dropdown");
     const overlay = document.getElementById("gc-notif-overlay");
     const btn = document.getElementById("gc-bell-btn");
@@ -354,9 +581,8 @@ const NotificationBell = (() => {
       return;
     }
 
-    // Chỉ render chuông nếu đã đăng nhập
-    if (!_isLoggedIn()) return;
-
+    _stopPolling();
+    _isOpen = false;
     _renderBell(container);
 
     // Gắn sự kiện
@@ -364,17 +590,27 @@ const NotificationBell = (() => {
     const overlay = document.getElementById("gc-notif-overlay");
     const markAllBtn = document.getElementById("gc-mark-all-read");
 
-    if (bellBtn) bellBtn.addEventListener("click", _toggleDropdown);
+    if (bellBtn) {
+      bellBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        _toggleDropdown();
+      });
+    }
     if (overlay) overlay.addEventListener("click", _closeDropdown);
     if (markAllBtn) markAllBtn.addEventListener("click", _markAllRead);
 
     // Esc đóng dropdown
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && _isOpen) _closeDropdown();
-    });
+    if (!_escBound) {
+      _escBound = true;
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && _isOpen) _closeDropdown();
+      });
+    }
 
-    // Bắt đầu polling
-    _startPolling();
+    // Bắt đầu polling nếu đã đăng nhập
+    if (_isLoggedIn()) {
+      _startPolling();
+    }
   }
 
   // ---- PUBLIC API ----
@@ -385,3 +621,5 @@ const NotificationBell = (() => {
     getUnreadCount: () => _unreadCount,
   };
 })();
+
+window.NotificationBell = NotificationBell;

@@ -110,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Lấy token từ phản hồi đăng ký hoặc tự động đăng nhập để lấy token
         const resData = response.data || response;
         let accessToken = resData.access_token;
-        let refreshToken = resData.refresh_token;
         let role = resData.role;
 
         // Fallback: nếu API register chưa cấp token, tự động đăng nhập ngay lập tức
@@ -123,7 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             const loginData = loginRes.data || loginRes;
             accessToken = loginData.access_token;
-            refreshToken = loginData.refresh_token;
             role = loginData.role;
           } catch (loginErr) {
             console.warn("Tự động đăng nhập sau đăng ký không thành công:", loginErr);
@@ -134,9 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (accessToken) {
           localStorage.setItem("access_token", accessToken);
         }
-        if (refreshToken) {
-          localStorage.setItem("refresh_token", refreshToken);
-        }
+        localStorage.removeItem("refresh_token");
+        localStorage.setItem("remember_login", "false");
+        localStorage.setItem("auth_provider", "password");
         if (role) {
           localStorage.setItem("user_role", role);
         }
@@ -149,10 +147,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
       } catch (error) {
         console.error("Lỗi đăng ký:", error);
-        showAlert(
-          error.message || "Đăng ký thất bại, vui lòng kiểm tra lại thông tin.",
-          "error",
-        );
+        const backendMessage = error?.data?.error ?? error?.data?.detail;
+        const message = typeof backendMessage === "string" && backendMessage.trim()
+          ? backendMessage
+          : (error?.message && !/^Lỗi\s+\d+$/i.test(error.message)
+            ? error.message
+            : (Number(error?.status) === 409
+              ? "Email hoặc tên người dùng đã được sử dụng. Hãy thử thông tin khác."
+              : "Đăng ký thất bại, vui lòng kiểm tra lại thông tin."));
+        showAlert(message, "error");
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = "Đăng ký ngay";
@@ -166,7 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const baseUrl = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
         ? CONFIG.API_BASE_URL
         : "http://127.0.0.1:8000";
-      window.location.href = `${baseUrl}/auth/google/login`;
+      const loginUrl = new URL("/auth/google/login", baseUrl);
+      loginUrl.searchParams.set("redirect_to", new URL("home.html", window.location.href).href);
+      window.location.href = loginUrl.href;
     });
   }
 });

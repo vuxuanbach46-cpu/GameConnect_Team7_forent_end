@@ -1,50 +1,4 @@
-const STORAGE_KEY = "gameconnect_my_teams";
-
-const demoTeams = [
-    {
-        id: 1,
-        name: "GameConnect Warriors",
-        game: "Liên Minh Huyền Thoại",
-        description: "Cùng nhau leo rank, giao lưu và tìm đồng đội mỗi tối.",
-        role: "captain",
-        members: 3,
-        maxMembers: 5
-    },
-    {
-        id: 2,
-        name: "Valorant Legends",
-        game: "Valorant",
-        description: "Đội chơi Valorant vui vẻ, ưu tiên teamwork và giao tiếp.",
-        role: "member",
-        members: 4,
-        maxMembers: 5
-    },
-    {
-        id: 3,
-        name: "PUBG Squad",
-        game: "PUBG",
-        description: "Tập hợp những người yêu thích PUBG và chơi cùng cuối tuần.",
-        role: "member",
-        members: 4,
-        maxMembers: 4
-    }
-];
-
-function loadMyTeams() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved !== null) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) return parsed;
-        }
-    } catch (error) {
-        console.error("Không thể đọc danh sách đội:", error);
-    }
-
-    return demoTeams;
-}
-
-let myTeams = loadMyTeams();
+let myTeams = [];
 
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -91,7 +45,7 @@ function renderMyTeams() {
 
       <div class="my-teams-info">
         <span>🎯 ${escapeHTML(team.game)}</span>
-        <span>👥 ${team.members}/${team.maxMembers}</span>
+        <span>👥 ${escapeHTML(team.members)}/${escapeHTML(team.maxMembers)}</span>
       </div>
 
       <div class="my-teams-card-actions">
@@ -114,20 +68,48 @@ function renderMyTeams() {
 document.getElementById("team-role-filter")
     .addEventListener("change", renderMyTeams);
 
-renderMyTeams();
+async function loadMyTeams() {
+    const status = document.getElementById("my-teams-status");
+    if (!localStorage.getItem("access_token")) {
+        status.textContent = "Vui lòng đăng nhập để xem các đội của bạn.";
+        return;
+    }
+    status.textContent = "Đang tải danh sách đội...";
+    try {
+        const response = await api.get("/api/teams/mine");
+        myTeams = response.data;
+        status.textContent = "";
+        renderMyTeams();
+    } catch (error) {
+        status.textContent = error.message || "Không thể tải danh sách đội.";
+    }
+}
+
+loadMyTeams();
 
 // Điều hướng chung cho các trang đội và quản trị.
 (() => {
   const current = location.pathname.split('/').pop();
+  const token = localStorage.getItem('access_token');
+  let role = localStorage.getItem('user_role') || '';
+  if (token) {
+    try {
+      const p = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (p && p.role) role = p.role;
+    } catch (e) {}
+  }
+  const isAdmin = Boolean(token) && String(role).toUpperCase() === 'ADMIN';
   const links = [
     ['home.html', '⌂', 'Trang chủ'],
     ['community.html', '▤', 'Cộng đồng'],
     ['friends.html', '♙', 'Bạn bè'],
     ['team-posts.html', '⌕', 'Tìm đồng đội'],
-    ['teams.html', '◈', 'Danh sách đội'],
-    ['my-team.html', '♜', 'Đội của tôi'],
-    ['admin_users.html', '⚙', 'Quản lý người dùng']
   ];
+  if (isAdmin) {
+    links.push(['admin-dashboard.html', '📊', 'Dashboard Admin']);
+    links.push(['admin-reports.html', '🛡', 'Quản lý Báo cáo']);
+    links.push(['admin_users.html', '⚙', 'Quản lý người dùng']);
+  }
   const active = current === 'team-detail.html' ? 'teams.html' : current === 'team-feed.html' ? 'my-team.html' : current === 'admin_user-detail.html' ? 'admin_users.html' : current;
   const shell = document.createElement('aside');
   shell.className = 'gc-team-nav';

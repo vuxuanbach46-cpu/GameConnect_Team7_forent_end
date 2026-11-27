@@ -1,113 +1,378 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng | GameConnect</title>
-
-    <link rel="stylesheet" href="../css/index.css">
-    <link rel="stylesheet" href="../css/admin.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Người dùng | Admin — GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/notifications.css">
+  <link rel="stylesheet" href="../css/admin-reports.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
+<body class="fc-dark-body" data-root="../">
+  <header id="app-header"></header>
 
-<body class="admin-page gc-team-page" data-root="../">
-    <div class="admin-shell">
+  <div class="fc-app-shell">
+    <!-- ==================== SIDEBAR TRÁI (CHUẨN TRANG HOME) ==================== -->
+    <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
+      <div class="fc-bar-group">
+        <a href="home.html" class="fc-brand-link" title="GameConnect - Sảnh chính">
+          <div class="fc-brand-logo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <line x1="15" y1="13" x2="15.01" y2="13"></line>
+              <line x1="18" y1="11" x2="18.01" y2="11"></line>
+              <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+            </svg>
+          </div>
+          <div class="fc-brand-text">
+            <span class="fc-brand-title">GameConnect</span>
+            <span class="fc-brand-sub">GAMING HUB</span>
+          </div>
+        </a>
 
-        <!-- Sidebar dùng chung cho Admin -->
-        <aside id="admin-sidebar"></aside>
+        <div class="fc-nav-divider"></div>
 
-        <div class="admin-workspace">
+        <!-- Mục Admin (Chỉ hiển thị cho tài khoản ADMIN) -->
+        <a href="admin-dashboard.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Dashboard Thống kê">
+          <span class="fc-nav-icon" style="color: #f59e0b;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Dashboard Thống Kê</span>
+        </a>
 
-            <header class="admin-topbar">
-                <h1>Quản lý người dùng</h1>
-                <span class="muted">GameConnect / Admin</span>
-            </header>
+        <a href="admin-reports.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Quản lý Báo cáo">
+          <span class="fc-nav-icon" style="color: #ef4444;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Quản lý Báo cáo</span>
+        </a>
 
-            <main class="admin-main">
-                <section class="card">
+        <a href="admin_users.html" class="fc-nav-item admin-nav-item active" style="display: none;" title="Quản lý Người dùng" aria-current="page">
+          <span class="fc-nav-icon" style="color: #38bdf8;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+              <path d="M18 11.5v1.5m0 6v1.5m4.5-4.5h-1.5m-6 0h-1.5"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Quản lý Người dùng</span>
+        </a>
 
-                    <div class="admin-toolbar">
-                        <h2>Danh sách người dùng</h2>
+        <!-- Điều hướng chính -->
+        <a href="quick-match.html" class="fc-nav-item" title="Tìm đội nhanh">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm đội nhanh</span>
+        </a>
 
-                        <input id="user-search" type="search" placeholder="Tìm theo tên hoặc email..."
-                            aria-label="Tìm người dùng">
-                    </div>
+        <a href="quick-match.html?view=rooms" class="fc-nav-item" title="Tìm phòng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm phòng</span>
+        </a>
 
-                    <p class="muted" id="demo-notice">
-                        Dữ liệu minh họa - chưa kết nối API quản trị.
-                    </p>
+        <a href="community.html" class="fc-nav-item" title="Bảng tin cộng đồng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bảng tin</span>
+        </a>
 
-                    <!-- Bảng người dùng -->
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Họ và tên</th>
-                                    <th>Email</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
+        <a href="friends.html" class="fc-nav-item" title="Bạn bè &amp; Kết nối">
+          <span class="fc-nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bạn bè &amp; Kết nối</span>
+        </a>
 
-                            <tbody id="users-table-body"></tbody>
-                        </table>
-                    </div>
+        <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Câu lạc bộ</span>
+        </a>
+      </div>
+    </aside>
 
-                    <p id="users-message" role="status"></p>
+    <!-- ==================== KHU VỰC NỘI DUNG CHÍNH ==================== -->
+    <main class="ar-container">
+      <div class="ar-content">
 
-                    <!-- Phân trang -->
-                    <div class="admin-pagination">
-                        <button type="button" class="btn" id="prev-page">
-                            Trang trước
-                        </button>
-
-                        <span id="page-info"></span>
-
-                        <button type="button" class="btn" id="next-page">
-                            Trang sau
-                        </button>
-                    </div>
-
-                </section>
-            </main>
+        <!-- HEADER TRANG -->
+        <div class="ar-header">
+          <div class="ar-header-left">
+            <div class="ar-header-badge-icon" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.12);">
+              <i class="fa-solid fa-users-gear"></i>
+            </div>
+            <div class="ar-title-group">
+              <h1>
+                Quản Lý Tài Khoản Người Dùng
+                <span class="ar-admin-badge"><i class="fa-solid fa-user-shield"></i> Admin Only</span>
+              </h1>
+              <p>Phân trang, tìm kiếm, lọc trạng thái tài khoản; khóa kèm lý do &amp; thời hạn (1 / 7 / 30 ngày hoặc vĩnh viễn) và mở khóa. Tài khoản hết hạn khóa sẽ tự động mở lại khi người dùng đăng nhập.</p>
+            </div>
+          </div>
         </div>
-    </div>
 
-    <!-- Hộp thoại khóa tài khoản -->
-    <dialog id="lock-dialog" class="admin-dialog">
-        <form id="lock-form">
+        <!-- THẺ THỐNG KÊ NHANH -->
+        <div class="ar-stats-row au-stats-row">
+          <div class="ar-stat-card">
+            <div class="ar-stat-info">
+              <span>Tổng số tài khoản</span>
+              <h3 id="stat-users-total">0</h3>
+            </div>
+            <div class="ar-stat-icon total">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="ar-stat-card">
+            <div class="ar-stat-info">
+              <span>Đang hoạt động (ACTIVE)</span>
+              <h3 id="stat-users-active" style="color: #22c55e;">0</h3>
+            </div>
+            <div class="ar-stat-icon resolved">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+          </div>
+          <div class="ar-stat-card">
+            <div class="ar-stat-info">
+              <span>Đang bị khóa (LOCKED)</span>
+              <h3 id="stat-users-locked" style="color: #ef4444;">0</h3>
+            </div>
+            <div class="ar-stat-icon pending" style="color: #ef4444; background: rgba(239, 68, 68, 0.12);">
+              <i class="fa-solid fa-user-lock"></i>
+            </div>
+          </div>
+        </div>
 
-            <h2>Khóa tài khoản</h2>
-            <p id="lock-user-label"></p>
-
-            <label for="lock-duration">
-                Chọn thời hạn khóa
-            </label>
-
-            <select id="lock-duration" required>
-                <option value="1">1 ngày</option>
-                <option value="7">7 ngày</option>
-                <option value="30">30 ngày</option>
-                <option value="permanent">Vĩnh viễn</option>
-            </select>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-danger">
-                    Xác nhận khóa
-                </button>
-
-                <button type="button" class="btn" id="cancel-lock">
-                    Hủy
-                </button>
+        <!-- THANH CÔNG CỤ LỌC TRẠNG THÁI & TÌM KIẾM -->
+        <div class="ar-filter-panel">
+          <div class="ar-filter-left">
+            <!-- Tabs lọc theo trạng thái -->
+            <div class="ar-status-tabs" role="tablist" aria-label="Lọc theo trạng thái tài khoản">
+              <button type="button" class="ar-status-tab active" data-user-status="">
+                Tất cả
+              </button>
+              <button type="button" class="ar-status-tab" data-user-status="ACTIVE">
+                <i class="fa-solid fa-circle" style="font-size: 8px; color: #22c55e; margin-right: 5px;"></i> Hoạt động
+              </button>
+              <button type="button" class="ar-status-tab" data-user-status="LOCKED">
+                <i class="fa-solid fa-circle" style="font-size: 8px; color: #ef4444; margin-right: 5px;"></i> Đã khóa
+              </button>
             </div>
 
-        </form>
-    </dialog>
+            <!-- Chọn số dòng mỗi trang -->
+            <div class="ar-select-wrapper">
+              <select class="ar-select" id="user-page-size" aria-label="Số người dùng mỗi trang">
+                <option value="10">Hiển thị 10 / trang</option>
+                <option value="20" selected>Hiển thị 20 / trang</option>
+                <option value="50">Hiển thị 50 / trang</option>
+              </select>
+              <i class="fa-solid fa-chevron-down ar-select-arrow"></i>
+            </div>
+          </div>
 
-    <script src="../js/config.js"></script>
-    <script src="../js/admin_layout.js"></script>
-    <script src="../js/pages/admin_users.js"></script>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <!-- Ô tìm kiếm theo username hoặc email -->
+            <div class="ar-search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="search" id="user-search" class="ar-search-input" placeholder="Tìm theo username hoặc email..." autocomplete="off">
+            </div>
+
+            <!-- Nút làm mới -->
+            <button type="button" class="ar-btn-refresh" id="btn-refresh-users" title="Làm mới danh sách">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Thông báo trạng thái -->
+        <p id="users-message" class="au-feedback-msg" role="status" hidden></p>
+
+        <!-- BẢNG DANH SÁCH NGƯỜI DÙNG -->
+        <div class="ar-table-card">
+          <div class="ar-table-responsive">
+            <table class="ar-table au-table">
+              <thead>
+                <tr>
+                  <th style="width: 68px;">ID</th>
+                  <th style="width: 220px;">Người dùng</th>
+                  <th style="width: 220px;">Email</th>
+                  <th style="width: 110px;">Vai trò</th>
+                  <th>Trạng thái &amp; Chi tiết khóa</th>
+                  <th style="width: 130px;">Ngày tạo</th>
+                  <th style="width: 210px; text-align: right;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr>
+                  <td colspan="7" class="au-empty-cell">Đang tải danh sách người dùng từ hệ thống...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Phân trang -->
+          <div class="ar-pagination">
+            <div class="ar-page-info" id="page-info">
+              Đang tải dữ liệu...
+            </div>
+            <div class="ar-page-controls" id="users-pagination-controls">
+              <button type="button" class="ar-page-btn" id="prev-page" disabled>« Trước</button>
+              <button type="button" class="ar-page-btn" id="next-page" disabled>Sau »</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ==================== SIDEBAR PHẢI ==================== -->
+    <aside class="fc-right-bar" aria-label="Thanh công cụ nhanh">
+      <div class="fc-bar-group">
+        <button type="button" class="fc-right-icon-btn community-vs" aria-label="Đấu nhanh VS">VS</button>
+        <div id="gc-notif-bell"></div>
+        <a class="fc-right-icon-btn" href="friends.html" aria-label="Bạn bè &amp; Kết nối">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ==================== MODAL KHÓA TÀI KHOẢN (LÝ DO + THỜI HẠN 1/7/30 NGÀY HOẶC VĨNH VIỄN) ==================== -->
+  <div id="lock-modal" class="au-modal-overlay" hidden>
+    <div class="au-modal-backdrop" data-close-lock-modal></div>
+    <section class="au-modal-card" role="dialog" aria-modal="true" aria-labelledby="lock-modal-title">
+      <div class="au-modal-header">
+        <div class="au-modal-title-wrap">
+          <div class="au-modal-icon">
+            <i class="fa-solid fa-user-lock"></i>
+          </div>
+          <div>
+            <span class="au-modal-kicker">ADMIN SECURITY ACTION</span>
+            <h2 id="lock-modal-title">Khóa tài khoản người dùng</h2>
+          </div>
+        </div>
+        <button type="button" class="au-modal-close" id="close-lock-modal" aria-label="Đóng">✕</button>
+      </div>
+
+      <div class="au-modal-target" id="lock-user-label">
+        Đang chọn tài khoản...
+      </div>
+
+      <form id="lock-form" class="au-modal-form" novalidate>
+        <!-- Chọn thời hạn khóa: 1 / 7 / 30 ngày hoặc Vĩnh viễn -->
+        <div class="au-field">
+          <label for="lock-duration">Thời hạn khóa tài khoản <span class="au-req">*</span></label>
+          <div class="au-duration-grid" id="lock-duration-grid">
+            <button type="button" class="au-duration-chip active" data-duration-val="1">
+              <strong>1 ngày</strong>
+              <span>24 giờ</span>
+            </button>
+            <button type="button" class="au-duration-chip" data-duration-val="7">
+              <strong>7 ngày</strong>
+              <span>1 tuần</span>
+            </button>
+            <button type="button" class="au-duration-chip" data-duration-val="30">
+              <strong>30 ngày</strong>
+              <span>1 tháng</span>
+            </button>
+            <button type="button" class="au-duration-chip is-permanent" data-duration-val="permanent">
+              <strong>Vĩnh viễn</strong>
+              <span>Không thời hạn</span>
+            </button>
+          </div>
+          <select id="lock-duration" required hidden>
+            <option value="1" selected>1 ngày</option>
+            <option value="7">7 ngày</option>
+            <option value="30">30 ngày</option>
+            <option value="permanent">Vĩnh viễn</option>
+          </select>
+          <small class="au-field-hint">
+            <i class="fa-solid fa-circle-info"></i> Khi hết thời hạn khóa (1 / 7 / 30 ngày), tài khoản sẽ tự động được mở lại ngay khi người dùng đăng nhập.
+          </small>
+        </div>
+
+        <!-- Lý do khóa tài khoản -->
+        <div class="au-field">
+          <label for="lock-reason">Lý do khóa tài khoản <span class="au-req">*</span></label>
+          <div class="au-reason-presets">
+            <button type="button" class="au-reason-preset" data-reason-preset="Vi phạm quy tắc cộng đồng và ứng xử thiếu văn minh (Toxic).">Ngôn từ Toxic</button>
+            <button type="button" class="au-reason-preset" data-reason-preset="Spam bài đăng, tin nhắn hoặc quảng cáo trái phép trên hệ thống.">Spam / Quảng cáo</button>
+            <button type="button" class="au-reason-preset" data-reason-preset="Sử dụng phần mềm gian lận (Hack/Cheat) hoặc lợi dụng lỗi hệ thống.">Gian lận / Cheat</button>
+            <button type="button" class="au-reason-preset" data-reason-preset="Giả mạo danh tính hoặc lừa đảo người chơi khác.">Giả mạo / Lừa đảo</button>
+          </div>
+          <textarea
+            id="lock-reason"
+            rows="3"
+            maxlength="500"
+            required
+            placeholder="Nhập lý do chi tiết khóa tài khoản (tối đa 500 ký tự)..."
+          ></textarea>
+        </div>
+
+        <p id="lock-form-error" class="au-form-error" role="alert" hidden></p>
+
+        <div class="au-modal-actions">
+          <button type="button" class="au-btn au-btn-ghost" id="cancel-lock">Hủy bỏ</button>
+          <button type="submit" class="au-btn au-btn-danger" id="confirm-lock-submit">
+            <i class="fa-solid fa-lock"></i> Xác nhận khóa tài khoản
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="fc-toast-container" class="fc-toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
+  <script src="../js/pages/admin_users.js"></script>
+  <script src="../js/pages/sidebar-order.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
 </body>
-
 </html>

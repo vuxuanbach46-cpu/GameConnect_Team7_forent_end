@@ -228,6 +228,15 @@ body {
   gap: 16px;
 }
 
+.remember-login { display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none; }
+.remember-login input { position:absolute;width:1px;height:1px;opacity:0; }
+.remember-login-check { width:17px;height:17px;flex:0 0 17px;display:grid;place-items:center;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-input);color:transparent;font-size:10px;transition:.15s; }
+.remember-login input:checked + .remember-login-check { border-color:var(--primary);background:var(--primary);color:#fff; }
+.remember-login input:focus-visible + .remember-login-check { outline:2px solid var(--primary);outline-offset:2px; }
+.remember-login-copy { display:grid;gap:3px; }
+.remember-login-copy strong { color:var(--text-main);font-size:12px;font-weight:600; }
+.remember-login-copy small { color:var(--text-muted);font-size:10px; }
+
 .form-group label {
   display: block;
   font-size: 11px;

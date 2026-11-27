@@ -213,6 +213,12 @@
   color: #f43f5e;
 }
 
+.gc-notif-icon.type-NEW_MESSAGE,
+.gc-notif-icon.type-new_message {
+  background: rgba(232, 80, 2, 0.14);
+  color: var(--fc-orange, #e85002);
+}
+
 .gc-notif-icon.type-system {
   background: rgba(148, 163, 184, 0.12);
   color: #94a3b8;

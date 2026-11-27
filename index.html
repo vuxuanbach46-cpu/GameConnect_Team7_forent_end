@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GameConnect - Nền tảng cạnh tranh game thủ hàng đầu</title>
+    <title>GameConnect - Nền tảng kết nối &amp; ghép đội game thủ</title>
+    <link rel="icon" href="assets/images/logo.svg" />
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -23,7 +24,7 @@
     class="min-h-screen flex flex-col justify-between selection:bg-orange-500 selection:text-white"
   >
     <!-- ================================================================= -->
-    <!-- TOP NAVBAR (Chuẩn phong cách thanh sáng logo + menu + nút Đăng nhập) -->
+    <!-- TOP NAVBAR -->
     <!-- ================================================================= -->
     <header
       class="bg-[#e2e2e5] text-zinc-900 border-b border-zinc-300 sticky top-0 z-50"
@@ -43,29 +44,43 @@
           <nav
             class="hidden md:flex items-center space-x-6 text-xs font-bold uppercase tracking-wider text-zinc-700"
           >
-            <a href="index.html" class="hover:text-black transition"
-              >Trò chơi <i class="fa-solid fa-chevron-down text-[10px]"></i
-            ></a>
-            <a href="pages/team-posts.html" class="hover:text-black transition text-orange-600 font-extrabold"
+            <a
+              href="pages/quick-match.html"
+              data-auth-link="pages/quick-match.html"
+              class="hover:text-black transition text-orange-600 font-extrabold"
               >Tìm đồng đội</a
             >
-            <a href="pages/community.html" class="hover:text-black transition"
+            <a
+              href="pages/clubs.html"
+              data-auth-link="pages/clubs.html"
+              class="hover:text-black transition"
+              >Câu lạc bộ</a
+            >
+            <a
+              href="pages/community.html"
+              class="hover:text-black transition"
               >Cộng đồng</a
             >
-            <a href="pages/friends.html" class="hover:text-black transition"
-              >Bạn bè</a
+            <a
+              href="#db-live-section"
+              class="hover:text-black transition"
+              >Khám phá trực tiếp</a
             >
-            <a href="#" class="hover:text-black transition">Tải xuống</a>
           </nav>
         </div>
 
-        <!-- Tìm kiếm & Nút Đăng nhập (Thay đổi động tùy trạng thái qua index.js) -->
+        <!-- Nút Đăng nhập / Vào sảnh chính (Thay đổi động qua js/index.js) -->
         <div class="flex items-center space-x-4">
           <div id="auth-actions" class="flex items-center space-x-3">
             <a
               href="pages/login.html"
-              class="px-5 py-2 text-xs btn-faceit rounded-md"
+              class="px-4 py-2 text-xs font-bold text-zinc-800 hover:text-black transition"
               >ĐĂNG NHẬP</a
+            >
+            <a
+              href="pages/register.html"
+              class="px-5 py-2 text-xs btn-faceit rounded-md"
+              >ĐĂNG KÝ</a
             >
           </div>
         </div>
@@ -75,10 +90,10 @@
     <!-- MAIN CONTENT -->
     <main class="flex-grow">
       <!-- ================================================================= -->
-      <!-- SECTION 1: HERO THỦ THÁCH BẠN (Mô phỏng chính xác layout hình 1) -->
+      <!-- SECTION 1: HERO BANNER + THẺ GAME THỦ THẬT TỪ DATABASE -->
       <!-- ================================================================= -->
       <section
-        class="relative overflow-hidden bg-gradient-to-r from-[#dcdcdf] via-[#eaeaeD] to-[#d6d6da] text-zinc-900 py-20 lg:py-28 border-b border-zinc-300"
+        class="relative overflow-hidden bg-gradient-to-r from-[#dcdcdf] via-[#eaeaed] to-[#d6d6da] text-zinc-900 py-20 lg:py-28 border-b border-zinc-300"
       >
         <div
           class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10"
@@ -88,18 +103,18 @@
             <h1
               class="text-4xl sm:text-6xl font-black tracking-tight uppercase leading-none text-black"
             >
-              THỦ THÁCH <br />BẠN.
+              THỬ THÁCH <br />BẠN.
             </h1>
             <p
               class="text-sm sm:text-base text-zinc-700 leading-relaxed max-w-xl font-medium"
             >
-              Người chơi đến với GameConnect để trải nghiệm game cạnh tranh đỉnh
-              cao. Cày cuối trong các trận đấu hoặc bảng xếp hạng đồng đội để
-              chứng tỏ bản thân, không có giới hạn nào cho việc bạn có thể leo
-              lên đến đỉnh cao như thế nào.
+              Người chơi đến với GameConnect để tìm kiếm đồng đội hợp gu, tham
+              gia câu lạc bộ và chinh phục mọi bậc xếp hạng. Kết nối trực tiếp
+              theo tựa game, mức Rank, vị trí sở trường và khung giờ chơi.
             </p>
             <div class="flex flex-wrap items-center gap-6 pt-4">
               <a
+                id="hero-primary-cta"
                 href="pages/register.html"
                 class="px-8 py-3.5 text-sm btn-faceit rounded-md inline-flex items-center gap-2"
               >
@@ -112,15 +127,21 @@
                 <span
                   class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"
                 ></span>
-                <span>91,582 người chơi trực tuyến ngay bây giờ</span>
+                <span id="hero-live-stats"
+                  >Đang đồng bộ dữ liệu thực tế từ hệ thống...</span
+                >
               </div>
             </div>
           </div>
 
-          <!-- Cột phải: Các thẻ bài Profile minh họa (Giống ảnh 1) -->
-          <div class="lg:col-span-5 flex justify-center items-center gap-4">
-            <!-- Card 1: Donk666 -->
+          <!-- Cột phải: 3 Thẻ Profile (2 game thủ thật từ DB + Thẻ của bạn ở giữa) -->
+          <div
+            id="hero-profile-cards"
+            class="lg:col-span-5 flex justify-center items-center gap-4"
+          >
+            <!-- Card 1: Game thủ #1 từ DB -->
             <div
+              id="hero-card-1"
               class="profile-card-mock w-36 sm:w-44 h-56 sm:h-68 rounded-xl p-3 flex flex-col items-center justify-between transform -rotate-6 hover:rotate-0 transition duration-300"
             >
               <div
@@ -134,45 +155,63 @@
                   class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-orange-500 overflow-hidden p-0.5 bg-zinc-800"
                 >
                   <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=donk666"
+                    id="hero-card-1-avatar"
+                    src="https://api.dicebear.com/9.x/adventurer/svg?seed=Player1&backgroundColor=b6e3f4"
                     alt="Avatar"
                     class="w-full h-full object-cover rounded-full"
                   />
                 </div>
               </div>
-              <div class="text-center">
-                <div class="font-bold text-white text-xs sm:text-sm">
-                  donk666
-                  <i class="fa-solid fa-check text-[10px] text-orange-500"></i>
+              <div class="text-center w-full">
+                <div
+                  id="hero-card-1-name"
+                  class="font-bold text-white text-xs sm:text-sm truncate"
+                >
+                  Đang tải...
                 </div>
-                <div class="text-[10px] text-orange-400 font-semibold mt-0.5">
-                  Level 10 • Elo 3,240
+                <div
+                  id="hero-card-1-meta"
+                  class="text-[10px] text-orange-400 font-semibold mt-0.5 truncate"
+                >
+                  Game thủ nổi bật
                 </div>
               </div>
             </div>
 
             <!-- Card 2: You (Chính bạn) -->
-            <div
-              class="profile-card-mock w-36 sm:w-44 h-56 sm:h-68 rounded-xl p-3 flex flex-col items-center justify-between border-orange-500/50 shadow-orange-500/10 z-10"
+            <a
+              id="hero-card-you"
+              href="pages/register.html"
+              class="profile-card-mock w-36 sm:w-44 h-56 sm:h-68 rounded-xl p-3 flex flex-col items-center justify-between border-orange-500/50 shadow-orange-500/10 z-10 hover:border-orange-500 transition"
             >
               <div class="w-full flex justify-end text-[10px] text-zinc-400">
                 <i class="fa-solid fa-user text-orange-500"></i>
               </div>
               <div
-                class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-zinc-600 flex items-center justify-center bg-zinc-900/80 text-zinc-400"
+                id="hero-card-you-avatar-wrap"
+                class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-zinc-600 flex items-center justify-center bg-zinc-900/80 text-zinc-400 overflow-hidden"
               >
                 <i class="fa-solid fa-user-plus text-xl"></i>
               </div>
-              <div class="text-center">
-                <div class="font-bold text-white text-xs sm:text-sm">You</div>
-                <div class="text-[10px] text-zinc-400 mt-0.5">
+              <div class="text-center w-full">
+                <div
+                  id="hero-card-you-name"
+                  class="font-bold text-white text-xs sm:text-sm truncate"
+                >
+                  Bạn
+                </div>
+                <div
+                  id="hero-card-you-meta"
+                  class="text-[10px] text-zinc-400 mt-0.5 truncate"
+                >
                   Sẵn sàng tham gia
                 </div>
               </div>
-            </div>
+            </a>
 
-            <!-- Card 3: ZywOo -->
+            <!-- Card 3: Game thủ #2 từ DB -->
             <div
+              id="hero-card-2"
               class="profile-card-mock w-36 sm:w-44 h-56 sm:h-68 rounded-xl p-3 flex flex-col items-center justify-between transform rotate-6 hover:rotate-0 transition duration-300"
             >
               <div
@@ -186,19 +225,25 @@
                   class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-amber-400 overflow-hidden p-0.5 bg-zinc-800"
                 >
                   <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=ZywOo"
+                    id="hero-card-2-avatar"
+                    src="https://api.dicebear.com/9.x/adventurer/svg?seed=Player2&backgroundColor=b6e3f4"
                     alt="Avatar"
                     class="w-full h-full object-cover rounded-full"
                   />
                 </div>
               </div>
-              <div class="text-center">
-                <div class="font-bold text-white text-xs sm:text-sm">
-                  ZywOo
-                  <i class="fa-solid fa-check text-[10px] text-amber-400"></i>
+              <div class="text-center w-full">
+                <div
+                  id="hero-card-2-name"
+                  class="font-bold text-white text-xs sm:text-sm truncate"
+                >
+                  Đang tải...
                 </div>
-                <div class="text-[10px] text-amber-400 font-semibold mt-0.5">
-                  Level 10 • Elo 3,190
+                <div
+                  id="hero-card-2-meta"
+                  class="text-[10px] text-amber-400 font-semibold mt-0.5 truncate"
+                >
+                  Game thủ nổi bật
                 </div>
               </div>
             </div>
@@ -207,75 +252,82 @@
       </section>
 
       <!-- ================================================================= -->
-      <!-- SECTION 2: KHÔNG CHỈ ĐƠN THUẦN LÀ MAI MỐI (Mô phỏng ảnh 2) -->
+      <!-- SECTION 2: 4 TÍNH NĂNG CỐT LÕI (GẮN SỐ LIỆU THẬT TỪ DATABASE) -->
       <!-- ================================================================= -->
       <section class="py-20 bg-[#0f1015] border-b border-[#242631]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <!-- Tiêu đề lớn -->
           <div class="text-center max-w-3xl mx-auto mb-16">
             <h2
               class="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight mb-4"
             >
-              KHÔNG CHỈ ĐƠN THUẦN LÀ MAI MỐI.
+              KHÔNG CHỈ ĐƠN THUẦN LÀ GHÉP ĐỘI.
             </h2>
             <p class="text-sm sm:text-base text-zinc-400 leading-relaxed">
-              GameConnect là nơi hội tụ mọi tham vọng, cung cấp nhiều định dạng
-              thi đấu khác nhau trong các trò chơi được hỗ trợ, phù hợp với mọi
-              loại người chơi và quy mô nhóm.
+              GameConnect là nơi hội tụ cộng đồng game thủ Việt Nam, cung cấp
+              sảnh ghép đội 5v5 thời gian thực, hệ thống Câu lạc bộ theo tựa
+              game và bảng tin cộng đồng sôi nổi.
             </p>
           </div>
 
-          <!-- Lưới 4 thẻ tính năng lớn (Matchmaking, Giải đấu, Cốc, Vòng loại) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Card 1: Mai mối -->
+            <!-- Card 1: Tìm đội nhanh 5v5 -->
             <div class="faceit-card p-8 flex flex-col justify-between">
               <div>
                 <div class="flex items-center gap-2 mb-4">
                   <span
+                    id="stat-badge-rooms"
                     class="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    >SỐNG</span
+                    >TRỰC TUYẾN · SẢNH 5V5</span
                   >
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-2">Mai mối</h3>
-                <p class="text-sm text-zinc-400 mb-6">
-                  Chơi đơn hay chơi cùng đồng đội. Cày Elo dưới sự bảo vệ của hệ
-                  thống chống gian lận GameConnect. Chơi miễn phí.
+                <h3 class="text-2xl font-bold text-white mb-2">
+                  Tìm đội nhanh 5v5
+                </h3>
+                <p id="stat-desc-rooms" class="text-sm text-zinc-400 mb-6">
+                  Tạo sảnh đội 5 người hoặc ghép trận tự động theo tựa game,
+                  khoảng Rank, vị trí (Role) và yêu cầu Mic.
                 </p>
               </div>
               <div>
                 <a
-                  href="pages/login.html"
+                  href="pages/quick-match.html"
+                  data-auth-link="pages/quick-match.html"
                   class="inline-block px-6 py-2.5 text-xs btn-faceit rounded-md text-center"
                 >
-                  CHƠI NGAY
+                  VÀO SẢNH GHÉP ĐỘI
                 </a>
               </div>
             </div>
 
-            <!-- Card 2: Giải đấu đội -->
+            <!-- Card 2: Câu lạc bộ & Đội tuyển -->
             <div class="faceit-card p-8 flex flex-col justify-between">
               <div>
                 <div class="flex items-center gap-2 mb-4">
                   <span
+                    id="stat-badge-clubs"
                     class="px-2.5 py-1 rounded text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20"
-                    >MÙA GIẢI THỨ 59 – ĐĂNG KÝ NGAY</span
+                    >CÂU LẠC BỘ GAME THỦ</span
                   >
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-2">Giải đấu đội</h3>
-                <p class="text-sm text-zinc-400 mb-6">
-                  Hãy xem bạn có thể tiến xa đến đâu khi đối đầu với hơn 3000
-                  đội nghiệp dư trong giải đấu lớn nhất.
+                <h3 class="text-2xl font-bold text-white mb-2">
+                  Câu lạc bộ &amp; Đội tuyển
+                </h3>
+                <p id="stat-desc-clubs" class="text-sm text-zinc-400 mb-6">
+                  Tham gia hoặc sáng lập Câu lạc bộ theo tựa game yêu thích,
+                  theo dõi bảng tin thông báo nội bộ từ Đội trưởng.
                 </p>
               </div>
               <div class="flex flex-wrap gap-3">
                 <a
-                  href="pages/login.html"
+                  href="pages/clubs.html"
+                  data-auth-link="pages/clubs.html"
                   class="px-5 py-2.5 text-xs font-bold text-white bg-[#22242e] hover:bg-[#2b2e3b] border border-[#343846] rounded-md transition"
                 >
-                  TÌM MỘT ĐỘI
+                  KHÁM PHÁ CLB
                 </a>
                 <a
-                  href="pages/login.html"
+                  href="pages/clubs.html"
+                  data-auth-link="pages/clubs.html"
                   class="px-5 py-2.5 text-xs btn-faceit rounded-md"
                 >
                   THAM GIA NGAY
@@ -283,56 +335,59 @@
               </div>
             </div>
 
-            <!-- Card 3: Cốc hàng ngày -->
+            <!-- Card 3: Bài đăng tuyển đồng đội -->
             <div class="faceit-card p-8 flex flex-col justify-between">
               <div>
                 <div class="flex items-center gap-2 mb-4">
                   <span
+                    id="stat-badge-teamposts"
                     class="px-2.5 py-1 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                    >MỖI GIỜ</span
+                    >TUYỂN THÀNH VIÊN</span
                   >
                 </div>
                 <h3 class="text-2xl font-bold text-white mb-2">
-                  Cốc hàng ngày và hàng tuần
+                  Tuyển đồng đội theo vị trí
                 </h3>
-                <p class="text-sm text-zinc-400 mb-6">
-                  Hãy cùng đồng đội tham gia các giải đấu được tổ chức đều đặn
-                  và giành phần thưởng giá trị.
+                <p id="stat-desc-teamposts" class="text-sm text-zinc-400 mb-6">
+                  Đăng bài tìm thành viên theo bậc Rank, vai trò cần tuyển và
+                  khung giờ chơi, hoặc ứng tuyển vào các đội đang thiếu người.
                 </p>
               </div>
               <div>
                 <a
-                  href="pages/login.html"
+                  href="pages/quick-match.html?view=rooms"
+                  data-auth-link="pages/quick-match.html?view=rooms"
                   class="inline-block px-6 py-2.5 text-xs font-bold text-white bg-[#22242e] hover:bg-[#2b2e3b] border border-[#343846] rounded-md transition"
                 >
-                  KHÁM PHÁ CỐC
+                  XEM PHÒNG ĐANG TUYỂN
                 </a>
               </div>
             </div>
 
-            <!-- Card 4: Vòng loại chính thức -->
+            <!-- Card 4: Cộng đồng & Kết nối bạn bè -->
             <div class="faceit-card p-8 flex flex-col justify-between">
               <div>
                 <div class="flex items-center gap-2 mb-4">
                   <span
+                    id="stat-badge-community"
                     class="px-2.5 py-1 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                    >ĐĂNG KÝ ĐÃ MỞ</span
+                    >CỘNG ĐỒNG &amp; CHAT 1-1</span
                   >
                 </div>
                 <h3 class="text-2xl font-bold text-white mb-2">
-                  Vòng loại chính thức
+                  Bảng tin &amp; Kết nối bạn bè
                 </h3>
-                <p class="text-sm text-zinc-400 mb-6">
-                  Tìm kiếm các giải đấu từ hơn 10.000 nhà tổ chức giải sử dụng
-                  GameConnect.
+                <p id="stat-desc-community" class="text-sm text-zinc-400 mb-6">
+                  Chia sẻ khoảnh khắc highlight, gợi ý kết bạn theo bạn chung &amp;
+                  game chung, nhắn tin 1-1 thời gian thực.
                 </p>
               </div>
               <div>
                 <a
-                  href="pages/login.html"
+                  href="pages/community.html"
                   class="inline-block px-6 py-2.5 text-xs btn-faceit rounded-md"
                 >
-                  ĐĂNG KÝ NHÓM
+                  VÀO CỘNG ĐỒNG
                 </a>
               </div>
             </div>
@@ -341,129 +396,190 @@
       </section>
 
       <!-- ================================================================= -->
-      <!-- SECTION 3: BẢNG XẾP HẠNG CÁ NHÂN & ĐỘI TUYỂN (Mô phỏng ảnh 3) -->
+      <!-- SECTION 3: DỮ LIỆU TRỰC TIẾP TỪ DATABASE (GAME THỦ, PHÒNG MỞ, CLB, BÀI ĐĂNG) -->
       <!-- ================================================================= -->
-      <section class="py-20 bg-[#121318] border-b border-[#242631]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center max-w-3xl mx-auto mb-12">
-            <h2
-              class="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight mb-4"
+      <section
+        id="db-live-section"
+        class="py-20 bg-[#121318] border-b border-[#242631]"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
+          <!-- 3A. BẢNG GAME THỦ NỔI BẬT TRONG HỆ THỐNG (/api/profiles/search & /api/games) -->
+          <div>
+            <div
+              class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8"
             >
-              BẢNG XẾP HẠNG CHO CẢ CÁ NHÂN VÀ ĐỘI TUYỂN.
-            </h2>
-            <p class="text-sm sm:text-base text-zinc-400">
-              Leo lên bảng xếp hạng với tư cách người chơi cá nhân hoặc đồng
-              đội, và xem vị trí của bạn so với những người chơi khác trong trò
-              chơi.
-            </p>
+              <div>
+                <span
+                  class="text-xs font-extrabold uppercase tracking-widest text-orange-500 block mb-2"
+                  >DỮ LIỆU THỰC TẾ TỪ HỆ THỐNG</span
+                >
+                <h2
+                  class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight"
+                >
+                  GAME THỦ &amp; HỒ SƠ CÔNG KHAI
+                </h2>
+                <p class="text-sm text-zinc-400 mt-1">
+                  Lọc theo tựa game để xem các game thủ đã cập nhật hồ sơ, mức
+                  Rank và vị trí thi đấu trên GameConnect.
+                </p>
+              </div>
+
+              <!-- Bộ lọc Game lấy từ GET /api/games -->
+              <div
+                id="landing-game-filters"
+                class="flex flex-wrap items-center gap-2"
+              >
+                <button
+                  type="button"
+                  data-game-id=""
+                  class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-orange-600 text-white border border-orange-500 transition"
+                >
+                  Tất cả game
+                </button>
+              </div>
+            </div>
+
+            <!-- Bảng danh sách Game thủ từ Database -->
+            <div class="faceit-card overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm text-zinc-300">
+                  <thead
+                    class="bg-[#1f222d] text-zinc-400 font-bold uppercase tracking-wider border-b border-[#2e3142]"
+                  >
+                    <tr>
+                      <th class="py-3.5 px-5 w-16">#</th>
+                      <th class="py-3.5 px-5">Game thủ</th>
+                      <th class="py-3.5 px-5">Khu vực &amp; Giờ chơi</th>
+                      <th class="py-3.5 px-5">Tựa game &amp; Vị trí</th>
+                      <th class="py-3.5 px-5">Bậc Rank</th>
+                      <th class="py-3.5 px-5 text-right">Hồ sơ</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="landing-players-tbody"
+                    class="divide-y divide-[#242631]"
+                  >
+                    <tr>
+                      <td
+                        colspan="6"
+                        class="py-8 px-6 text-center text-zinc-500"
+                      >
+                        Đang tải danh sách game thủ từ cơ sở dữ liệu...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
-          <!-- Bảng xếp hạng mẫu -->
-          <div class="faceit-card overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs sm:text-sm text-zinc-300">
-                <thead
-                  class="bg-[#1f222d] text-zinc-400 font-bold uppercase tracking-wider border-b border-[#2e3142]"
+          <!-- 3B. LƯỚI 2 CỘT: PHÒNG ĐANG MỞ (/api/matchmaking/rooms + /api/team-posts) & CÂU LẠC BỘ (/api/teams) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Cột trái (7 cột): Tổ đội & Phòng đang tìm người -->
+            <div class="lg:col-span-7 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"
+                  ></span>
+                  <h3
+                    class="text-base sm:text-lg font-extrabold text-white uppercase tracking-wide"
+                  >
+                    Phòng &amp; Bài Tuyển Đội Đang Mở
+                  </h3>
+                </div>
+                <a
+                  href="pages/quick-match.html?view=rooms"
+                  data-auth-link="pages/quick-match.html?view=rooms"
+                  class="text-xs font-bold text-orange-400 hover:text-orange-300 transition"
                 >
-                  <tr>
-                    <th class="py-4 px-6">Xếp hạng</th>
-                    <th class="py-4 px-6">Người chơi</th>
-                    <th class="py-4 px-6">Quốc gia</th>
-                    <th class="py-4 px-6">Trình độ kỹ năng</th>
-                    <th class="py-4 px-6 text-right">Elo / Điểm</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-[#242631]">
-                  <tr class="hover:bg-[#1e2029] transition">
-                    <td class="py-4 px-6 font-bold text-white">#1</td>
-                    <td class="py-4 px-6 flex items-center gap-3">
-                      <img
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=tain"
-                        class="w-8 h-8 rounded-full bg-zinc-800"
-                        alt="Avatar"
-                      />
-                      <span class="font-bold text-white"
-                        >tain-
-                        <i class="fa-solid fa-check text-orange-500 text-xs"></i
-                      ></span>
-                    </td>
-                    <td class="py-4 px-6">🇻🇳</td>
-                    <td class="py-4 px-6">
-                      <span
-                        class="px-2 py-1 rounded bg-orange-500/20 text-orange-400 font-bold text-xs"
-                        >Level 10</span
-                      >
-                    </td>
-                    <td class="py-4 px-6 text-right font-black text-white">
-                      5,545
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-[#1e2029] transition">
-                    <td class="py-4 px-6 font-bold text-white">#2</td>
-                    <td class="py-4 px-6 flex items-center gap-3">
-                      <img
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=KAD1M"
-                        class="w-8 h-8 rounded-full bg-zinc-800"
-                        alt="Avatar"
-                      />
-                      <span class="font-bold text-white"
-                        >KAD1M
-                        <i class="fa-solid fa-check text-orange-500 text-xs"></i
-                      ></span>
-                    </td>
-                    <td class="py-4 px-6">🇰🇷</td>
-                    <td class="py-4 px-6">
-                      <span
-                        class="px-2 py-1 rounded bg-orange-500/20 text-orange-400 font-bold text-xs"
-                        >Level 10</span
-                      >
-                    </td>
-                    <td class="py-4 px-6 text-right font-black text-white">
-                      5,401
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-[#1e2029] transition">
-                    <td class="py-4 px-6 font-bold text-white">#3</td>
-                    <td class="py-4 px-6 flex items-center gap-3">
-                      <img
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=donk666"
-                        class="w-8 h-8 rounded-full bg-zinc-800"
-                        alt="Avatar"
-                      />
-                      <span class="font-bold text-white"
-                        >donk666
-                        <i class="fa-solid fa-check text-orange-500 text-xs"></i
-                      ></span>
-                    </td>
-                    <td class="py-4 px-6">🇯🇵</td>
-                    <td class="py-4 px-6">
-                      <span
-                        class="px-2 py-1 rounded bg-orange-500/20 text-orange-400 font-bold text-xs"
-                        >Level 10</span
-                      >
-                    </td>
-                    <td class="py-4 px-6 text-right font-black text-white">
-                      5,299
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  Xem tất cả phòng →
+                </a>
+              </div>
+
+              <div id="landing-open-rooms-list" class="space-y-3">
+                <div
+                  class="faceit-card p-6 text-center text-zinc-500 text-xs"
+                >
+                  Đang tải danh sách phòng đang mở từ cơ sở dữ liệu...
+                </div>
+              </div>
+            </div>
+
+            <!-- Cột phải (5 cột): Câu lạc bộ nổi bật từ DB -->
+            <div class="lg:col-span-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <h3
+                  class="text-base sm:text-lg font-extrabold text-white uppercase tracking-wide"
+                >
+                  Câu Lạc Bộ Đang Hoạt Động
+                </h3>
+                <a
+                  href="pages/clubs.html"
+                  data-auth-link="pages/clubs.html"
+                  class="text-xs font-bold text-orange-400 hover:text-orange-300 transition"
+                >
+                  Khám phá CLB →
+                </a>
+              </div>
+
+              <div id="landing-clubs-list" class="space-y-3">
+                <div
+                  class="faceit-card p-6 text-center text-zinc-500 text-xs"
+                >
+                  Đang tải danh sách câu lạc bộ từ cơ sở dữ liệu...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3C. BÀI ĐĂNG MỚI NHẤT TỪ CỘNG ĐỒNG (GET /posts) -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3
+                  class="text-base sm:text-lg font-extrabold text-white uppercase tracking-wide"
+                >
+                  Bài Đăng Cộng Đồng Mới Nhất
+                </h3>
+                <p class="text-xs text-zinc-400 mt-0.5">
+                  Cập nhật trực tiếp từ bảng tin cộng đồng GameConnect
+                </p>
+              </div>
+              <a
+                href="pages/community.html"
+                class="text-xs font-bold text-orange-400 hover:text-orange-300 transition"
+              >
+                Vào bảng tin cộng đồng →
+              </a>
+            </div>
+
+            <div
+              id="landing-posts-grid"
+              class="grid grid-cols-1 md:grid-cols-3 gap-4"
+            >
+              <div
+                class="faceit-card p-6 text-center text-zinc-500 text-xs md:col-span-3"
+              >
+                Đang tải bài viết cộng đồng mới nhất...
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ================================================================= -->
-      <!-- SECTION 4: CALL TO ACTION CUỐI TRANG (Mô phỏng ảnh 5) -->
+      <!-- SECTION 4: CALL TO ACTION CUỐI TRANG -->
       <!-- ================================================================= -->
       <section class="py-24 bg-[#0f1015] text-center">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2
             class="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight mb-8"
           >
-            SẴN SÀNG THỬ THÁCH BẢN THÂN TRÒ CHƠI?
+            SẴN SÀNG THỬ THÁCH BẢN THÂN TRONG TRÒ CHƠI?
           </h2>
           <a
+            id="footer-primary-cta"
             href="pages/register.html"
             class="px-10 py-4 text-base btn-faceit rounded-md inline-block"
           >
@@ -490,50 +606,90 @@
             <span>GAMECONNECT</span>
           </div>
           <p class="text-zinc-500 mb-4">
-            Nền tảng thi đấu đỉnh cao dành cho cộng đồng game thủ.
+            Nền tảng kết nối, ghép đội 5v5 và quản lý Câu lạc bộ dành cho cộng
+            đồng game thủ.
           </p>
         </div>
         <div>
           <div class="font-bold text-white uppercase tracking-wider mb-3">
-            Trợ giúp & Tài nguyên
+            Tính năng chính
           </div>
           <ul class="space-y-2">
-            <li><a href="#" class="hover:text-white transition">Hỗ trợ</a></li>
             <li>
-              <a href="#" class="hover:text-white transition">Chống Gian Lận</a>
+              <a
+                href="pages/quick-match.html"
+                data-auth-link="pages/quick-match.html"
+                class="hover:text-white transition"
+                >Tìm đội nhanh 5v5</a
+              >
             </li>
             <li>
-              <a href="#" class="hover:text-white transition">Cửa Hàng</a>
+              <a
+                href="pages/clubs.html"
+                data-auth-link="pages/clubs.html"
+                class="hover:text-white transition"
+                >Câu lạc bộ</a
+              >
+            </li>
+            <li>
+              <a
+                href="pages/community.html"
+                class="hover:text-white transition"
+                >Bảng tin cộng đồng</a
+              >
             </li>
           </ul>
         </div>
         <div>
           <div class="font-bold text-white uppercase tracking-wider mb-3">
-            Thông tin công ty
+            Tài khoản &amp; Kết nối
           </div>
           <ul class="space-y-2">
             <li>
-              <a href="#" class="hover:text-white transition">Giới thiệu</a>
+              <a
+                href="pages/friends.html"
+                data-auth-link="pages/friends.html"
+                class="hover:text-white transition"
+                >Bạn bè &amp; Chat 1-1</a
+              >
             </li>
             <li>
-              <a href="#" class="hover:text-white transition">Việc làm</a>
+              <a
+                href="pages/profile.html"
+                data-auth-link="pages/profile.html"
+                class="hover:text-white transition"
+                >Hồ sơ game thủ</a
+              >
             </li>
-            <li><a href="#" class="hover:text-white transition">Báo chí</a></li>
+            <li>
+              <a href="pages/login.html" class="hover:text-white transition"
+                >Đăng nhập / Đăng ký</a
+              >
+            </li>
           </ul>
         </div>
         <div>
           <div class="font-bold text-white uppercase tracking-wider mb-3">
-            Trò chơi
+            Trò chơi hỗ trợ (Từ DB)
           </div>
-          <ul class="space-y-2">
+          <ul id="footer-games-list" class="space-y-2">
             <li>
-              <a href="#" class="hover:text-white transition">Valorant</a>
+              <a href="#db-live-section" class="hover:text-white transition"
+                >Valorant</a
+              >
             </li>
             <li>
-              <a href="#" class="hover:text-white transition">CS2 Premier</a>
+              <a href="#db-live-section" class="hover:text-white transition"
+                >Counter-Strike 2</a
+              >
             </li>
             <li>
-              <a href="#" class="hover:text-white transition"
+              <a href="#db-live-section" class="hover:text-white transition"
+                >Liên Minh Huyền Thoại</a
+              >
+            </li>
+            <li>
+              <a href="#db-live-section" class="hover:text-white transition"
                 >Liên Quân Mobile</a
               >
             </li>
@@ -547,7 +703,10 @@
       </div>
     </footer>
 
-    <!-- SCRIPT TỰ ĐỘNG BẮT TOKEN GOOGLE OAUTH & CẬP NHẬT TRẠNG THÁI -->
+    <!-- SCRIPTS KẾT NỐI API DATABASE CHO TRANG INDEX.HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/index.js"></script>
   </body>
 </html>

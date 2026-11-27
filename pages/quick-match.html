@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm đội nhanh | GameConnect</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/friends.css">
+  <link rel="stylesheet" href="../css/notifications.css">
+  <link rel="stylesheet" href="../css/quick-match.css">
+</head>
+<body class="fc-dark-body" data-root="../">
+  <header id="app-header"></header>
+
+  <div class="fc-app-shell">
+    <!-- ==================== THANH ĐIỀU HƯỚNG BÊN TRÁI ==================== -->
+    <aside class="fc-left-bar" aria-label="Thanh điều hướng chính">
+      <div class="fc-bar-group">
+        <a href="home.html" class="fc-brand-link" title="GameConnect - Sảnh chính">
+          <div class="fc-brand-logo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <line x1="15" y1="13" x2="15.01" y2="13"></line>
+              <line x1="18" y1="11" x2="18.01" y2="11"></line>
+              <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+            </svg>
+          </div>
+          <div class="fc-brand-text">
+            <span class="fc-brand-title">GameConnect</span>
+            <span class="fc-brand-sub">GAMING HUB</span>
+          </div>
+        </a>
+
+        <div class="fc-nav-divider"></div>
+
+        <a href="admin-dashboard.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Dashboard Thống kê">
+          <span class="fc-nav-icon" style="color: #f59e0b;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Dashboard Thống Kê</span>
+        </a>
+
+        <a href="admin-reports.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Quản lý Báo cáo">
+          <span class="fc-nav-icon" style="color: #ef4444;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Quản lý Báo cáo</span>
+        </a>
+
+        <a href="admin_users.html" class="fc-nav-item admin-nav-item" style="display: none;" title="Quản lý Người dùng">
+          <span class="fc-nav-icon" style="color: #38bdf8;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+              <path d="M18 11.5v1.5m0 6v1.5m4.5-4.5h-1.5m-6 0h-1.5"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Quản lý Người dùng</span>
+        </a>
+
+        <!-- <div class="fc-nav-divider"></div> -->
+
+        <!-- Tìm đội nhanh (đang ở trang này) -->
+        <a href="quick-match.html" class="fc-nav-item active" id="btn-nav-quick" title="Tìm đội nhanh">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm đội nhanh</span>
+        </a>
+
+        <a href="community.html" class="fc-nav-item" title="Bảng tin cộng đồng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Bảng tin</span>
+        </a>
+
+        <!-- Bạn bè & Kết nối -> chuyển sang trang Bạn bè -->
+        <a href="friends.html" class="fc-nav-item" title="Bạn bè & Kết nối">
+          <span class="fc-nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span class="fc-nav-badge" id="sidebar-req-badge" style="display: none;">0</span>
+          </span>
+          <span class="fc-nav-label">Bạn bè & Kết nối</span>
+        </a>
+
+        <a href="clubs.html" class="fc-nav-item" title="Câu lạc bộ">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="7" r="3"></circle><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m10.5 9.5-3 5m6-5 3 5m-7.5 4h6"></path>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Câu lạc bộ</span>
+        </a>
+
+            <!-- Quản lý đội chơi -->
+
+
+        <a href="quick-match.html?view=rooms" class="fc-nav-item" id="btn-nav-find-room" title="Tìm phòng">
+          <span class="fc-nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </span>
+          <span class="fc-nav-label">Tìm phòng</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ==================== KHU VỰC CHÍNH Ở GIỮA ==================== -->
+    <main class="fc-main-area">
+      <header class="fc-top-tabbar">
+        <a href="home.html" class="fc-tab-back-home">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Trang chủ</span>
+        </a>
+
+        <div class="qm-queue-label" id="qm-queue-label">
+          <span class="qm-live-dot"></span>
+          <span>HÀNG CHỜ TÌM ĐỘI NHANH • SEA / VN 5V5</span>
+        </div>
+      </header>
+
+      <div class="fc-content-scroll">
+        <div class="fc-content-container">
+
+          <!-- ============ BANNER 3 KHỐI: CẤU HÌNH & BỘ LỌC ============ -->
+          <section class="qm-banner" aria-label="Cấu hình tìm đội nhanh">
+            <div class="qm-banner-grid">
+
+              <!-- Khối 1: Chọn game & hồ sơ rank hiện tại -->
+              <div class="qm-card" id="qm-card-game">
+                <div class="qm-card-title">GAME &amp; HỒ SƠ RANK CỦA BẠN</div>
+
+                <div class="fc-dropdown qm-dd-full" id="dd-game">
+                  <button type="button" class="fc-dropdown-trigger" id="btn-dd-game" aria-expanded="false">
+                    <span class="fc-dropdown-trigger-left" id="label-dd-game"></span>
+                    <svg class="fc-dropdown-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="fc-dropdown-menu" id="menu-dd-game" hidden></div>
+                </div>
+
+                <div class="qm-me-rank" id="qm-me-rank"></div>
+              </div>
+
+              <!-- Khối 2: Chế độ chơi & phong cách -->
+              <div class="qm-card" id="qm-card-mode">
+                <div class="qm-card-title">CHẾ ĐỘ &amp; PHONG CÁCH</div>
+
+                <div class="qm-field">
+                  <span class="qm-field-label">Chế độ chơi</span>
+                  <div class="qm-seg" id="seg-queue">
+                    <button type="button" class="qm-seg-btn" data-queue="ranked">🏆 Xếp hạng</button>
+                    <button type="button" class="qm-seg-btn" data-queue="unrated">🎮 Đấu thường</button>
+                  </div>
+                </div>
+
+                <div class="qm-field" id="field-cs2-mode" hidden>
+                  <span class="qm-field-label">Hệ thống rank CS2</span>
+                  <div class="qm-seg" id="seg-cs2mode">
+                    <button type="button" class="qm-seg-btn" data-cs2mode="faceit">FACEIT</button>
+                    <button type="button" class="qm-seg-btn" data-cs2mode="premier">Premier</button>
+                  </div>
+                </div>
+
+                <div class="qm-field">
+                  <span class="qm-field-label">Phong cách chơi</span>
+                  <div class="qm-seg" id="seg-vibe">
+                    <button type="button" class="qm-seg-btn" data-vibe="tryhard">🔥 Tryhard leo rank</button>
+                    <button type="button" class="qm-seg-btn" data-vibe="chill">☕ Chill vui vẻ</button>
+                  </div>
+                </div>
+
+                <div class="qm-field qm-field-row">
+                  <button type="button" class="qm-toggle" id="btn-toggle-mic" aria-pressed="false">
+                    <span class="qm-toggle-box"></span>
+                    <span>🎤 Bắt buộc có Mic</span>
+                  </button>
+                  <div class="qm-seg qm-seg-sm" id="seg-region">
+                    <button type="button" class="qm-seg-btn" data-region="VN">
+                      <svg class="qm-flag" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="30" height="20" fill="#da251d"/><polygon points="15,4 16.76,9.42 22.46,9.42 17.85,12.76 19.61,18.18 15,14.84 10.39,18.18 12.15,12.76 7.54,9.42 13.24,9.42" fill="#ffff00"/></svg>
+                      VN
+                    </button>
+                    <button type="button" class="qm-seg-btn" data-region="SEA">🌏 SEA</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Khối 3: Khoảng rank & vị trí -->
+              <div class="qm-card" id="qm-card-rank">
+                <div class="qm-card-title">KHOẢNG RANK &amp; VỊ TRÍ CẦN TÌM</div>
+
+                <div class="qm-rank-range">
+                  <div class="qm-field">
+                    <span class="qm-field-label">Từ Min Rank</span>
+                    <div class="fc-dropdown qm-dd-full" id="dd-min">
+                      <button type="button" class="fc-dropdown-trigger" id="btn-dd-min" aria-expanded="false">
+                        <span class="fc-dropdown-trigger-left" id="label-dd-min"></span>
+                        <svg class="fc-dropdown-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                      <div class="fc-dropdown-menu qm-rank-menu" id="menu-dd-min" hidden></div>
+                    </div>
+                  </div>
+
+                  <span class="qm-range-arrow" aria-hidden="true">➔</span>
+
+                  <div class="qm-field">
+                    <span class="qm-field-label">Đến Max Rank</span>
+                    <div class="fc-dropdown qm-dd-full" id="dd-max">
+                      <button type="button" class="fc-dropdown-trigger" id="btn-dd-max" aria-expanded="false">
+                        <span class="fc-dropdown-trigger-left" id="label-dd-max"></span>
+                        <svg class="fc-dropdown-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                      <div class="fc-dropdown-menu qm-rank-menu qm-menu-right" id="menu-dd-max" hidden></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="qm-field">
+                  <span class="qm-field-label">Vị trí cần tìm</span>
+                  <div class="qm-role-chips" id="qm-role-chips"></div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ============ NÚT CHUYỂN CHẾ ĐỘ XEM ============ -->
+          <div class="qm-view-switch" role="tablist" aria-label="Chế độ xem">
+            <button type="button" class="qm-view-btn active" role="tab" data-view="lobby" aria-selected="true">
+              <span>🏠 Sảnh đội của tôi</span>
+              <span class="qm-view-sub">Post Party</span>
+            </button>
+            <button type="button" class="qm-view-btn" role="tab" data-view="rooms" aria-selected="false">
+              <span>🔍 Danh sách phòng đang mở</span>
+              <span class="qm-view-sub">Find Party</span>
+              <span class="fc-tab-count" id="qm-rooms-count">0</span>
+            </button>
+          </div>
+
+          <!-- ============ SẢNH ĐỘI 5 Ô ============ -->
+          <section id="view-lobby" class="qm-view">
+            <div class="qm-lobby-head">
+              <div class="qm-lobby-title" id="qm-lobby-title">Sảnh đội của bạn</div>
+              <div class="qm-lobby-meta">
+                <span class="qm-lobby-count" id="qm-lobby-count">1/5 người</span>
+                <button type="button" class="fc-btn fc-btn-danger-ghost qm-leave-btn" id="btn-leave-lobby" hidden>Rời phòng</button>
+              </div>
+            </div>
+            <div class="qm-slots" id="qm-slots"></div>
+          </section>
+
+          <!-- ============ DANH SÁCH PHÒNG ĐANG MỞ ============ -->
+          <section id="view-rooms" class="qm-view" hidden>
+            <div class="fc-section-label">
+              <span id="qm-rooms-heading">PHÒNG PHÙ HỢP VỚI BỘ LỌC CỦA BẠN</span>
+              <span class="fc-section-cols-hint">CHỦ PHÒNG · GAME &amp; THIẾT LẬP · KHOẢNG RANK · THAO TÁC</span>
+            </div>
+            <div class="fc-player-list" id="qm-rooms-list"></div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- ============ THANH ĐIỀU KHIỂN DƯỚI CÙNG (MATCH BAR) ============ -->
+      <div class="qm-matchbar" id="qm-matchbar">
+        <div class="qm-matchbar-summary" id="qm-summary"></div>
+
+        <div class="qm-matchbar-actions">
+          <button type="button" class="fc-btn fc-btn-danger-ghost" id="btn-cancel-search" hidden>Huỷ tìm</button>
+          <button type="button" class="fc-btn fc-btn-secondary" id="btn-post-room">ĐĂNG PHÒNG TUYỂN NGƯỜI</button>
+          <button type="button" class="fc-btn fc-btn-primary qm-find-btn" id="btn-find-match">TÌM ĐỘI NHANH (FIND MATCH)</button>
+        </div>
+
+        <div class="qm-matchbar-status">
+          <div class="qm-search-status" id="qm-search-status" hidden>
+            <span class="qm-spinner"></span>
+            <span>Đang dò tìm đội...</span>
+            <strong id="qm-timer">00:00</strong>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== THANH XÃ HỘI BÊN PHẢI ==================== -->
+    <aside class="fc-right-bar" aria-label="Thanh trạng thái bạn bè nhanh">
+      <div class="fc-avatar-menu-wrapper">
+        <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Nhấn để mở tuỳ chọn giao diện Sáng / Tối">
+          <img
+            src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4"
+            alt="Avatar của bạn"
+            class="fc-self-avatar"
+          >
+          <span class="fc-status-dot"></span>
+        </button>
+
+        <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
+          <div class="fc-avatar-dropdown-header">
+            <strong>Đang tải...</strong>
+            <span>● Đang trực tuyến</span>
+          </div>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <div class="fc-avatar-dropdown-label">Giao diện hiển thị</div>
+          <button type="button" class="fc-theme-option" data-set-theme="dark">
+            <span>🌙 Chế độ Tối (Dark)</span>
+            <span class="fc-theme-check" id="check-theme-dark">✓</span>
+          </button>
+          <button type="button" class="fc-theme-option" data-set-theme="light">
+            <span>☀️ Chế độ Sáng (Light)</span>
+            <span class="fc-theme-check" id="check-theme-light"></span>
+          </button>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <a href="profile.html" id="avatar-profile-btn" class="fc-avatar-profile-btn">
+            <span class="fc-profile-icon">🎮</span>
+            <span>Hồ sơ game thủ</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 17L17 7"></path>
+              <path d="M7 7h10v10"></path>
+            </svg>
+          </a>
+          <div class="fc-avatar-dropdown-divider"></div>
+          <button type="button" id="logout-btn" class="fc-avatar-logout-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Đăng xuất</span>
+          </button>
+          <button type="button" id="open-change-password" class="fc-avatar-password-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Đổi mật khẩu</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="fc-right-icon-btn" title="Đấu nhanh VS" style="font-weight: 800; font-size: 12px;">VS</button>
+
+      <!-- CHUÔNG THÔNG BÁO (Tài nguyên chung) -->
+      <div id="gc-notif-bell"></div>
+
+      <a href="friends.html?tab=received" class="fc-right-icon-btn" title="Lời mời kết bạn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+      </a>
+
+      <div class="fc-party-box">
+        <!-- Tổ đội hiện tại -->
+        <button type="button" class="fc-right-icon-btn active" id="btn-right-party" title="Tổ đội hiện tại">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="qm-right-party-count" id="qm-right-party-count">1</span>
+        </button>
+
+        <a href="friends.html" class="fc-right-icon-btn" title="Mở trang Bạn bè">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Bạn bè đang online -->
+      <div class="qm-right-online" id="qm-right-online" aria-label="Bạn bè đang online"></div>
+    </aside>
+  </div>
+
+  <!-- Khung hiển thị thông báo góc dưới -->
+  <div id="fc-toast-container" class="fc-toast-container"></div>
+
+  <div id="change-password-modal" class="gc-password-modal" hidden>
+    <button type="button" class="gc-password-backdrop" data-close-password aria-label="Đóng popup"></button>
+    <section class="gc-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+      <div class="gc-password-heading">
+        <div><span class="gc-password-kicker">ACCOUNT SECURITY</span><h2 id="change-password-title">Đổi mật khẩu</h2><p>Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p></div>
+        <button type="button" id="close-change-password" class="gc-password-close" aria-label="Đóng">✕</button>
+      </div>
+      <form id="change-password-form" class="gc-password-form">
+        <label><span>Mật khẩu hiện tại</span><input id="old-password" type="password" autocomplete="current-password" maxlength="128" required></label>
+        <label><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required><small>Tối thiểu 6 ký tự.</small></label>
+        <label><span>Xác nhận mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required></label>
+        <p id="change-password-message" class="gc-password-message" role="status" hidden></p>
+        <div class="gc-password-actions"><button type="button" id="cancel-change-password" class="gc-password-cancel">Huỷ</button><button type="submit" id="change-password-submit" class="gc-password-submit">Cập nhật mật khẩu</button></div>
+      </form>
+    </section>
+  </div>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // Khởi tạo chuông thông báo dùng chung
+    NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
+  </script>
+  <script src="../js/pages/quick-match.js"></script>
+  <script src="../js/pages/sidebar-order.js"></script>
+  <script src="../js/pages/rightbar-sync.js"></script>
+</body>
+</html>
