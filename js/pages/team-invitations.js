@@ -100,7 +100,7 @@ async function loadInvitations(successMessage = "") {
       icon.innerHTML = '<img src="../assets/images/logo.svg" alt="GameConnect Logo" style="width: 36px; height: 36px;">';
       empty.append(icon, makeElement("strong", "", "Hộp thư lời mời đang trống"), makeElement("span", "", "Khám phá bạn bè và cùng nhau lập đội để sẵn sàng vào trận."));
       const browse = makeElement("a", "gc-invitations-empty-link", "Tìm đồng đội");
-      browse.href = "team-posts.html";
+      browse.href = "quick-match.html";
       const arrow = makeElement("i", "fa-solid fa-arrow-right");
       arrow.setAttribute("aria-hidden", "true");
       browse.append(" ", arrow);

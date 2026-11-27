@@ -581,9 +581,6 @@ const NotificationBell = (() => {
       return;
     }
 
-    // Chỉ render chuông nếu đã đăng nhập
-    if (!_isLoggedIn()) return;
-
     _stopPolling();
     _isOpen = false;
     _renderBell(container);
@@ -610,8 +607,10 @@ const NotificationBell = (() => {
       });
     }
 
-    // Bắt đầu polling
-    _startPolling();
+    // Bắt đầu polling nếu đã đăng nhập
+    if (_isLoggedIn()) {
+      _startPolling();
+    }
   }
 
   // ---- PUBLIC API ----
@@ -622,3 +621,5 @@ const NotificationBell = (() => {
     getUnreadCount: () => _unreadCount,
   };
 })();
+
+window.NotificationBell = NotificationBell;

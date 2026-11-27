@@ -116,18 +116,23 @@
       };
     }
 
+    const getBellApi = () =>
+      window.NotificationBell ||
+      (typeof NotificationBell !== "undefined" ? NotificationBell : null);
+
     const mountBell = () => {
-      if (typeof window.NotificationBell === "undefined" || typeof window.NotificationBell.init !== "function") {
+      const bellApi = getBellApi();
+      if (!bellApi || typeof bellApi.init !== "function") {
         return false;
       }
       if (!bellEl.querySelector("#gc-bell-btn")) {
         bellEl.innerHTML = "";
         delete bellEl.dataset.gcBellFallback;
-        window.NotificationBell.init({ root: "gc-notif-bell", rootPath: "../" });
-      } else if (typeof window.NotificationBell.refreshBadge === "function") {
-        window.NotificationBell.refreshBadge();
+        bellApi.init({ root: "gc-notif-bell", rootPath: "../" });
+      } else if (typeof bellApi.refreshBadge === "function") {
+        bellApi.refreshBadge();
       }
-      return true;
+      return Boolean(bellEl.querySelector("#gc-bell-btn"));
     };
 
     if (mountBell()) return;
