@@ -97,7 +97,7 @@ async function loadInvitations(successMessage = "") {
       setInvitationMessage(successMessage || "Bạn chưa có lời mời nào đang chờ. Khi có đội mời, lời mời sẽ xuất hiện tại đây.", "empty");
       const empty = makeElement("div", "gc-invitations-empty");
       const icon = makeElement("span", "gc-invitations-empty-icon");
-      icon.innerHTML = '<i class="fa-regular fa-envelope-open" aria-hidden="true"></i>';
+      icon.innerHTML = '<img src="../assets/images/logo.svg" alt="GameConnect Logo" style="width: 36px; height: 36px;">';
       empty.append(icon, makeElement("strong", "", "Hộp thư lời mời đang trống"), makeElement("span", "", "Khám phá bạn bè và cùng nhau lập đội để sẵn sàng vào trận."));
       const browse = makeElement("a", "gc-invitations-empty-link", "Tìm đồng đội");
       browse.href = "team-posts.html";
