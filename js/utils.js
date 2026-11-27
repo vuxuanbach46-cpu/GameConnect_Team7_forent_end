@@ -30,6 +30,9 @@ function showToast(message, type = "success") {
 
 // Lấy role hiện tại của người dùng từ JWT hoặc localStorage
 function getCurrentUserRole() {
+  const savedRole = String(localStorage.getItem("user_role") || "").toUpperCase();
+  if (savedRole === "ADMIN") return "ADMIN";
+
   const token = localStorage.getItem("access_token");
   if (!token) return "";
 
@@ -46,7 +49,7 @@ function getCurrentUserRole() {
     // Bỏ qua lỗi giải mã token, fallback sang localStorage
   }
 
-  return String(localStorage.getItem("user_role") || "").toUpperCase();
+  return savedRole;
 }
 
 // Kiểm tra tài khoản hiện tại có phải ADMIN không
@@ -74,7 +77,7 @@ function requireAdminAccess() {
   return true;
 }
 
-// Tự động ẩn/xóa các mục menu Admin trên mọi trang nếu không phải ADMIN
+// Tự động hiển thị hoặc ẩn các mục menu Admin trên mọi trang
 document.addEventListener("DOMContentLoaded", () => {
   const adminItems = document.querySelectorAll(".admin-nav-item");
   if (!adminItems.length) return;
@@ -83,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
       el.style.display = "";
     });
   } else {
-    adminItems.forEach((el) => el.remove());
+    adminItems.forEach((el) => {
+      el.style.display = "none";
+    });
   }
 });
