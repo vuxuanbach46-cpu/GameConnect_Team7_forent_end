@@ -20,7 +20,46 @@
     const wrapper = document.createElement("div");
     wrapper.className = "fc-avatar-menu-wrapper";
     wrapper.dataset.gcRightTool = "avatar";
-    wrapper.innerHTML = '<a href="profile.html" class="fc-self-avatar-wrap" title="Mở hồ sơ game thủ" aria-label="Mở hồ sơ game thủ"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4" alt="Avatar của bạn" class="fc-self-avatar"><span class="fc-status-dot"></span></a>';
+
+    // Tạo button avatar giống trang home (thay vì link trực tiếp sang profile)
+    const isGoogleAuth = localStorage.getItem("auth_provider") === "google";
+    wrapper.innerHTML = `
+      <button type="button" id="btn-avatar-menu" class="fc-self-avatar-wrap" title="Tài khoản, giao diện Sáng / Tối &amp; Đăng xuất">
+        <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=User&backgroundColor=b6e3f4" alt="Avatar của bạn" class="fc-self-avatar">
+        <span class="fc-status-dot"></span>
+      </button>
+      <div id="avatar-dropdown-menu" class="fc-avatar-dropdown" hidden>
+        <div class="fc-avatar-dropdown-header">
+          <strong id="avatar-user-name">Đang tải...</strong>
+          <span>● Đang trực tuyến</span>
+        </div>
+        <div class="fc-avatar-dropdown-divider"></div>
+        <div class="fc-avatar-dropdown-label">Giao diện hiển thị</div>
+        <button type="button" class="fc-theme-option" data-set-theme="dark">
+          <span>🌙 Chế độ Tối (Dark)</span>
+          <span class="fc-theme-check" id="check-theme-dark">✓</span>
+        </button>
+        <button type="button" class="fc-theme-option" data-set-theme="light">
+          <span>☀️ Chế độ Sáng (Light)</span>
+          <span class="fc-theme-check" id="check-theme-light"></span>
+        </button>
+        <div class="fc-avatar-dropdown-divider"></div>
+        <a href="profile.html" id="avatar-profile-btn" class="fc-avatar-profile-btn">
+          <span class="fc-profile-icon">🎮</span>
+          <span>Hồ sơ game thủ</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+        </a>
+        <div class="fc-avatar-dropdown-divider"></div>
+        <button type="button" id="logout-btn" class="fc-avatar-logout-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Đăng xuất</span>
+        </button>
+        <button type="button" id="open-change-password" class="fc-avatar-password-btn"${isGoogleAuth ? ' hidden' : ''}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>Đổi mật khẩu</span>
+        </button>
+      </div>`;
+
     return wrapper;
   }
 
@@ -78,9 +117,13 @@
 
     let bell = bar.querySelector(":scope > #gc-notif-bell");
     if (!bell) {
-      bell = createLink("notifications.html", "Thông báo", ICONS.bell);
+      // Tạo container div cho chuông thông báo (tránh lồng <a> trong <a>)
+      bell = document.createElement("div");
       bell.id = "gc-notif-bell";
       bell.dataset.gcBellFallback = "true";
+      const bellLink = createLink("notifications.html", "Thông báo", ICONS.bell);
+      bellLink.dataset.gcBellFallback = "true";
+      bell.append(bellLink);
     }
     // Keep the notification icon visible if NotificationBell has not rendered yet
     // (for example, when auth initialization is delayed or the module exits early).
@@ -131,6 +174,236 @@
     const common = [avatar, vs, bell, invite, friendList, create, chatList];
     // Keep the rail identical on every page while preserving the friend chat heads list below "+".
     bar.replaceChildren(...common);
+
+    // Khởi tạo menu avatar dropdown (đồng bộ với trang home)
+    initAvatarMenu();
+  }
+
+  // ==================== AVATAR DROPDOWN MENU (ĐỒNG BỘ VỚI HOME) ====================
+  function initAvatarMenu() {
+    // Trang home đã tự quản lý menu avatar, không cần khởi tạo lại
+    const isHomePage = location.pathname.split("/").pop() === "home.html";
+    if (isHomePage) return;
+
+    const avatarBtn = document.getElementById("btn-avatar-menu");
+    const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+    if (!avatarBtn || !avatarDropdown) return;
+
+    // Nếu đã khởi tạo rồi thì bỏ qua
+    if (avatarBtn.dataset.gcMenuInit) return;
+    avatarBtn.dataset.gcMenuInit = "true";
+
+    // Toggle menu khi nhấn avatar
+    avatarBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      avatarDropdown.hidden = !avatarDropdown.hidden;
+    });
+
+    // Đóng menu khi nhấn ra ngoài
+    document.addEventListener("click", (e) => {
+      if (!avatarDropdown.hidden && !avatarDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        avatarDropdown.hidden = true;
+      }
+    });
+
+    // Đóng menu khi nhấn Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !avatarDropdown.hidden) {
+        avatarDropdown.hidden = true;
+      }
+    });
+
+    // Chuyển đổi giao diện sáng/tối
+    function applyTheme(theme) {
+      const isLight = theme === "light";
+      document.body.classList.toggle("fc-light-mode", isLight);
+      document.body.dataset.theme = isLight ? "light" : "dark";
+      if (!isLight) document.body.classList.add("dark-mode");
+      else document.body.classList.remove("dark-mode");
+      localStorage.setItem("gc_friends_theme", isLight ? "light" : "dark");
+
+      const checkDark = document.getElementById("check-theme-dark");
+      const checkLight = document.getElementById("check-theme-light");
+      if (checkDark) checkDark.textContent = isLight ? "" : "✓";
+      if (checkLight) checkLight.textContent = isLight ? "✓" : "";
+
+      document.querySelectorAll(".fc-theme-option").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.setTheme === (isLight ? "light" : "dark"));
+      });
+    }
+
+    // Áp dụng theme đã lưu
+    const savedTheme = localStorage.getItem("gc_friends_theme") || "dark";
+    applyTheme(savedTheme);
+
+    document.querySelectorAll(".fc-theme-option").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        applyTheme(opt.dataset.setTheme);
+        avatarDropdown.hidden = true;
+      });
+    });
+
+    // Đăng xuất
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("remember_login");
+        localStorage.removeItem("auth_provider");
+        localStorage.removeItem("user_role");
+        window.location.href = "../index.html";
+      });
+    }
+
+    // Tải thông tin user (tên + avatar) từ API
+    loadRightbarUserInfo();
+
+    // Đổi mật khẩu - tạo modal nếu chưa có
+    initChangePasswordModal();
+  }
+
+  function buildDiceBearAvatar(seed) {
+    return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(seed || "User")}&backgroundColor=b6e3f4`;
+  }
+
+  function resolveAvatarUrl(rawAvatar, seed) {
+    if (!rawAvatar || typeof rawAvatar !== "string" || !rawAvatar.trim()) {
+      return buildDiceBearAvatar(seed);
+    }
+    const trimmed = rawAvatar.trim();
+    if (/^(https?:|data:|blob:|\.\.\/)/i.test(trimmed)) return trimmed;
+    const apiBase = (typeof CONFIG !== "undefined" && CONFIG.API_BASE_URL)
+      ? CONFIG.API_BASE_URL.replace(/\/api\/?$/, "").replace(/\/$/, "")
+      : "http://127.0.0.1:8000";
+    return `${apiBase}/${trimmed.replace(/^\//, "")}`;
+  }
+
+  async function loadRightbarUserInfo() {
+    const token = localStorage.getItem("access_token");
+    if (!token || typeof api === "undefined") return;
+
+    const nameEl = document.getElementById("avatar-user-name");
+    const avatarImg = document.querySelector(".fc-self-avatar");
+
+    try {
+      const meRes = await api.get("/auth/me");
+      const meData = meRes?.data || meRes || {};
+      const username = meData.username || "";
+      let displayName = meData.display_name || username || "Game thủ";
+      let avatarUrl = meData.avatar
+        ? resolveAvatarUrl(meData.avatar, username)
+        : buildDiceBearAvatar(username);
+
+      try {
+        const profRes = await api.get("/profiles/me");
+        const prof = profRes?.data || profRes || {};
+        if (prof.display_name) displayName = prof.display_name;
+        if (prof.avatar) avatarUrl = resolveAvatarUrl(prof.avatar, username);
+      } catch (_) {}
+
+      if (nameEl) nameEl.textContent = displayName;
+      if (avatarImg) {
+        avatarImg.src = avatarUrl;
+        avatarImg.alt = displayName;
+      }
+    } catch (_) {}
+  }
+
+  function initChangePasswordModal() {
+    const openBtn = document.getElementById("open-change-password");
+    if (!openBtn) return;
+
+    // Nếu trang chưa có modal đổi mật khẩu, tạo nó
+    let modal = document.getElementById("change-password-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "change-password-modal";
+      modal.className = "gc-password-modal";
+      modal.hidden = true;
+      modal.innerHTML = `
+        <button type="button" class="gc-password-backdrop" data-close-password aria-label="Đóng popup"></button>
+        <section class="gc-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+          <div class="gc-password-heading">
+            <div><span class="gc-password-kicker">ACCOUNT SECURITY</span><h2 id="change-password-title">Đổi mật khẩu</h2><p>Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p></div>
+            <button type="button" id="close-change-password" class="gc-password-close" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <form id="change-password-form" class="gc-password-form">
+            <label><span>Mật khẩu hiện tại</span><input id="old-password" type="password" autocomplete="current-password" maxlength="128" required></label>
+            <label><span>Mật khẩu mới</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required><small>Tối thiểu 6 ký tự.</small></label>
+            <label><span>Xác nhận mật khẩu mới</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="6" maxlength="128" required></label>
+            <p id="change-password-message" class="gc-password-message" role="status" hidden></p>
+            <div class="gc-password-actions"><button type="button" id="cancel-change-password" class="gc-password-cancel">Huỷ</button><button type="submit" id="change-password-submit" class="gc-password-submit"><i class="fa-solid fa-key"></i> Cập nhật mật khẩu</button></div>
+          </form>
+        </section>`;
+      document.body.append(modal);
+    }
+
+    const passwordForm = document.getElementById("change-password-form");
+    const passwordMessage = document.getElementById("change-password-message");
+    const passwordSubmit = document.getElementById("change-password-submit");
+    const avatarDropdown = document.getElementById("avatar-dropdown-menu");
+
+    const setPasswordModal = (open) => {
+      if (!modal) return;
+      modal.hidden = !open;
+      document.body.classList.toggle("gc-password-modal-open", open);
+      if (open) {
+        if (avatarDropdown) avatarDropdown.hidden = true;
+        window.setTimeout(() => document.getElementById("old-password")?.focus(), 30);
+      } else {
+        passwordForm?.reset();
+        if (passwordMessage) {
+          passwordMessage.hidden = true;
+          passwordMessage.textContent = "";
+          passwordMessage.classList.remove("error");
+        }
+      }
+    };
+
+    openBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setPasswordModal(true);
+    });
+
+    ["close-change-password", "cancel-change-password"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("click", () => setPasswordModal(false));
+    });
+
+    modal.querySelectorAll("[data-close-password]").forEach((el) => {
+      el.addEventListener("click", () => setPasswordModal(false));
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal && !modal.hidden) setPasswordModal(false);
+    });
+
+    passwordForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const oldPassword = document.getElementById("old-password").value;
+      const newPassword = document.getElementById("new-password").value;
+      const confirmPassword = document.getElementById("confirm-password").value;
+      const showMsg = (text, isError = false) => {
+        passwordMessage.textContent = text;
+        passwordMessage.classList.toggle("error", isError);
+        passwordMessage.hidden = false;
+      };
+      if (newPassword !== confirmPassword) { showMsg("Mật khẩu xác nhận không khớp.", true); return; }
+      if (oldPassword === newPassword) { showMsg("Mật khẩu mới cần khác mật khẩu hiện tại.", true); return; }
+      passwordSubmit.disabled = true;
+      passwordSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...';
+      try {
+        const response = await api.put("/auth/change-password", { old_password: oldPassword, new_password: newPassword });
+        showMsg(response?.message || "Đổi mật khẩu thành công.");
+        passwordForm.reset();
+      } catch (error) {
+        showMsg(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", true);
+      } finally {
+        passwordSubmit.disabled = false;
+        passwordSubmit.innerHTML = '<i class="fa-solid fa-key"></i> Cập nhật mật khẩu';
+      }
+    });
   }
 
   // ==================== LƯU & ĐỒNG BỘ DANH SÁCH NGƯỜI ĐANG NHẮN TIN QUA LOCALSTORAGE ====================
